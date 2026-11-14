@@ -70,6 +70,8 @@ docs/             Product, design, science, architecture, delivery
 .github/          Contribution templates and continuous integration
 ```
 
+See the [22-ticket MVP roadmap](docs/roadmap.md) and [verified scaffold status](docs/scaffold-status.md).
+
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [ownership](docs/ownership.md). Coding agents must read [AGENTS.md](AGENTS.md). Pick a ticket from the [NASA Space Apps board](https://github.com/users/Sammieblz/projects/14), respect folder ownership, and keep pull requests small. Contributors beyond the original five are welcome.
 
 ## Data and credits
