@@ -18,6 +18,43 @@ from .schemas import ApiError, SequenceJob, SequenceManifest, SequenceRequest
 
 LOG = logging.getLogger(__name__)
 TERMINAL = {"ready", "failed", "cancelled", "expired"}
+# Stop downloading once this many distinct, spectrally comparable epochs have
+# arrived (or max_frames, if smaller). Processing still makes the final choice.
+EARLY_STOP_EPOCHS = 4
+
+
+def enough_comparable_epochs(request: SequenceRequest, target: int):
+    """Build the retriever's early-stop test from processing's own rules.
+
+    Uses the processor's target-wavelength lookup and grouping rule without
+    changing them, so stopping early can only shorten the input list; it never
+    changes how processing judges the files that did arrive.
+    """
+    from .processing.errors import ProcessingError
+    from .processing.fits_reader import inspect_observation
+    from .processing.spectral import select_compatible_frames
+
+    inspected = {}
+
+    def enough(observations) -> bool:
+        for observation in observations:
+            key = (observation.observation_id, observation.detector)
+            if key in inspected:
+                continue
+            try:
+                item = inspect_observation(observation, request.ra_deg, request.dec_deg)
+            except ProcessingError:
+                item = None
+            if item is not None and (
+                (request.wavelength_min_um is not None and item.wavelength_um < request.wavelength_min_um)
+                or (request.wavelength_max_um is not None and item.wavelength_um > request.wavelength_max_um)
+            ):
+                item = None
+            inspected[key] = item
+        group = select_compatible_frames([item for item in inspected.values() if item is not None])
+        return len({item.observation.observed_start_utc for item in group}) >= target
+
+    return enough
 
 
 class JobError(Exception):
@@ -146,6 +183,16 @@ class JobManager:
             from .processing.service import AstronomyProcessor
             retriever = (self.retriever_factory or IrsaRetriever)(cancelled=cancelled)
             processor = (self.processor_factory or AstronomyProcessor)()
+
+            def on_download(done, total):
+                self._update(record, progress=round(0.1 + 0.4 * done / max(total, 1), 3),
+                             message=f"Downloaded {done} of {total} IRSA observations")
+
+            if hasattr(retriever, "on_download"):
+                retriever.on_download = on_download
+            if hasattr(retriever, "enough_epochs") and isinstance(processor, AstronomyProcessor) and processor.available():
+                retriever.enough_epochs = enough_comparable_epochs(
+                    record.request, min(record.request.max_frames, EARLY_STOP_EPOCHS))
             self._update(record, status="retrieving", progress=0.1, message="Querying and downloading IRSA observations")
             inputs = record.directory / "inputs"
             inputs.mkdir()
@@ -183,6 +230,19 @@ class JobManager:
                     "message": f"{len(skipped)} of {selected} selected IRSA cutouts were left out because the archive was busy or returned an unusable response. This sequence uses only the observations that downloaded.",
                 }]
                 payload["processing"] = {**payload["processing"], "archive_downloads_skipped": len(skipped)}
+            # Optional retriever report: exposures never requested because
+            # enough comparable epochs had already arrived.
+            not_fetched = list(getattr(retriever, "not_fetched", None) or [])
+            if not_fetched:
+                selected = getattr(retriever, "selected_count", len(observations) + len(not_fetched))
+                payload["warnings"] = [*payload["warnings"], {
+                    "code": "ARCHIVE_SEARCH_STOPPED_EARLY",
+                    "message": f"Downloading stopped after {selected - len(not_fetched)} of {selected} sampled IRSA observations because enough spectrally comparable epochs had arrived. The other {len(not_fetched)} were not fetched, so a full download could find more epochs.",
+                }]
+                payload["processing"] = {**payload["processing"], "archive_downloads_not_fetched": len(not_fetched)}
+            busy = getattr(retriever, "busy_responses", None)
+            if isinstance(busy, int):
+                payload["processing"] = {**payload["processing"], "archive_busy_responses": busy}
             manifest = SequenceManifest.model_validate(payload)
             (record.directory / "manifest.json").write_text(manifest.model_dump_json(indent=2), encoding="utf-8")
             if self._cache_bytes() > self.max_bytes:

@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from app.jobs import JobManager, JobError
+from app.jobs import JobManager, JobError, enough_comparable_epochs
 from app.paths import fixture_directory
 from app.schemas import SequenceManifest, SequenceRequest
 
@@ -219,3 +219,63 @@ def test_cache_scan_fails_closed_when_file_cannot_be_inspected(tmp_path, monkeyp
         assert exc.value.code == "CACHE_UNAVAILABLE"
     finally:
         manager.close()
+
+
+def test_download_progress_is_reported_while_retrieving(tmp_path):
+    gate = threading.Event()
+
+    class ProgressRetriever(Retriever):
+        on_download = None
+
+        async def retrieve(self, request, directory):
+            self.on_download(1, 4)
+            gate.wait(5)
+            return [object(), object()]
+
+    manager = JobManager(tmp_path, retriever_factory=ProgressRetriever, processor_factory=Processor)
+    try:
+        job = manager.submit(SequenceRequest(ra_deg=10, dec_deg=20))
+        end = time.monotonic() + 5
+        while manager.status(job.sequence_id).message != "Downloaded 1 of 4 IRSA observations":
+            assert time.monotonic() < end, "progress message never appeared"
+            time.sleep(0.01)
+        assert manager.status(job.sequence_id).progress == pytest.approx(0.2)
+        gate.set()
+        assert finish(manager, job.sequence_id).status == "ready"
+    finally:
+        gate.set()
+        manager.close()
+
+
+def test_early_stop_and_busy_replies_are_disclosed_in_the_manifest(tmp_path):
+    class EarlyRetriever(Retriever):
+        async def retrieve(self, request, directory):
+            self.selected_count, self.not_fetched, self.busy_responses = 16, ["a", "b", "c"], 2
+            return [object(), object()]
+
+    manager = JobManager(tmp_path, retriever_factory=EarlyRetriever, processor_factory=Processor)
+    try:
+        job = manager.submit(SequenceRequest(ra_deg=10, dec_deg=20))
+        assert finish(manager, job.sequence_id).status == "ready"
+        manifest = manager.manifest(job.sequence_id)
+        warning = next(item for item in manifest.warnings if item.code == "ARCHIVE_SEARCH_STOPPED_EARLY")
+        assert warning.message.startswith("Downloading stopped after 13 of 16 sampled IRSA observations")
+        assert manifest.processing["archive_downloads_not_fetched"] == 3
+        assert manifest.processing["archive_busy_responses"] == 2
+    finally:
+        manager.close()
+
+
+def test_early_stop_check_uses_processing_wavelength_rules(tmp_path):
+    # Explicitly synthetic FITS controls from the processing tests.
+    from test_processing import DEC, RA, make_observation
+
+    first = make_observation(tmp_path, 0, wavelength_um=1.0)
+    far = make_observation(tmp_path, 1, wavelength_um=1.5)
+    near = make_observation(tmp_path, 2, wavelength_um=1.005)
+    enough = enough_comparable_epochs(SequenceRequest(ra_deg=RA, dec_deg=DEC), 2)
+    assert not enough([first, far])
+    assert enough([first, far, near])
+    # A requested wavelength range applies before grouping, as in processing.
+    filtered = enough_comparable_epochs(SequenceRequest(ra_deg=RA, dec_deg=DEC, wavelength_max_um=1.002), 2)
+    assert not filtered([first, far, near])

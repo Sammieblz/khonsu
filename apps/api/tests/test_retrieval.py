@@ -15,8 +15,8 @@ from urllib.parse import parse_qs, urlsplit
 
 from app.retrieval.presets import PRESETS, preset_position
 from app.retrieval.service import (
-    IrsaRetriever, MAX_ATTEMPTS, MAX_METADATA_ROWS, ObservationMetadata, RetrievalError,
-    cutout_url, parse_metadata, query_url, select_observations, validate_irsa_url,
+    DOWNLOAD_CONCURRENCY, IrsaRetriever, MAX_ATTEMPTS, MAX_METADATA_ROWS, ObservationMetadata, RetrievalError,
+    _ByteBudget, cutout_url, parse_metadata, query_url, select_observations, spread_order, validate_irsa_url,
 )
 
 SOURCE = "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W18_1B/l2b-v27-2026-196/1/level2_2025W18_1B_0074_2D1_spx_l2b-v27-2026-196.fits"
@@ -163,27 +163,127 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(IrsaRetriever._retry_delay(0, busy("600")), 15.0)
         self.assertEqual(IrsaRetriever._retry_delay(9, busy()), 8.0)
 
-    def _retrieve_with(self, outcomes):
-        """Run _retrieve over three real-shaped rows; outcomes[i] is None or an error."""
+    def _retrieve_with(self, outcomes, *, delay=0.0, setup=None, max_frames=None):
+        """Run _retrieve over real-shaped rows; outcomes[i] is None or an error for row i.
+
+        Each row gets its own source URL so parallel downloads can be told
+        apart. The fake records every call so tests can inspect concurrency.
+        """
         t = datetime(2025, 1, 1, tzinfo=timezone.utc)
-        rows = [ObservationMetadata(str(i), t + timedelta(days=i), t + timedelta(days=i), 1, "DR1", SOURCE) for i in range(3)]
+        sources = [SOURCE.replace("_0074_", f"_{7400 + i}_") for i in range(len(outcomes))]
+        rows = [ObservationMetadata(str(i), t + timedelta(days=i), t + timedelta(days=i), 1, "DR1", sources[i]) for i in range(len(outcomes))]
         retriever = IrsaRetriever()
         retriever._deadline = time.monotonic() + 100
-        calls = iter(outcomes)
+        retriever.calls, retriever.max_in_flight = [], 0
+        lock, in_flight = threading.Lock(), [0]
+        if setup:
+            setup(retriever)
 
-        def fake_read(url, limit, destination=None, attempts=None):
-            error = next(calls)
-            if error is not None:
-                raise error
-            destination.write_bytes(FITS)
-            return len(FITS)
+        def fake_read(url, limit, destination=None, attempts=None, budget=None):
+            index = next(i for i, source in enumerate(sources) if url.startswith(source))
+            with lock:
+                retriever.calls.append(index)
+                in_flight[0] += 1
+                retriever.max_in_flight = max(retriever.max_in_flight, in_flight[0])
+            try:
+                if outcomes[index] is not None:
+                    raise outcomes[index]
+                end = time.monotonic() + delay
+                while time.monotonic() < end:
+                    retriever._check()  # Like the real reader, notice cancel or abort.
+                    time.sleep(0.005)
+                destination.write_bytes(FITS)
+                return len(FITS)
+            finally:
+                with lock:
+                    in_flight[0] -= 1
 
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(retriever, "_search", return_value=rows), \
                 patch.object(retriever, "_read", side_effect=fake_read):
-            result = retriever._retrieve(request(max_frames=3), Path(tmp))
+            result = retriever._retrieve(request(max_frames=max_frames or len(outcomes)), Path(tmp))
             self.assertTrue(all(item.fits_path.is_file() for item in result))
         return retriever, result
+
+    def test_spread_order_visits_every_frame_widest_gap_first(self):
+        self.assertEqual(spread_order(0), [])
+        self.assertEqual(spread_order(1), [0])
+        self.assertEqual(spread_order(3), [0, 2, 1])
+        order = spread_order(16)
+        self.assertEqual(sorted(order), list(range(16)))
+        self.assertEqual(order[:3], [0, 15, 7])
+        # The first four downloads already span the whole time range.
+        self.assertEqual(sorted(order[:4]), [0, 3, 7, 15])
+
+    def test_downloads_run_in_parallel_within_the_limit_and_return_in_time_order(self):
+        retriever, result = self._retrieve_with([None] * 10, delay=0.05)
+        self.assertEqual(retriever.max_in_flight, DOWNLOAD_CONCURRENCY)
+        self.assertEqual([item.observation_id for item in result], [str(i) for i in range(10)])
+        self.assertEqual(sorted(retriever.calls), list(range(10)))
+        self.assertEqual(retriever.not_fetched, [])
+
+    def test_progress_is_reported_for_each_download(self):
+        reports = []
+        retriever, result = self._retrieve_with([None, RetrievalError("archive_busy", "busy"), None, None],
+                                                setup=lambda r: setattr(r, "on_download", lambda done, total: reports.append((done, total))))
+        self.assertEqual(reports, [(1, 4), (2, 4), (3, 4)])
+        self.assertEqual(retriever.skipped_downloads, ["1"])
+
+    def test_early_stop_keeps_in_flight_files_and_reports_the_rest_unfetched(self):
+        def setup(retriever):
+            retriever.enough_epochs = lambda observations: len(observations) >= 3
+        retriever, result = self._retrieve_with([None] * 12, delay=0.03, setup=setup)
+        self.assertGreaterEqual(len(result), 3)
+        self.assertTrue(retriever.not_fetched)
+        fetched = {item.observation_id for item in result}
+        self.assertEqual(len(fetched) + len(retriever.not_fetched), 12)
+        self.assertFalse(fetched & set(retriever.not_fetched))
+        # Nothing reported as not fetched was ever requested from the archive.
+        self.assertFalse({str(index) for index in retriever.calls} & set(retriever.not_fetched))
+        # Results stay chronological even though downloads ran in spread order.
+        self.assertEqual([item.observation_id for item in result], sorted(fetched, key=int))
+
+    def test_a_failing_early_stop_check_never_stops_downloads(self):
+        def setup(retriever):
+            retriever.enough_epochs = lambda observations: 1 / 0
+        retriever, result = self._retrieve_with([None] * 5, setup=setup)
+        self.assertEqual(len(result), 5)
+        self.assertEqual(retriever.not_fetched, [])
+
+    def test_a_fatal_error_stops_new_downloads_and_interrupts_running_ones(self):
+        # Spread order for 8 is 0, 7, 3, 1, ...; row 1 fails inside the first batch.
+        outcomes = [None] * 8
+        outcomes[1] = RetrievalError("archive_size_limit", "too big")
+        started = time.monotonic()
+        with self.assertRaises(RetrievalError) as caught:
+            self._retrieve_with(outcomes, delay=2.0)
+        self.assertEqual(caught.exception.code, "archive_size_limit")
+        # The three 2 s downloads already running were interrupted, not awaited.
+        self.assertLess(time.monotonic() - started, 1.0)
+
+    def test_parallel_downloads_share_one_byte_budget(self):
+        retriever = IrsaRetriever()
+        retriever._deadline = time.monotonic() + 10
+        budget = _ByteBudget(limit=len(FITS) + 10)
+        with tempfile.TemporaryDirectory() as tmp:
+            first, second = Path(tmp) / "a.fits.part", Path(tmp) / "b.fits.part"
+            with patch.object(retriever._opener, "open", side_effect=[Response(FITS, SOURCE), Response(FITS, SOURCE)]):
+                self.assertEqual(retriever._read(SOURCE, 1000, first, budget=budget), len(FITS))
+                with self.assertRaises(RetrievalError) as caught:
+                    retriever._read(SOURCE, 1000, second, budget=budget)
+            self.assertEqual(caught.exception.code, "archive_size_limit")
+            # The refused file was removed and gave its partial bytes back.
+            self.assertFalse(second.exists())
+            self.assertEqual(budget.used, len(FITS))
+
+    def test_busy_responses_are_counted(self):
+        retriever = IrsaRetriever()
+        retriever._deadline = time.monotonic() + 100
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(retriever, "_pause"), \
+                patch.object(retriever._opener, "open", side_effect=[busy(), busy(code=429), busy(code=500), Response(FITS, SOURCE)]):
+            retriever._read(SOURCE, 100, Path(tmp) / "input.fits.part")
+        self.assertEqual(retriever.busy_responses, 2)
 
     def test_an_unavailable_cutout_is_skipped_and_reported(self):
         retriever, result = self._retrieve_with([None, RetrievalError("archive_busy", "busy"), None])
