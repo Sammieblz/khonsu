@@ -67,16 +67,42 @@
       "sha256": "d23fb384a7c8736d49c6f0564a7abf9ad68e13e76d1edacb9f1f7726a5a0ef28"
     },
     "manifest.json": {
-      "size_bytes": 6415,
-      "sha256": "e4271576e7f3b150362e87f209bd989beb8f090efba157292dc044289a8582e9"
+      "size_bytes": 7225,
+      "sha256": "63543c2f51485d0c2e9b6e2a25a5b84847d1e04f92efb3c8a9a2588db084aa96"
     },
     "source-manifest.json": {
       "size_bytes": 6149,
       "sha256": "5a00e845583b34fcd512bf4b02861dcf7a6101b89af007cdb1dd563d0b00648e"
+    },
+    "frame-0001.bin": {
+      "size_bytes": 69620,
+      "sha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9"
+    },
+    "frame-0002.bin": {
+      "size_bytes": 69620,
+      "sha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f"
+    },
+    "frame-0003.bin": {
+      "size_bytes": 69620,
+      "sha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684"
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
   "irsa_acknowledgements": "https://irsa.ipac.caltech.edu/ack.html",
   "spherex_acknowledgements": "https://irsa.ipac.caltech.edu/data/SPHEREx/docs/overview_dr1.html",
-  "dr1_spectral_image_doi": "https://doi.org/10.26131/IRSA678"
+  "dr1_spectral_image_doi": "https://doi.org/10.26131/IRSA678",
+  "prepared_rasters": {
+    "frame-0001.bin": {
+      "aligned_fits_sha256": "7c9df9f5d4ea78a856bdb1b7d9b1f5231a75bde7deb95e46a1acc9b22821b24f",
+      "transform": "flip-y; float32 little endian; invalid zero plus separate mask"
+    },
+    "frame-0002.bin": {
+      "aligned_fits_sha256": "d8f2ca236d3d468d32ed10b6f7ee87988e2d3620b8ede3496a802ffc998c0fd9",
+      "transform": "flip-y; float32 little endian; invalid zero plus separate mask"
+    },
+    "frame-0003.bin": {
+      "aligned_fits_sha256": "d61d935cc79af389cb15d84f352979a45ea6035bdf946f0a602fd851c590776c",
+      "transform": "flip-y; float32 little endian; invalid zero plus separate mask"
+    }
+  }
 }

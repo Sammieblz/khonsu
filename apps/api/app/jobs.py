@@ -301,7 +301,8 @@ class JobManager:
     def asset(self, identity: str, filename: str) -> Path:
         manifest = self.manifest(identity)
         allowed = {frame.image_url.rsplit("/", 1)[-1] for frame in manifest.frames}
-        if filename not in allowed or Path(filename).name != filename or not filename.endswith(".png"):
+        allowed.update(frame.raster.url.rsplit("/", 1)[-1] for frame in manifest.frames if frame.raster)
+        if filename not in allowed or Path(filename).name != filename or not filename.endswith((".png", ".bin")):
             raise JobError(404, "ASSET_NOT_FOUND", "Frame not found.")
         path = self.get(identity).directory / "frames" / filename
         if not path.is_file():

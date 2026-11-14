@@ -122,10 +122,18 @@ class DisplaySettings(ApiModel):
         return self
 
 
+class PreparedRaster(ApiModel):
+    url: str = Field(min_length=1, max_length=2048)
+    encoding: Literal["float32-le-mask8-v1"] = "float32-le-mask8-v1"
+    size_bytes: int = Field(gt=0, le=5 * 1024 * 1024)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
 class Frame(ApiModel):
     frame_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,80}$")
     label: str = Field(min_length=1, max_length=160)
     image_url: str = Field(min_length=1, max_length=2048)
+    raster: PreparedRaster | None = None
     observed_start_utc: datetime | None = None
     observed_end_utc: datetime | None = None
     wavelength_um: Wavelength | None = None
@@ -172,6 +180,9 @@ class SequenceManifest(ApiModel):
 
     @model_validator(mode="after")
     def validate_provenance(self) -> "SequenceManifest":
+        for frame in self.frames:
+            if frame.raster and frame.raster.size_bytes != self.grid.width_px * self.grid.height_px * 5:
+                raise ValueError("Prepared raster size must match the common grid")
         if len({frame.frame_id for frame in self.frames}) != len(self.frames):
             raise ValueError("Frame IDs must be unique within a sequence")
         if self.data_mode != "synthetic":

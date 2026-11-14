@@ -72,7 +72,7 @@ class AstronomyProcessor:
             from .alignment import (
                 ASINH_A, GRID_OVERSAMPLE, MIN_GRID_PX, STRETCH_HIGH_PERCENTILE, STRETCH_MIN_SPAN_SIGMA,
                 STRETCH_SKY_SIGMA_BELOW, auto_grid_size, native_pixel_scale_arcsec, output_wcs,
-                reproject_observation, shared_limits, write_calibrated_grid, write_png,
+                reproject_observation, shared_limits, write_calibrated_grid, write_png, write_prepared_raster,
             )
             from .fits_reader import inspect_observation, read_observation
             from .spectral import MAX_CENTER_SPREAD_IN_BANDWIDTHS, select_compatible_frames
@@ -191,11 +191,13 @@ class AstronomyProcessor:
             stem = f"frame-{index:04d}"
             write_png(output_dir / f"{stem}.png", image, valid, low, high)
             write_calibrated_grid(output_dir / f"{stem}.fits", image, valid, wcs)
+            raster = write_prepared_raster(output_dir / f"{stem}.bin", image, valid)
             source = item.observation
             frame_models.append(Frame(
                 frame_id=stem,
                 label=source.observed_start_utc.isoformat(),
                 image_url=f"/v1/sequences/{options.sequence_id}/frames/{stem}.png",
+                raster={**raster, "url": f"/v1/sequences/{options.sequence_id}/frames/{stem}.bin"},
                 observed_start_utc=source.observed_start_utc,
                 observed_end_utc=source.observed_end_utc,
                 wavelength_um=item.wavelength_um,

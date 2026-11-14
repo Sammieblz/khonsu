@@ -116,7 +116,7 @@ def sequence_manifest(sequence_id: SequencePath):
 @app.get("/v1/sequences/{sequence_id}/frames/{filename}", response_class=FileResponse,
          responses={404: {"model": ApiError}, **ERRORS}, tags=["sequences"])
 def sequence_frame(sequence_id: SequencePath, filename: str):
-    return FileResponse(get_manager().asset(sequence_id, filename), media_type="image/png")
+    return FileResponse(get_manager().asset(sequence_id, filename), media_type="image/png" if filename.endswith(".png") else "application/octet-stream")
 
 
 def real_examples():
@@ -147,9 +147,11 @@ def example_frame(example_id: SequencePath, filename: str):
     except CachedExampleError:
         return cached_example_failure()
     for manifest in available:
-        if manifest.sequence_id == example_id and filename in {Path(f.image_url).name for f in manifest.frames}:
-            if Path(filename).name == filename and filename.endswith(".png"):
-                return FileResponse(FIXTURES / "real" / example_id / filename, media_type="image/png")
+        allowed = {Path(f.image_url).name for f in manifest.frames}
+        allowed.update(Path(f.raster.url).name for f in manifest.frames if f.raster)
+        if manifest.sequence_id == example_id and filename in allowed:
+            if Path(filename).name == filename and filename.endswith((".png", ".bin")):
+                return FileResponse(FIXTURES / "real" / example_id / filename, media_type="image/png" if filename.endswith(".png") else "application/octet-stream")
     return error_response(404, "EXAMPLE_NOT_FOUND", "A verified cached example is not available.")
 
 

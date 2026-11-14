@@ -49,16 +49,34 @@
       "sha256": "893dc01d81e385c9bebb8f306f6f263c45de6ec3799a562296bf61f4e95e32e4"
     },
     "manifest.json": {
-      "size_bytes": 5697,
-      "sha256": "034fa86b45b3bcc53d3fd8fa683ad3a072e14fcc23401e8632895e0024915c0b"
+      "size_bytes": 6265,
+      "sha256": "b267cbcc33cc33702ffeb7de47f6c5dafa95afb99bc919be2d41855636a492f6"
     },
     "source-manifest.json": {
       "size_bytes": 5428,
       "sha256": "914fe2e1265114f24b00b849b2e8103517ff2574b55734e7b28575096342abfd"
+    },
+    "frame-0001.bin": {
+      "size_bytes": 68445,
+      "sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91"
+    },
+    "frame-0002.bin": {
+      "size_bytes": 68445,
+      "sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de"
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
   "irsa_acknowledgements": "https://irsa.ipac.caltech.edu/ack.html",
   "spherex_acknowledgements": "https://irsa.ipac.caltech.edu/data/SPHEREx/docs/overview_dr1.html",
-  "dr1_spectral_image_doi": "https://doi.org/10.26131/IRSA678"
+  "dr1_spectral_image_doi": "https://doi.org/10.26131/IRSA678",
+  "prepared_rasters": {
+    "frame-0001.bin": {
+      "aligned_fits_sha256": "f9a76b4ae9a35605f46ad6e0a7aa6bbc77c5183917550dd83b46b3d1babea8fe",
+      "transform": "flip-y; float32 little endian; invalid zero plus separate mask"
+    },
+    "frame-0002.bin": {
+      "aligned_fits_sha256": "638bc1163c8f93dc03e019c8bd96d35469342dc725ef9049001bcf259adc58d2",
+      "transform": "flip-y; float32 little endian; invalid zero plus separate mask"
+    }
+  }
 }

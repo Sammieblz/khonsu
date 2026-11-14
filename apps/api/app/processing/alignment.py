@@ -1,6 +1,7 @@
 """Celestial reprojection and one shared display mapping for genuine frames."""
 
 import math
+import hashlib
 
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -142,3 +143,19 @@ def write_calibrated_grid(path, image, valid, wcs: WCS):
         fits.PrimaryHDU(), fits.ImageHDU(image, header=header, name="IMAGE"),
         fits.ImageHDU(valid.astype(np.uint8), name="VALID"),
     ]).writeto(path, overwrite=True)
+
+
+def write_prepared_raster(path, image, valid):
+    """Top-left row-major float32 LE intensities followed by one validity byte.
+
+    Invalid samples are zero-filled only for transport; their mask stays zero.
+    Valid negative and above-display-limit intensities are preserved.
+    """
+    values = np.flipud(np.where(valid, image, 0)).astype("<f4")
+    mask = np.flipud(valid).astype(np.uint8)
+    data = values.tobytes(order="C") + mask.tobytes(order="C")
+    temporary = path.with_suffix(".bin.tmp")
+    temporary.write_bytes(data)
+    temporary.replace(path)
+    return {"encoding": "float32-le-mask8-v1", "size_bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest()}

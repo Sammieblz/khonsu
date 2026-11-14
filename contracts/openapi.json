@@ -143,6 +143,16 @@
             ],
             "title": "Observed Start Utc"
           },
+          "raster": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreparedRaster"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "release": {
             "anyOf": [
               {
@@ -310,6 +320,41 @@
           "height_px"
         ],
         "title": "ImageGrid",
+        "type": "object"
+      },
+      "PreparedRaster": {
+        "additionalProperties": false,
+        "properties": {
+          "encoding": {
+            "const": "float32-le-mask8-v1",
+            "default": "float32-le-mask8-v1",
+            "title": "Encoding",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 5242880.0,
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "url": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "size_bytes",
+          "sha256"
+        ],
+        "title": "PreparedRaster",
         "type": "object"
       },
       "PresetTarget": {
