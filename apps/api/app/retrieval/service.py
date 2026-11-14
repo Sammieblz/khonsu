@@ -7,13 +7,15 @@ Network access stays here. Processing receives local FITS files only.
 from __future__ import annotations
 
 import asyncio
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 import csv
-from collections import Counter
-from dataclasses import dataclass
+from collections import Counter, deque
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 import hashlib
 import io
+import logging
 import math
 from pathlib import Path
 import re
@@ -49,10 +51,17 @@ SKIPPABLE_DOWNLOAD_ERRORS = frozenset({"archive_busy", "archive_unavailable", "i
 BACKOFF_BASE_SECONDS = 1.0
 BACKOFF_MAX_SECONDS = 8.0
 RETRY_AFTER_MAX_SECONDS = 15.0
+# Cutouts fetched at once. Each 4 MB cutout took 3 to 54 s one at a time on
+# November 14, 2026, so archive latency, not bandwidth, sets the wall time.
+# A small pool cuts that without hammering IRSA; busy replies are counted.
+DOWNLOAD_CONCURRENCY = 4
 RETRYABLE_STATUS = frozenset({408, 429, 500, 502, 503, 504})
 BUSY_STATUS = frozenset({429, 503})
 _FITS_PATH = re.compile(r"^/ibe/data/spherex/(dr1|qr3)/level2/[A-Za-z0-9_./-]+\.fits$")
 _DETECTOR = re.compile(r"^SPHEREx-D([1-6])$", re.IGNORECASE)
+
+
+LOG = logging.getLogger(__name__)
 
 
 class RetrievalError(RuntimeError):
@@ -207,6 +216,53 @@ def cutout_url(source_url: str, request: SequenceRequest) -> str:
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(params), ""))
 
 
+def spread_order(count: int) -> list[int]:
+    """Visit chronological indices widest-gap first: 0, last, middle, quarters...
+
+    Downloading in this order means an early stop still leaves epochs spread
+    across the whole time span instead of bunched at its start.
+    """
+    if count <= 0:
+        return []
+    order, seen = [0], {0}
+    if count > 1:
+        order.append(count - 1)
+        seen.add(count - 1)
+    spans = deque([(0, count - 1)])
+    while spans:
+        low, high = spans.popleft()
+        if high - low < 2:
+            continue
+        middle = (low + high) // 2
+        if middle not in seen:
+            order.append(middle)
+            seen.add(middle)
+        spans.extend(((low, middle), (middle, high)))
+    return order
+
+
+@dataclass
+class _ByteBudget:
+    """Per-sequence byte cap shared by parallel downloads.
+
+    Bytes are counted as they stream in, so the sum on disk never exceeds the
+    cap, and a failed or retried attempt gives its bytes back.
+    """
+    limit: int = field(default_factory=lambda: MAX_TOTAL_BYTES)
+    used: int = 0
+    lock: threading.Lock = field(default_factory=threading.Lock)
+
+    def take(self, count: int) -> None:
+        with self.lock:
+            if self.used + count > self.limit:
+                raise RetrievalError("archive_size_limit", "The archive response exceeded the download size limit. Reduce the field size.")
+            self.used += count
+
+    def give_back(self, count: int) -> None:
+        with self.lock:
+            self.used -= count
+
+
 class IrsaRetriever:
     def __init__(self, *, cancel_event: threading.Event | None = None, cancelled: Callable[[], bool] | None = None, timeout_seconds: float = 30, deadline_seconds: float = 240):
         self.cancel_event = cancel_event or threading.Event()
@@ -215,6 +271,15 @@ class IrsaRetriever:
         self.deadline_seconds = min(max(deadline_seconds, 1), 600)
         self._opener = build_opener(_IrsaRedirects())
         self._deadline = 0.0
+        # Optional hooks the job manager sets. on_download(done, total) reports
+        # progress. enough_epochs(observations) returns True once the files
+        # already downloaded hold enough comparable epochs to stop early.
+        self.on_download: Callable[[int, int], None] | None = None
+        self.enough_epochs: Callable[[list[ObservationInput]], bool] | None = None
+        self.busy_responses = 0
+        self._stats_lock = threading.Lock()
+        # Set when one download fails fatally so the others stop promptly.
+        self._abort = threading.Event()
 
     def cancel(self) -> None:
         self.cancel_event.set()
@@ -222,6 +287,8 @@ class IrsaRetriever:
     def _check(self) -> None:
         if self.cancel_event.is_set() or self.cancelled():
             raise RetrievalError("cancelled", "The archive request was cancelled.")
+        if self._abort.is_set():
+            raise RetrievalError("aborted", "Another archive download failed, so the remaining downloads stopped.")
         if time.monotonic() >= self._deadline:
             raise RetrievalError("archive_timeout", "Archive retrieval exceeded its time budget. Try fewer frames.")
 
@@ -252,11 +319,13 @@ class IrsaRetriever:
                 delay = max(delay, min(requested, RETRY_AFTER_MAX_SECONDS))
         return delay
 
-    def _read(self, url: str, limit: int, destination: Path | None = None, attempts: int = MAX_ATTEMPTS) -> bytes | int:
+    def _read(self, url: str, limit: int, destination: Path | None = None, attempts: int = MAX_ATTEMPTS,
+              budget: _ByteBudget | None = None) -> bytes | int:
         validate_irsa_url(url, metadata=destination is None)
         attempts = min(max(attempts, 1), MAX_ATTEMPTS)
         for attempt in range(attempts):
             self._check()
+            taken = 0  # Bytes this attempt drew from the shared sequence budget.
             try:
                 req = Request(url, headers={"User-Agent": "Khonsu/0.1 (NASA Space Apps science prototype)", "Accept": "text/csv" if destination is None else "application/fits"})
                 with self._opener.open(req, timeout=min(self.timeout_seconds, max(1, self._deadline-time.monotonic()))) as response:
@@ -278,6 +347,9 @@ class IrsaRetriever:
                             total += len(block)
                             if total > limit:
                                 raise RetrievalError("archive_size_limit", "The archive response exceeded the download size limit. Reduce the field size.")
+                            if budget is not None:
+                                budget.take(len(block))
+                                taken += len(block)
                             if handle:
                                 handle.write(block)
                             else:
@@ -291,10 +363,17 @@ class IrsaRetriever:
             except RetrievalError:
                 if destination:
                     destination.unlink(missing_ok=True)
+                if budget is not None and taken:
+                    budget.give_back(taken)
                 raise
             except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
                 if destination:
                     destination.unlink(missing_ok=True)
+                if budget is not None and taken:
+                    budget.give_back(taken)
+                if isinstance(exc, HTTPError) and exc.code in BUSY_STATUS:
+                    with self._stats_lock:
+                        self.busy_responses += 1
                 retryable = not isinstance(exc, HTTPError) or exc.code in RETRYABLE_STATUS
                 delay = self._retry_delay(attempt, exc)
                 if (attempt == attempts - 1 or not retryable
@@ -316,37 +395,97 @@ class IrsaRetriever:
             self.cancel()
             raise
 
+    def _download(self, row: ObservationMetadata, request: SequenceRequest, download_dir: Path, budget: _ByteBudget) -> ObservationInput:
+        url = cutout_url(row.source_fits_url, request)
+        name = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24] + ".fits"
+        path = download_dir / name
+        partial = path.with_suffix(".fits.part")
+        self._read(url, MAX_FITS_BYTES, partial, attempts=FITS_ATTEMPTS, budget=budget)
+        partial.replace(path)
+        return ObservationInput(path, row.observation_id, row.observed_start_utc, row.observed_end_utc, row.detector, row.release, url)
+
+    def _notify(self, done: int, total: int) -> None:
+        if self.on_download is None:
+            return
+        try:
+            self.on_download(done, total)
+        except Exception:  # Progress is advisory; never fail a download over it.
+            LOG.warning("Download progress hook failed", exc_info=True)
+
+    def _has_enough(self, observations: list[ObservationInput]) -> bool:
+        if self.enough_epochs is None:
+            return False
+        try:
+            return bool(self.enough_epochs(observations))
+        except Exception:  # An unusable check means keep downloading.
+            LOG.warning("Early-stop check failed; continuing downloads", exc_info=True)
+            return False
+
     def _retrieve(self, request: SequenceRequest, download_dir: Path) -> list[ObservationInput]:
         rows = select_observations(self._search(request), request.max_frames)
         download_dir.mkdir(parents=True, exist_ok=True)
-        results = []
-        total = 0
         # Read by the job manager so a shorter sequence is disclosed, never
         # presented as the full selection.
         self.selected_count = len(rows)
         self.skipped_downloads: list[str] = []
+        self.not_fetched: list[str] = []
+        self._abort.clear()
+        budget = _ByteBudget(limit=MAX_TOTAL_BYTES)
+        results: dict[int, ObservationInput] = {}
+        skipped: list[int] = []
+        failures: list[RetrievalError] = []
+        submitted: set[int] = set()
         last_error: RetrievalError | None = None
-        for row in rows:
-            self._check()
-            url = cutout_url(row.source_fits_url, request)
-            name = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24] + ".fits"
-            path = download_dir / name
-            partial = path.with_suffix(".fits.part")
+        stopped_early = False
+        queue = iter(spread_order(len(rows)))
+        with ThreadPoolExecutor(max_workers=DOWNLOAD_CONCURRENCY, thread_name_prefix="khonsu-irsa") as pool:
+            pending = {}
+
+            def submit_next():
+                if stopped_early or failures:
+                    return
+                index = next(queue, None)
+                if index is not None:
+                    self._check()
+                    submitted.add(index)
+                    pending[pool.submit(self._download, rows[index], request, download_dir, budget)] = index
+
             try:
-                size = self._read(url, min(MAX_FITS_BYTES, MAX_TOTAL_BYTES-total), partial, attempts=FITS_ATTEMPTS)
-            except RetrievalError as exc:
-                if exc.code not in SKIPPABLE_DOWNLOAD_ERRORS:
-                    raise
-                self.skipped_downloads.append(row.observation_id)
-                last_error = exc
-                continue
-            total += size
-            partial.replace(path)
-            results.append(ObservationInput(path, row.observation_id, row.observed_start_utc, row.observed_end_utc, row.detector, row.release, url))
-        if last_error is not None and len(results) < 2:
+                for _ in range(DOWNLOAD_CONCURRENCY):
+                    submit_next()
+                while pending:
+                    done, _ = wait(pending, return_when=FIRST_COMPLETED)
+                    for future in done:
+                        index = pending.pop(future)
+                        try:
+                            results[index] = future.result()
+                        except RetrievalError as exc:
+                            if exc.code in SKIPPABLE_DOWNLOAD_ERRORS:
+                                skipped.append(index)
+                                last_error = exc
+                            elif exc.code != "aborted":
+                                failures.append(exc)
+                                self._abort.set()
+                        else:
+                            self._notify(len(results), len(rows))
+                            if not stopped_early and self._has_enough([results[key] for key in sorted(results)]):
+                                # In-flight downloads finish and are kept;
+                                # nothing new starts.
+                                stopped_early = True
+                        submit_next()
+            except BaseException:
+                self._abort.set()
+                raise
+        if failures:
+            raise failures[0]
+        self.skipped_downloads = [rows[index].observation_id for index in sorted(skipped)]
+        if stopped_early:
+            self.not_fetched = [row.observation_id for index, row in enumerate(rows) if index not in submitted]
+        observations = [results[index] for index in sorted(results)]
+        if last_error is not None and len(observations) < 2:
             # Report the archive problem rather than a misleading epoch count.
             raise last_error
-        return results
+        return observations
 
     async def retrieve(self, request: SequenceRequest, download_dir: Path) -> list[ObservationInput]:
         self._deadline = time.monotonic() + self.deadline_seconds
