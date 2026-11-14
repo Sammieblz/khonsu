@@ -16,7 +16,7 @@ Run from `infra/cloudflare` with Node.js 22.13+ and a working Docker engine:
 
 ```sh
 cp wrangler.jsonc.example wrangler.jsonc
-npm install
+npm ci
 ```
 
 In PowerShell, replace `cp` with `Copy-Item -LiteralPath wrangler.jsonc.example -Destination wrangler.jsonc` if preferred. Edit `KHONSU_CORS_ORIGINS` before serving requests. The placeholder `https://replace-me.invalid` is deliberately rejected. For local development use `http://localhost:3000,http://127.0.0.1:3000`; for hosting use exact HTTPS frontend origins without a trailing slash, wildcard or path.
@@ -28,7 +28,7 @@ npm run check
 npm run dev
 ```
 
-Wrangler generates runtime and binding types in `worker-configuration.d.ts`; `tsc` checks against those types. This avoids relying on stale manually declared container APIs or an old `@cloudflare/workers-types` package. Exact top-level pins are Wrangler 4.162.0, verified as a November 13 release, and TypeScript 5.9.3, matching the official Containers template. Generate and review `package-lock.json` once dependencies can be installed. Do not fabricate one.
+Wrangler generates runtime and binding types in `worker-configuration.d.ts`; `tsc` checks against those types. This avoids relying on stale manually declared container APIs or an old `@cloudflare/workers-types` package. Exact top-level pins are Wrangler 4.162.0, verified as a November 13 release, and TypeScript 5.9.3, matching the official Containers template. `package-lock.json` is committed; install with `npm ci` and review lockfile diffs with any dependency change. npm 11 may report that the `esbuild` and `workerd` install scripts are not covered by `allowScripts`. With npm 11.19 on Windows, the test and typecheck commands passed and the `esbuild`, `workerd` and `wrangler` binaries ran without those scripts.
 
 `npm test` needs only Node's built-in test runner and TypeScript stripping. Tests cover request, route, CORS and body boundaries. `npm run bundle` is a non-publishing Worker dry run after configuration and dependency installation; it does not prove a container deployment or live archive integration. No dependency install or container lifecycle test is implied by a successful source-only test.
 

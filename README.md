@@ -29,7 +29,7 @@ Open http://localhost:3000. The API runs at http://localhost:8000 with interacti
 For native development, use Node.js 24 and Python 3.12:
 
 ```sh
-npm --prefix apps/web install
+npm --prefix apps/web ci
 npm --prefix apps/web run dev
 python -m venv .venv
 ```

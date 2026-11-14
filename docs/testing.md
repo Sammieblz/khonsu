@@ -12,7 +12,7 @@ python -m pip install PyYAML==6.0.3
 python scripts/check-repository.py
 python -m pytest apps/api/tests -q
 python scripts/export-contracts.py --check
-npm --prefix apps/web install
+npm --prefix apps/web ci
 npm --prefix apps/web run test
 npm --prefix apps/web run typecheck
 npm --prefix apps/web run build
@@ -20,7 +20,7 @@ docker compose config --quiet
 docker compose up --build
 ```
 
-The web build must produce `apps/web/out/`. Initial npm installation creates the package lock; commit the reviewed lockfile before the team changes dependencies in parallel, then use `npm ci`. Pin direct requirements and keep dependency updates owned by Robel or Tyrone.
+The web build must produce `apps/web/out/`. The web and gateway `package-lock.json` files are committed, so CI, the web image and contributors install with `npm ci`. Pin direct requirements and keep dependency updates owned by Robel or Tyrone; a dependency change commits the reviewed manifest and lockfile together.
 
 `export-contracts.py` has a documented bootstrap snapshot mode for offline development. Live FastAPI export in an installed environment is authoritative. A mismatch must be reconciled by regenerating the contract, reviewing the diff and updating the TypeScript output together. Do not weaken the check to hide drift.
 

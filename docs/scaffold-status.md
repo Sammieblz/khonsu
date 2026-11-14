@@ -24,7 +24,7 @@ The backend now implements bounded IRSA retrieval, wavelength-aware FITS process
 
 Frontend viewing, time controls, consumption of job states, evidence export, quality presentation and a scientifically useful cached fallback remain team tasks. No Cloudflare account, paid plan, hosted backend or public frontend was provisioned.
 
-The initial npm manifests build successfully in CI. Robel and Tyrone should review and commit the generated web and gateway package locks in the baseline task before parallel dependency changes, then switch install commands to `npm ci`. Dependency lock artifacts are available in the successful Actions run.
+The web and gateway package locks are committed ([#1](https://github.com/Sammieblz/khonsu/issues/1)). CI, the web image and the documented setup install with `npm ci`. Route later dependency changes through the lockfile owners in `docs/ownership.md`.
 
 ## Planning state
 

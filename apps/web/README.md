@@ -4,7 +4,7 @@ Next.js App Router, TypeScript, and CSS Modules. The public frontend is a static
 
 ## Local development
 
-Use Node.js 24. Install dependencies with `npm install` in this directory, copy `.env.example` to `.env.local`, then run `npm run dev`. Start the backend separately using the repository's Docker Compose instructions.
+Use Node.js 24. Install the locked dependencies with `npm ci` in this directory, copy `.env.example` to `.env.local`, then run `npm run dev`. Start the backend separately using the repository's Docker Compose instructions.
 
 `NEXT_PUBLIC_API_BASE_URL` defaults to `http://localhost:8000`. This is public, build-time browser configuration. A deployed frontend must be rebuilt with the deployed backend address; `localhost` in a visitor's browser points to that visitor's computer.
 
@@ -15,7 +15,7 @@ Use Node.js 24. Install dependencies with `npm install` in this directory, copy 
 - `npm test`: coordinate, raster-selection, annotation-storage, and time-navigation checks using Node's built-in test runner.
 - `npm run build`: production static export to `out/`.
 
-An npm lockfile must be generated and committed once registry access is available. The initial authoring environment could not install the dependencies offline, so this scaffold's production build is not yet verified.
+`package-lock.json` is committed. Use `npm ci` for a reproducible install. Change dependencies only through Robel (see `docs/ownership.md`): run `npm install <package>` deliberately, review the lockfile diff and commit both files in one focused pull request. The production static export is built in CI.
 
 ## Ownership
 
