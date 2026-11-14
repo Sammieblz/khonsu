@@ -1,0 +1,31 @@
+name: Feature or implementation task
+description: A bounded task with clear outputs and acceptance criteria
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Problem and outcome
+      description: Explain who needs this and the resulting behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Owner, scope and dependencies
+      description: Name the human owner, folder boundary, blocked issues and shared contracts.
+    validations:
+      required: true
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation guidance and references
+      description: Give enough detail for a human or coding agent to begin safely.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and verification
+      description: Use observable outcomes and meaningful checks. State the data mode.
+    validations:
+      required: true

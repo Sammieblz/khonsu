@@ -1,0 +1,16 @@
+name: Bug report
+description: Report a reproducible failure without exposing secrets
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected behavior and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Environment and safe evidence
+      description: Browser, screen size, data mode, source identifiers, relevant errors and screenshots. Remove secrets and private notes.
+    validations:
+      required: true

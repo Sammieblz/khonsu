@@ -1,0 +1,4 @@
+interface:
+  display_name: "Khonsu Data and API"
+  short_description: "Connect archive data through bounded API contracts"
+  default_prompt: "Use $khonsu-data-api to connect the requested archive or endpoint through the canonical Khonsu API and provenance contract."
