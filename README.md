@@ -24,7 +24,7 @@ Install Docker Desktop and start its Linux container engine. Then run:
 docker compose up --build
 ```
 
-Open http://localhost:3000. The API runs at http://localhost:8000 with interactive API documentation at http://localhost:8000/docs. The backend accepts a bounded live query and returns a job to poll. The frontend shell still needs the team's job/viewer integration. Use the API documentation to exercise the completed backend independently.
+Open http://localhost:3000. The API runs at http://localhost:8000 with interactive API documentation at http://localhost:8000/docs. The backend accepts a bounded live query and returns a job to poll. The explorer form starts a live search, shows progress, and loads the finished sequence into the viewer; a search typically takes a few minutes. Use the API documentation to exercise the backend directly.
 
 For native development, use Node.js 24 and Python 3.12:
 

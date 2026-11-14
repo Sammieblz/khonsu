@@ -17,7 +17,9 @@ export function CoordinateForm({ onSubmit, busy }: { onSubmit: (request: Sequenc
     const result = parseCoordinates(ra, dec, fov);
     if (!result.ok) { setError(result.message); return; }
     setError("");
-    onSubmit({ ...result.value, coordinate_frame: "ICRS", max_frames: 24 });
+    // 16 frames completed a live IRSA search in about 214 s on 2026-11-14,
+    // inside the API's 240 s job budget; 24 risked JOB_TIMEOUT under load.
+    onSubmit({ ...result.value, coordinate_frame: "ICRS", max_frames: 16 });
   }
 
   return (
@@ -33,7 +35,7 @@ export function CoordinateForm({ onSubmit, busy }: { onSubmit: (request: Sequenc
       <input id="fov" name="fov" inputMode="decimal" type="number" step="any" min="0.5" max="60" value={fov} onChange={event => setFov(event.target.value)} required aria-invalid={!!error} />
       {error && <p className={styles.error} role="alert">{error}</p>}
       <button className={styles.primaryButton} type="submit" disabled={busy}>{busy ? "CONTACTING ARCHIVE" : "EXPLORE THIS FIELD"}<Icon name="arrow" /></button>
-      <p className={styles.formNote}>Scaffold build: live retrieval is not implemented yet. Requests will show the backend's explicit status.</p>
+      <p className={styles.formNote}>Searches query real SPHEREx observations at NASA/IPAC IRSA and can take a few minutes. Results are temporary; repeat the search if it expires.</p>
     </form>
   );
 }

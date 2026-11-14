@@ -26,11 +26,11 @@ An npm lockfile must be generated and committed once registry access is availabl
 
 Coordinate shared interfaces in `src/features/explorer/interfaces.ts` before changing component signatures. Import API shapes from `src/lib/api/generated.d.ts`; do not invent a second copy.
 
-## Honest scaffold behavior
+## Current behavior
 
-The initial screen displays no astronomy images. It explicitly says the observation pipeline is not connected. Submitting coordinates calls `POST /v1/sequences` and surfaces the backend's current explicit not-implemented error. The reference targets are names from the challenge, not claims of downloaded or validated observations.
+The initial screen displays no astronomy images. Submitting coordinates starts a live job (`POST /v1/sequences`, 16 frames) through `src/lib/api/client.ts`. The client polls with capped backoff, shows the job's progress and message, and lets the user cancel. When the job is ready it loads the manifest into the viewer. Each failure state shows the server's message and code with a retry or change-the-query hint. A new search clears the previous sequence and cancels the abandoned job so the single backend worker is released. A "Load cached real example" action appears after a failure only when the backend bundles verified cached-real examples (`GET /v1/examples`, currently empty). The reference targets are names from the challenge, not claims of downloaded or validated observations.
 
-Viewer and annotation modules contain initial isolated implementations for the assigned owners to extend. Pan/zoom and sky-drag time controls are reserved and visibly disabled or documented. The job-to-manifest flow, real data, keyboard marking, actual epoch-gap timeline, and comparison modes remain implementation work.
+Viewer and annotation modules contain initial isolated implementations for the assigned owners to extend. Pan/zoom and sky-drag time controls are reserved and visibly disabled or documented. Shareable query URLs, preset selection, keyboard marking, actual epoch-gap timeline, quality explanations and comparison modes remain implementation work.
 
 Do not turn the backend's opt-in synthetic fixture into default imagery or label it as SPHEREx data. Keep synthetic disclosure visible if a development fixture is enabled later.
 

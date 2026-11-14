@@ -27,7 +27,7 @@ The authoritative public models live in `apps/api/app/schemas.py`. Export them t
 | `GET /v1/demo/manifest` | Explicit synthetic development manifest |
 | `GET /v1/demo/frames/{filename}` | Allowlisted synthetic assets only |
 
-The checked-in OpenAPI file is the exact field and status-code contract. Real frame delivery uses API-controlled artifact routes. The frontend remains an integration task for the team. Avoid returning internal paths, upstream credentials, or unbounded archive response bodies in errors.
+The checked-in OpenAPI file is the exact field and status-code contract. Real frame delivery uses API-controlled artifact routes. The browser client in `apps/web/src/lib/api/client.ts` implements this lifecycle: `runSequenceJob` creates the job, polls with capped backoff (1 s growing to 5 s, abandoned and cancelled after 10 minutes), maps HTTP 410 to a repeat-the-search state and fetches the manifest when ready. Avoid returning internal paths, upstream credentials, or unbounded archive response bodies in errors.
 
 ## Scientific handoff
 

@@ -5,40 +5,105 @@ import { Brand } from "@/components/ui/Brand";
 import { AnnotationPanel } from "@/features/annotations/AnnotationPanel";
 import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
-import { ApiClientError, requestSequence } from "@/lib/api/client";
+import { ApiClientError, cancelSequence, listExamples, recoveryFor, runSequenceJob } from "@/lib/api/client";
 import { CoordinateForm } from "./CoordinateForm";
+import { SearchStatus, type SearchState } from "./SearchStatus";
 import { TargetPresets } from "./TargetPresets";
 import type { ImageSelection, SequenceManifest, SequenceRequest } from "./interfaces";
 import styles from "./explorer.module.css";
 
+const TERMINAL = new Set(["ready", "failed", "cancelled", "expired"]);
+
+interface ActiveRun {
+  controller: AbortController;
+  jobId: string | null;
+  status: string | null;
+}
+
 export function ExplorerScreen() {
-  const [sequence] = useState<SequenceManifest | null>(null);
+  const [sequence, setSequence] = useState<SequenceManifest | null>(null);
   const [activeFrameId, setActiveFrameId] = useState<string | null>(null);
   const [selection, setSelection] = useState<ImageSelection | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [serviceMessage, setServiceMessage] = useState("");
-  const pendingRequest = useRef<AbortController | null>(null);
+  const [search, setSearch] = useState<SearchState>({ phase: "idle" });
+  const [examples, setExamples] = useState<SequenceManifest[]>([]);
+  const activeRun = useRef<ActiveRun | null>(null);
   const { annotations, addAnnotation, removeAnnotation } = useAnnotations();
 
-  useEffect(() => () => pendingRequest.current?.abort(), []);
+  // Stop polling and release the single backend worker for an abandoned job.
+  function stopActiveRun(): Promise<void> {
+    const run = activeRun.current;
+    activeRun.current = null;
+    if (!run) return Promise.resolve();
+    run.controller.abort();
+    if (!run.jobId || (run.status && TERMINAL.has(run.status))) return Promise.resolve();
+    return cancelSequence(run.jobId).then(() => undefined, () => undefined);
+  }
+
+  useEffect(() => {
+    const controller = new AbortController();
+    listExamples(controller.signal).then(setExamples, () => undefined);
+    return () => {
+      controller.abort();
+      void stopActiveRun();
+    };
+  }, []);
+
+  function showSequence(manifest: SequenceManifest) {
+    setSequence(manifest);
+    setActiveFrameId(manifest.frames[0]?.frame_id ?? null);
+    setSelection(null);
+  }
 
   async function submit(request: SequenceRequest) {
-    pendingRequest.current?.abort();
-    const controller = new AbortController();
-    pendingRequest.current = controller;
-    setBusy(true);
-    setServiceMessage("");
+    await stopActiveRun();
+    const run: ActiveRun = { controller: new AbortController(), jobId: null, status: null };
+    activeRun.current = run;
+    // Never leave a previous sequence on screen under a new query.
+    setSequence(null);
+    setActiveFrameId(null);
+    setSelection(null);
+    setSearch({ phase: "running", request, job: null });
     try {
-      await requestSequence(request, controller.signal);
-      setServiceMessage("The service accepted a response. The job-to-viewer integration is reserved for the next implementation slice.");
+      const manifest = await runSequenceJob(request, {
+        signal: run.controller.signal,
+        onUpdate: job => {
+          if (activeRun.current !== run) return;
+          run.jobId = job.sequence_id;
+          run.status = job.status;
+          setSearch({ phase: "running", request, job });
+        },
+      });
+      if (activeRun.current !== run) return;
+      activeRun.current = null;
+      showSequence(manifest);
+      setSearch({ phase: "ready", request, manifest });
     } catch (error) {
-      if (controller.signal.aborted) return;
-      setServiceMessage(error instanceof ApiClientError
-        ? `${error.code}: ${error.message}`
-        : "The local observation service is unavailable. Start the backend container or configure its public address.");
-    } finally {
-      if (pendingRequest.current === controller) setBusy(false);
+      if (activeRun.current !== run || run.controller.signal.aborted) return;
+      activeRun.current = null;
+      const failure = error instanceof ApiClientError
+        ? error
+        : new ApiClientError("The search failed unexpectedly. Retry, or reload the page.", 0, "CLIENT_FAILURE");
+      setSearch({ phase: "failed", request, code: failure.code, message: failure.message, recovery: recoveryFor(failure.code) });
     }
+  }
+
+  async function cancelSearch() {
+    if (search.phase !== "running") return;
+    const { request } = search;
+    await stopActiveRun();
+    setSearch({ phase: "cancelled", request });
+  }
+
+  function retrySearch() {
+    if (search.phase === "failed" || search.phase === "cancelled") void submit(search.request);
+  }
+
+  function loadExample() {
+    const example = examples[0];
+    if (!example) return;
+    void stopActiveRun();
+    showSequence(example);
+    setSearch({ phase: "example", manifest: example });
   }
 
   return (
@@ -62,8 +127,8 @@ export function ExplorerScreen() {
             <TargetPresets />
           </div>
           <aside className={styles.sidePanel} aria-label="Field selection and candidate notes">
-            <CoordinateForm onSubmit={submit} busy={busy} />
-            {serviceMessage && <p className={styles.serviceMessage} role="status">{serviceMessage}</p>}
+            <CoordinateForm onSubmit={request => void submit(request)} busy={search.phase === "running"} />
+            <SearchStatus state={search} canLoadExample={examples.length > 0} onCancel={() => void cancelSearch()} onRetry={retrySearch} onLoadExample={loadExample} />
             <AnnotationPanel selection={selection} annotations={annotations.filter(item => item.selection.sequenceId === sequence?.sequence_id)} onAdd={addAnnotation} onRemove={removeAnnotation} />
           </aside>
         </section>

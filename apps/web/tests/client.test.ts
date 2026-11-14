@@ -1,0 +1,127 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { ApiClientError, recoveryFor, resolveAssetUrl, runSequenceJob } from "../src/lib/api/client.ts";
+
+interface Step { status?: number; body?: unknown; reject?: Error }
+
+// Scripted fetch: each request consumes the next step, so an unexpected
+// extra request (for example, polling after abort) fails the test.
+function scriptFetch(steps: Step[]) {
+  const calls: { url: string; method: string }[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    calls.push({ url: String(input), method: init?.method ?? "GET" });
+    if (init?.signal?.aborted) {
+      const error = new Error("aborted");
+      error.name = "AbortError";
+      throw error;
+    }
+    const step = steps.shift();
+    if (!step) throw new Error(`Unexpected request ${String(input)}`);
+    if (step.reject) throw step.reject;
+    return new Response(JSON.stringify(step.body ?? null), {
+      status: step.status ?? 200, headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+  return { calls, restore() { globalThis.fetch = original; } };
+}
+
+const API = "http://localhost:8000";
+const request = { ra_deg: 248.1672331, dec_deg: 66.7550238, fov_arcmin: 6, max_frames: 8 };
+const job = (status: string, extra: Record<string, unknown> = {}) => ({ sequence_id: "job-abc", status, progress: 0, ...extra });
+const instant = async () => {};
+
+test("polls a live job through each state to its manifest", async () => {
+  const manifest = { sequence_id: "job-abc", data_mode: "live", frames: [] };
+  const fake = scriptFetch([
+    { status: 202, body: job("queued") }, { body: job("retrieving") },
+    { body: job("processing") }, { body: job("ready", { manifest_url: "/v1/sequences/job-abc/manifest" }) },
+    { body: manifest },
+  ]);
+  try {
+    const seen: string[] = [];
+    const result = await runSequenceJob(request, { sleep: instant, onUpdate: item => seen.push(item.status) });
+    assert.deepEqual(result, manifest);
+    assert.deepEqual(seen, ["queued", "retrieving", "processing", "ready"]);
+    assert.deepEqual(fake.calls.map(call => `${call.method} ${call.url}`), [
+      `POST ${API}/v1/sequences`,
+      `GET ${API}/v1/sequences/job-abc`, `GET ${API}/v1/sequences/job-abc`, `GET ${API}/v1/sequences/job-abc`,
+      `GET ${API}/v1/sequences/job-abc/manifest`,
+    ]);
+  } finally { fake.restore(); }
+});
+
+test("a failed job surfaces the server's error code and message", async () => {
+  const fake = scriptFetch([
+    { status: 202, body: job("queued") },
+    { body: job("failed", { error: { code: "archive_busy", message: "The IRSA archive is busy.", details: [] } }) },
+  ]);
+  try {
+    await assert.rejects(runSequenceJob(request, { sleep: instant }), (error: unknown) =>
+      error instanceof ApiClientError && error.code === "archive_busy" && error.message === "The IRSA archive is busy.");
+  } finally { fake.restore(); }
+});
+
+test("HTTP errors keep their status, code and details", async () => {
+  const fake = scriptFetch([{ status: 429, body: { code: "QUEUE_FULL", message: "The processing queue is full.", details: ["try later"] } }]);
+  try {
+    await assert.rejects(runSequenceJob(request, { sleep: instant }), (error: unknown) =>
+      error instanceof ApiClientError && error.status === 429 && error.code === "QUEUE_FULL" && error.details[0] === "try later");
+  } finally { fake.restore(); }
+});
+
+test("an expired job or backend restart asks for a new search", async () => {
+  const fake = scriptFetch([
+    { status: 202, body: job("queued") },
+    { status: 410, body: { code: "JOB_EXPIRED", message: "expired", details: [] } },
+  ]);
+  try {
+    await assert.rejects(runSequenceJob(request, { sleep: instant }), (error: unknown) =>
+      error instanceof ApiClientError && error.status === 410 && error.code === "JOB_EXPIRED");
+  } finally { fake.restore(); }
+});
+
+test("an unreachable backend becomes a readable error", async () => {
+  const fake = scriptFetch([{ reject: new TypeError("fetch failed") }]);
+  try {
+    await assert.rejects(runSequenceJob(request, { sleep: instant }), (error: unknown) =>
+      error instanceof ApiClientError && error.code === "BACKEND_UNAVAILABLE");
+  } finally { fake.restore(); }
+});
+
+test("aborting stops polling without another request", async () => {
+  const controller = new AbortController();
+  const fake = scriptFetch([{ status: 202, body: job("queued") }]);
+  try {
+    await assert.rejects(
+      runSequenceJob(request, { signal: controller.signal, onUpdate: () => controller.abort() }),
+      (error: unknown) => (error as Error).name === "AbortError",
+    );
+    assert.equal(fake.calls.length, 1);
+  } finally { fake.restore(); }
+});
+
+test("waiting is bounded and the abandoned job is cancelled", async () => {
+  let clock = 0;
+  const fake = scriptFetch([
+    { status: 202, body: job("queued") }, { body: job("retrieving") }, { body: job("cancelled") },
+  ]);
+  try {
+    await assert.rejects(
+      runSequenceJob(request, { sleep: instant, maxWaitMs: 3000, now: () => (clock += 2000) - 2000 }),
+      (error: unknown) => error instanceof ApiClientError && error.code === "POLL_TIMEOUT",
+    );
+    assert.deepEqual(fake.calls.at(-1), { url: `${API}/v1/sequences/job-abc/cancel`, method: "POST" });
+  } finally { fake.restore(); }
+});
+
+test("recovery guidance separates retryable failures from ones needing a new query", () => {
+  assert.equal(recoveryFor("archive_busy"), "retry");
+  assert.equal(recoveryFor("JOB_EXPIRED"), "retry");
+  assert.equal(recoveryFor("INSUFFICIENT_COMPARABLE_EPOCHS"), "change-query");
+  assert.equal(recoveryFor("SCIENCE_UNAVAILABLE"), "none");
+});
+
+test("manifest frame paths resolve against the configured API origin", () => {
+  assert.equal(resolveAssetUrl("/v1/sequences/job-abc/frames/frame-0001.png"), `${API}/v1/sequences/job-abc/frames/frame-0001.png`);
+});
