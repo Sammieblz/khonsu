@@ -1,0 +1,4 @@
+interface:
+  display_name: "Khonsu Integration and Delivery"
+  short_description: "Integrate owned modules and verify the delivery path"
+  default_prompt: "Use $khonsu-integration-delivery to integrate the requested change, run relevant checks and prepare a clear Khonsu handoff."

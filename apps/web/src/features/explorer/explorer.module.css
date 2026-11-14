@@ -1,0 +1,83 @@
+.site { max-width: 1800px; margin: 0 auto; padding: 0 48px; background: radial-gradient(ellipse at 60% -30%, #1c2d49 0, transparent 55%); }
+.header { min-height: 108px; display: flex; align-items: center; gap: 36px; border-bottom: 1px solid var(--line); }
+.header nav { display: flex; align-items: center; gap: 28px; margin-left: auto; }
+.header nav a { text-decoration: none; font-family: var(--font-data); font-size: 10px; letter-spacing: .08em; padding: 14px 0; transition: color 140ms ease; }
+.header nav a:hover { color: var(--amber); }
+.buildLabel { padding: 7px 10px; border: 1px solid rgb(217 174 106 / 30%); color: var(--amber); font-family: var(--font-data); font-size: 8px; letter-spacing: .07em; }
+.introduction { display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; padding: 56px 0 42px; }
+.eyebrow { display: block; font-family: var(--font-data); font-size: 10px; letter-spacing: .12em; color: var(--amber); }
+.introduction h1 { margin: 16px 0 0; font-family: var(--font-display); font-size: clamp(48px, 5.7vw, 92px); line-height: .98; letter-spacing: .015em; font-weight: 600; }
+.introduction h1 span { color: var(--silver); }
+.introduction > p { max-width: 310px; margin: 0 0 5px; font-size: 13px; line-height: 1.9; color: var(--silver); }
+.workspace { scroll-margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 332px; align-items: start; border: 1px solid var(--line); }
+.mainInstrument { min-width: 0; }
+.sidePanel { min-width: 0; border-left: 1px solid var(--line); background: rgb(16 26 42 / 48%); }
+.coordinateForm { padding: 28px; }
+.formHeading { display: flex; justify-content: space-between; gap: 16px; }
+.smallLabel { font-family: var(--font-data); font-size: 9px; color: var(--silver); }
+.coordinateForm h2 { margin: 18px 0 12px; font-family: var(--font-display); font-weight: 500; font-size: 40px; line-height: 1.1; }
+.muted { color: var(--silver); font-size: 11px; line-height: 1.8; margin: 0 0 25px; }
+.coordinateForm label { display: flex; justify-content: space-between; gap: 12px; margin: 18px 0 8px; font-size: 11px; }
+.coordinateForm label span { color: var(--silver); font-size: 10px; }
+.coordinateForm input { width: 100%; height: 43px; padding: 0 12px; border: 1px solid var(--line); background: var(--space); color: var(--ivory); font-family: var(--font-data); font-size: 12px; }
+.coordinateForm input::placeholder { color: #657286; }
+.primaryButton { width: 100%; min-height: 47px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 15px; background: var(--amber); color: var(--space); border: 1px solid var(--amber); font-family: var(--font-data); font-size: 10px; letter-spacing: .03em; font-weight: 500; transition: background 140ms ease; }
+.primaryButton:hover:not(:disabled) { background: #eac794; }
+.formNote { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 12px 0 0; }
+.error { color: var(--danger); font-size: 11px; line-height: 1.6; }
+.serviceMessage { border-top: 1px solid var(--line); padding: 16px 28px; margin: 0; color: var(--amber); font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
+.referenceTargets { padding: 24px 28px; border-top: 1px solid var(--line); }
+.referenceTargets p { color: var(--silver); font-size: 10px; line-height: 1.6; margin: 8px 0 18px; }
+.referenceTargets ol { display: flex; flex-wrap: wrap; gap: 12px 24px; list-style: none; margin: 0; padding: 0; }
+.referenceTargets li { font-size: 11px; color: var(--ivory); }
+.referenceTargets li span { font-family: var(--font-data); font-size: 8px; margin-right: 8px; color: var(--amber); }
+.guide { scroll-margin-top: 24px; display: grid; grid-template-columns: 1fr 2fr; gap: 48px; padding: 64px 0; }
+.guide h2 { font-family: var(--font-display); font-size: 42px; line-height: 1.1; font-weight: 500; margin: 16px 0 0; }
+.guide ol { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin: 0; padding: 0; list-style: none; }
+.guide li > span { font-family: var(--font-data); font-size: 10px; color: var(--amber); }
+.guide h3 { margin: 14px 0 10px; font-size: 13px; font-weight: 600; }
+.guide p { margin: 0; color: var(--silver); font-size: 11px; line-height: 1.9; }
+.footer { display: flex; align-items: center; gap: 24px; padding: 25px 0 30px; border-top: 1px solid var(--line); font-family: var(--font-data); font-size: 9px; }
+.footer > span { color: var(--amber); letter-spacing: .12em; }
+.footer p { margin: 0; color: var(--silver); }
+.footer a { margin-left: auto; text-decoration: none; }
+@media (min-width: 1600px) { .workspace { grid-template-columns: minmax(0, 1fr) 360px; } }
+@media (max-width: 1100px) {
+  .site { padding: 0 28px; }
+  .header { gap: 20px; }
+  .header nav { gap: 18px; }
+  .buildLabel { display: none; }
+  .workspace { grid-template-columns: minmax(0, 1fr) 300px; }
+  .coordinateForm { padding: 24px; }
+  .guide { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width: 800px) {
+  .site { padding: 0 20px; }
+  .header { min-height: 90px; }
+  .header nav a { font-size: 9px; }
+  .header nav a:nth-child(3) { display: none; }
+  .introduction { align-items: flex-start; flex-direction: column; gap: 24px; padding: 36px 0 28px; }
+  .introduction h1 { font-size: clamp(46px, 8.5vw, 72px); }
+  .introduction > p { max-width: 440px; font-size: 12px; }
+  .workspace { grid-template-columns: 1fr; }
+  .sidePanel { border-left: 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .serviceMessage { grid-column: 1 / -1; }
+  .guide { padding: 44px 0; }
+  .guide ol { gap: 20px; }
+  .footer { flex-wrap: wrap; gap: 14px; line-height: 1.8; }
+}
+@media (max-width: 520px) {
+  .site { padding: 0 16px; }
+  .header nav { gap: 10px; }
+  .header nav a { font-size: 8px; }
+  .header nav a:nth-child(2) { display: none; }
+  .eyebrow { font-size: 9px; }
+  .sidePanel { display: block; }
+  .referenceTargets { padding: 24px 20px; }
+  .guide ol { grid-template-columns: 1fr; gap: 24px; }
+  .guide li { display: grid; grid-template-columns: 24px 1fr; column-gap: 16px; }
+  .guide li > span { grid-row: 1 / 3; padding-top: 3px; }
+  .guide h3 { margin: 0 0 8px; }
+  .footer { display: block; }
+  .footer p { margin: 10px 0; }
+}

@@ -1,0 +1,38 @@
+.instrument { padding: 24px 28px 0; min-width: 0; }
+.instrumentHeading { display: flex; justify-content: space-between; gap: 16px; color: var(--silver); font-family: var(--font-data); font-size: 9px; letter-spacing: .06em; }
+.instrumentHeading span:last-child { text-align: right; color: var(--amber); }
+.disclosure { padding: 10px 12px; border: 1px solid rgb(217 174 106 / 35%); font-size: 11px; line-height: 1.7; color: var(--amber); }
+.viewport { position: relative; min-height: 420px; height: clamp(420px, 35vw, 590px); margin-top: 20px; display: grid; place-items: center; overflow: hidden; background: linear-gradient(rgb(241 240 233 / 2%) 1px, transparent 1px), linear-gradient(90deg, rgb(241 240 233 / 2%) 1px, transparent 1px), radial-gradient(ellipse at center, rgb(40 64 94 / 14%), transparent 72%); background-size: 80px 80px, 80px 80px, auto; }
+.emptyState { padding: 24px 16px 70px; text-align: center; }
+.reticle { position: relative; width: 86px; height: 86px; margin: 0 auto 26px; border: 1px solid rgb(217 174 106 / 32%); border-radius: 50%; }
+.reticle::before, .reticle::after { content: ""; position: absolute; background: var(--amber); opacity: .5; }
+.reticle::before { width: 1px; top: 27px; bottom: 27px; left: 50%; }
+.reticle::after { height: 1px; left: 27px; right: 27px; top: 50%; }
+.reticle span { position: absolute; inset: 8px; border: 1px dashed rgb(170 181 199 / 24%); border-radius: 50%; }
+.reticle i { position: absolute; height: 5px; width: 5px; border-radius: 50%; top: -3px; left: 40px; background: var(--amber); }
+.emptyEyebrow { font-family: var(--font-data); font-size: 9px; letter-spacing: .13em; color: var(--amber); }
+.emptyState h2 { margin: 16px 0; font-family: var(--font-display); font-size: clamp(38px, 4vw, 64px); font-weight: 500; line-height: 1.03; }
+.emptyState p { font-size: 11px; line-height: 1.9; color: var(--silver); }
+.emptyDisclosure { display: block; margin-top: 22px; font-family: var(--font-data); font-size: 8px; letter-spacing: .1em; color: var(--silver); }
+.orientation { position: absolute; left: 12px; bottom: 16px; display: flex; gap: 10px; color: var(--silver); font-family: var(--font-data); font-size: 9px; }
+.tools { position: absolute; display: flex; right: 8px; bottom: 6px; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 4px; background: rgb(7 11 18 / 92%); }
+.tools button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px; background: transparent; color: var(--silver); border: 1px solid transparent; font-size: 10px; }
+.tools button[aria-pressed="true"] { border-color: rgb(217 174 106 / 40%); color: var(--amber); }
+.canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; cursor: crosshair; }
+.loadState { position: absolute; top: 40%; left: 20%; right: 20%; text-align: center; color: var(--amber); font-size: 12px; }
+.transport { position: relative; padding: 24px 0; }
+.timeReadout { display: flex; justify-content: space-between; align-items: center; gap: 20px; font-family: var(--font-data); font-size: 8px; letter-spacing: .03em; }
+.timeReadout > span { color: var(--silver); }
+.timeReadout strong { font-size: 9px; font-weight: 400; color: var(--ivory); text-align: right; }
+.timeArc { height: 50px; margin: 4px 0 -25px; pointer-events: none; }
+.timeArc svg { width: 100%; height: 100%; fill: none; }
+.timeArc path:first-child { stroke: var(--line); stroke-width: 1; }
+.timeArc path:last-child { stroke: var(--silver); stroke-width: 5; opacity: .35; }
+.timeSlider { display: block; width: calc(100% - 12px); margin: 0 6px 20px; accent-color: var(--amber); height: 30px; position: relative; }
+.transportButtons { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.transportButtons button { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--line); background: var(--space); color: var(--ivory); }
+.transportButtons .playButton { color: var(--amber); border-color: rgb(217 174 106 / 35%); }
+.sequenceNote { margin-left: 12px; font-family: var(--font-data); font-size: 7px; color: var(--silver); letter-spacing: .03em; }
+@media (max-width: 1100px) { .instrument { padding: 24px 20px 0; } .sequenceNote { display: none; } .timeReadout { align-items: flex-start; flex-direction: column; gap: 8px; } .timeReadout strong { text-align: left; } }
+@media (max-width: 800px) { .viewport { min-height: 380px; height: 380px; } .emptyState h2 { font-size: 48px; } .timeReadout { flex-direction: row; } }
+@media (max-width: 520px) { .instrument { padding: 20px 12px 0; } .instrumentHeading { font-size: 7px; } .viewport { min-height: 360px; height: 360px; margin-top: 12px; } .emptyState h2 { font-size: 40px; } .emptyState p { font-size: 10px; } .timeReadout { flex-direction: column; } .tools button { min-height: 44px; padding: 8px; } .tools button span { font-size: 9px; } .orientation { left: 4px; bottom: 64px; } }

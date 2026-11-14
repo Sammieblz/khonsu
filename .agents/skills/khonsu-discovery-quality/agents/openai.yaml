@@ -1,0 +1,4 @@
+interface:
+  display_name: "Khonsu Discovery and Quality"
+  short_description: "Review candidates, annotations and scientific evidence"
+  default_prompt: "Use $khonsu-discovery-quality to implement the requested candidate workflow and assess its evidence without overstating a discovery."

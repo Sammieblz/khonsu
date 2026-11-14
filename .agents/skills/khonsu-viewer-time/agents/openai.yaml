@@ -1,0 +1,4 @@
+interface:
+  display_name: "Khonsu Viewer and Time"
+  short_description: "Build aligned image viewing and observation playback"
+  default_prompt: "Use $khonsu-viewer-time to implement the requested sky-viewer behavior without changing scientific time or coordinate meaning."

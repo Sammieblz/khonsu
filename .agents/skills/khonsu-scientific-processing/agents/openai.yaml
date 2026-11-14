@@ -1,0 +1,4 @@
+interface:
+  display_name: "Khonsu Scientific Processing"
+  short_description: "Process FITS with explicit wavelength and quality rules"
+  default_prompt: "Use $khonsu-scientific-processing to implement the requested FITS processing with reproducible coordinate, wavelength and quality handling."

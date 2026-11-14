@@ -1,0 +1,875 @@
+{
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "DisplaySettings": {
+        "additionalProperties": false,
+        "properties": {
+          "stretch": {
+            "default": "asinh",
+            "enum": [
+              "linear",
+              "asinh"
+            ],
+            "type": "string"
+          },
+          "vmax": {
+            "type": "number"
+          },
+          "vmin": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "vmin",
+          "vmax"
+        ],
+        "type": "object"
+      },
+      "Frame": {
+        "additionalProperties": false,
+        "properties": {
+          "bandwidth_um": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "detector": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "frame_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "type": "string"
+          },
+          "image_url": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "masked_fraction": {
+            "default": 0,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "observation_id": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "observed_end_utc": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "observed_start_utc": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "release": {
+            "anyOf": [
+              {
+                "enum": [
+                  "DR1",
+                  "QR3"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "source_fits_url": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "maxLength": 2083,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/QualityWarning"
+            },
+            "type": "array"
+          },
+          "wavelength_um": {
+            "anyOf": [
+              {
+                "maximum": 5,
+                "minimum": 0.75,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "frame_id",
+          "label",
+          "image_url"
+        ],
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "live_processing_available": {
+            "const": false,
+            "default": false,
+            "type": "boolean"
+          },
+          "service": {
+            "const": "khonsu-api",
+            "default": "khonsu-api",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "type": "object"
+      },
+      "ImageGrid": {
+        "additionalProperties": false,
+        "properties": {
+          "height_px": {
+            "maximum": 4096,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "orientation": {
+            "const": "north-up-east-left",
+            "default": "north-up-east-left",
+            "type": "string"
+          },
+          "pixel_center_convention": {
+            "const": "zero-based-integer-centers",
+            "default": "zero-based-integer-centers",
+            "type": "string"
+          },
+          "pixel_origin": {
+            "const": "top-left",
+            "default": "top-left",
+            "type": "string"
+          },
+          "raster_to_wcs": {
+            "anyOf": [
+              {
+                "enum": [
+                  "identity",
+                  "flip-y"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "wcs_header": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "width_px": {
+            "maximum": 4096,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "width_px",
+          "height_px"
+        ],
+        "type": "object"
+      },
+      "PresetTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "coordinate_frame": {
+            "const": "ICRS",
+            "default": "ICRS",
+            "type": "string"
+          },
+          "coordinate_note": {
+            "type": "string"
+          },
+          "dec_deg": {
+            "anyOf": [
+              {
+                "maximum": 90,
+                "minimum": -90,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "label": {
+            "type": "string"
+          },
+          "object_type": {
+            "type": "string"
+          },
+          "preset_id": {
+            "type": "string"
+          },
+          "ra_deg": {
+            "anyOf": [
+              {
+                "exclusiveMaximum": 360,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "preset_id",
+          "label",
+          "object_type",
+          "coordinate_note"
+        ],
+        "type": "object"
+      },
+      "QualityWarning": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SequenceJob": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "manifest_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "sequence_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "retrieving",
+              "processing",
+              "ready",
+              "failed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence_id",
+          "status"
+        ],
+        "type": "object"
+      },
+      "SequenceManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "data_mode": {
+            "enum": [
+              "synthetic",
+              "cached-real",
+              "live"
+            ],
+            "type": "string"
+          },
+          "disclosure": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "display": {
+            "$ref": "#/components/schemas/DisplaySettings"
+          },
+          "frames": {
+            "items": {
+              "$ref": "#/components/schemas/Frame"
+            },
+            "maxItems": 96,
+            "minItems": 2,
+            "type": "array"
+          },
+          "grid": {
+            "$ref": "#/components/schemas/ImageGrid"
+          },
+          "requested_fov_arcmin": {
+            "maximum": 60,
+            "minimum": 0.5,
+            "type": "number"
+          },
+          "schema_version": {
+            "const": "1.0",
+            "default": "1.0",
+            "type": "string"
+          },
+          "sequence_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/SkyTarget"
+          },
+          "title": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/QualityWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sequence_id",
+          "data_mode",
+          "title",
+          "disclosure",
+          "target",
+          "requested_fov_arcmin",
+          "grid",
+          "display",
+          "frames"
+        ],
+        "type": "object"
+      },
+      "SequenceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "coordinate_frame": {
+            "const": "ICRS",
+            "default": "ICRS",
+            "type": "string"
+          },
+          "dec_deg": {
+            "maximum": 90,
+            "minimum": -90,
+            "type": "number"
+          },
+          "detector": {
+            "anyOf": [
+              {
+                "maximum": 6,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "end_utc": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "fov_arcmin": {
+            "default": 6,
+            "maximum": 60,
+            "minimum": 0.5,
+            "type": "number"
+          },
+          "max_frames": {
+            "default": 24,
+            "maximum": 96,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "ra_deg": {
+            "exclusiveMaximum": 360,
+            "minimum": 0,
+            "type": "number"
+          },
+          "start_utc": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "wavelength_max_um": {
+            "anyOf": [
+              {
+                "maximum": 5,
+                "minimum": 0.75,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "wavelength_min_um": {
+            "anyOf": [
+              {
+                "maximum": 5,
+                "minimum": 0.75,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "ra_deg",
+          "dec_deg"
+        ],
+        "type": "object"
+      },
+      "SkyTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "coordinate_frame": {
+            "const": "ICRS",
+            "default": "ICRS",
+            "type": "string"
+          },
+          "dec_deg": {
+            "maximum": 90,
+            "minimum": -90,
+            "type": "number"
+          },
+          "ra_deg": {
+            "exclusiveMaximum": 360,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "ra_deg",
+          "dec_deg"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Foundation API contract. Live SPHEREx retrieval and processing are not implemented.",
+    "title": "Khonsu API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/v1/demo/frames/{filename}": {
+      "get": {
+        "operationId": "synthetic_frame_v1_demo_frames__filename__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/svg+xml": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Allowlisted synthetic SVG asset"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Asset not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/v1/demo/manifest": {
+      "get": {
+        "operationId": "synthetic_manifest_v1_demo_manifest_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceManifest"
+                }
+              }
+            },
+            "description": "Explicit synthetic development graphics"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Fixture unavailable"
+          }
+        }
+      }
+    },
+    "/v1/presets": {
+      "get": {
+        "operationId": "presets_v1_presets_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PresetTarget"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/v1/sequences": {
+      "post": {
+        "operationId": "create_sequence_v1_sequences_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SequenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceJob"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Validation error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not implemented"
+          }
+        }
+      }
+    },
+    "/v1/sequences/{sequence_id}": {
+      "get": {
+        "operationId": "sequence_status_v1_sequences__sequence_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sequence_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceJob"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Validation error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not implemented"
+          }
+        }
+      }
+    },
+    "/v1/sequences/{sequence_id}/manifest": {
+      "get": {
+        "operationId": "sequence_manifest_v1_sequences__sequence_id__manifest_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sequence_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceManifest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Validation error"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not implemented"
+          }
+        }
+      }
+    }
+  },
+  "x-khonsu-contract-status": "bootstrap-unverified: run python scripts/export-contracts.py in a dependency-enabled runtime to replace with actual FastAPI output"
+}

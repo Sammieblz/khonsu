@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "sequence_id": "synthetic-demo-v1",
+  "data_mode": "synthetic",
+  "title": "Synthetic development sequence",
+  "disclosure": "SYNTHETIC DEVELOPMENT GRAPHICS. Not NASA images, not SPHEREx observations, and not evidence of any astronomical object. Coordinates and field size are placeholders. No observation times or measured wavelengths are supplied.",
+  "target": {"ra_deg": 0.0, "dec_deg": 0.0, "coordinate_frame": "ICRS"},
+  "requested_fov_arcmin": 6.0,
+  "grid": {
+    "width_px": 256,
+    "height_px": 256,
+    "pixel_origin": "top-left",
+    "orientation": "north-up-east-left",
+    "pixel_center_convention": "zero-based-integer-centers",
+    "wcs_header": null,
+    "raster_to_wcs": null
+  },
+  "display": {"stretch": "linear", "vmin": 0.0, "vmax": 1.0},
+  "frames": [
+    {
+      "frame_id": "synthetic-01",
+      "label": "Synthetic frame 1",
+      "image_url": "/v1/demo/frames/frame-01.svg",
+      "observed_start_utc": null,
+      "observed_end_utc": null,
+      "wavelength_um": null,
+      "bandwidth_um": null,
+      "detector": null,
+      "release": null,
+      "observation_id": null,
+      "source_fits_url": null,
+      "masked_fraction": 0.0,
+      "warnings": []
+    },
+    {
+      "frame_id": "synthetic-02",
+      "label": "Synthetic frame 2",
+      "image_url": "/v1/demo/frames/frame-02.svg",
+      "observed_start_utc": null,
+      "observed_end_utc": null,
+      "wavelength_um": null,
+      "bandwidth_um": null,
+      "detector": null,
+      "release": null,
+      "observation_id": null,
+      "source_fits_url": null,
+      "masked_fraction": 0.0,
+      "warnings": []
+    },
+    {
+      "frame_id": "synthetic-03",
+      "label": "Synthetic frame 3",
+      "image_url": "/v1/demo/frames/frame-03.svg",
+      "observed_start_utc": null,
+      "observed_end_utc": null,
+      "wavelength_um": null,
+      "bandwidth_um": null,
+      "detector": null,
+      "release": null,
+      "observation_id": null,
+      "source_fits_url": null,
+      "masked_fraction": 0.0,
+      "warnings": []
+    }
+  ],
+  "warnings": [{
+    "code": "SYNTHETIC_DATA",
+    "message": "Only validates viewer integration. Replace with separately verified real-data fixtures in the next milestone."
+  }]
+}

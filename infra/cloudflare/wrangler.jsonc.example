@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "khonsu-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-13",
+  "compatibility_flags": ["enable_request_signal"],
+  "vars": {
+    "KHONSU_CORS_ORIGINS": "https://replace-me.invalid"
+  },
+  "containers": [
+    {
+      "class_name": "KhonsuContainer",
+      "scheduling_policy": "durable_object",
+      "images": {
+        "base": {
+          "dockerfile": "../../apps/api/Dockerfile",
+          "build_context": "../.."
+        }
+      },
+      "ssh": { "enabled": false }
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "KHONSU_API", "class_name": "KhonsuContainer" }
+    ]
+  },
+  "exports": {
+    "KhonsuContainer": { "type": "durable-object", "storage": "sqlite" }
+  }
+}

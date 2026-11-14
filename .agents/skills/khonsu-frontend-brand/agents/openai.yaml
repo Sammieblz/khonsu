@@ -1,0 +1,4 @@
+interface:
+  display_name: "Khonsu Frontend and Brand"
+  short_description: "Build accessible Khonsu screens and visual identity"
+  default_prompt: "Use $khonsu-frontend-brand to implement the requested Khonsu interface while following its design system and accessibility rules."
