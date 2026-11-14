@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
         working-directory: apps/web
       - run: npm run test && npm run typecheck && npm run build
         working-directory: apps/web
@@ -45,10 +45,6 @@ jobs:
         with:
           name: khonsu-static-export
           path: apps/web/out
-      - uses: actions/upload-artifact@v4
-        with:
-          name: web-dependency-lock
-          path: apps/web/package-lock.json
   gateway:
     runs-on: ubuntu-latest
     defaults:
@@ -59,14 +55,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm run test
       - run: cp wrangler.jsonc.example wrangler.jsonc
       - run: npm run typecheck
-      - uses: actions/upload-artifact@v4
-        with:
-          name: gateway-dependency-lock
-          path: infra/cloudflare/package-lock.json
   containers:
     runs-on: ubuntu-latest
     steps:
