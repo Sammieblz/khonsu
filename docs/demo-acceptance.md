@@ -26,11 +26,11 @@ The [coverage report](target-coverage.md) accounts for all five required fields.
 
 ## Cached replay with the archive unavailable
 
-The integration run loaded both `real-wise-0855` and `real-epsilon-indi-b` through the real application with upstream access blocked. The backend instrumentation recorded zero attempted outbound requests during cached replay. The local API remained running to serve its bundled assets; this does not establish a backend-free frontend.
+The integration run loaded both `real-wise-0855` and `real-epsilon-indi-b` through the real application with upstream access blocked. The reviewed primary bundle totals 72,119 bytes and the backup 52,309 bytes, 124,428 bytes combined. The backend instrumentation recorded zero attempted outbound requests during cached replay. The local API remained running to serve its bundled assets; this does not establish a backend-free frontend.
 
 For both examples, the explicit selection under **Saved observations** displayed the cached-real label and original epochs, preserved unrelated query inputs (RA `12.345`, Dec `-4.567`, field `6`), and did not display a live-result label. Stepping selected real frames. The 390-pixel viewport had a 390-pixel document width, with no horizontal page overflow or browser errors. A second replay after rebuilding merged commit `fbe18a3` passed the same two-example, label, query-preservation, stepping and mobile-width checks.
 
-These are unmodified acceptance captures. The desktop capture shows the primary's second epoch; the mobile capture shows the backup's second epoch. Their retained development controls and image overlays are not a claim that the broader accessibility and viewer-layout ticket is finished.
+These are unmodified acceptance captures. The desktop capture shows the primary's second epoch; the mobile capture shows the backup's second epoch. The phone viewer's toolbar/orientation controls still overlap the image; that unchanged layout limitation belongs to [#18](https://github.com/Sammieblz/khonsu/issues/18). These width checks do not establish full accessibility acceptance.
 
 ![Cached WISE 0855 field at desktop width, with unrelated query inputs preserved and cached disclosure visible](images/cached-example-desktop.png)
 
