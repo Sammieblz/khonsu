@@ -10,7 +10,7 @@ Contributors beyond the original five engineers are welcome. Start with the READ
 6. Open a pull request using the template. Link the issue, show what changed, explain verification and limitations, and attach screenshots for visible behavior.
 7. Address review feedback and rerun relevant checks. Maintainers merge once acceptance criteria and checks pass.
 
-The repository's `.mcp.json` declares Linear's hosted MCP server (`https://mcp.linear.app/mcp`) for Claude Code. Claude Code asks you to approve this project server the first time; then run `/mcp`, choose `linear` and sign in with your own Linear account in the browser. The file holds no token, and the server is optional: decline it if you do not use Linear.
+The repository's `.mcp.json` declares Linear's hosted MCP server (`https://mcp.linear.app/mcp`) for Claude Code. Claude Code asks you to approve this project server the first time; then run `/mcp`, choose `linear` and sign in with your own Linear account in the browser. The file holds no token, and the server is optional: decline it if you do not use Linear. [Linear MCP setup](docs/linear-mcp-setup.md) covers joining the workspace and other clients.
 
 Use explicit coordinate and time units, plain language, descriptive error states and accessible controls. Never use the em dash character in authored content. Do not present synthetic fixtures as observations or candidates as confirmed discoveries.
 
