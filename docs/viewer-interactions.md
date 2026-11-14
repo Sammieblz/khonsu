@@ -55,6 +55,8 @@ Playback and a blink comparison must not silently crossfade or interpolate scien
 
 The initial loader preloads the supplied manifest and reports frame errors. Michael should bound preloading before connecting the maximum-size live sequence. The production viewer needs a small cache around the active frame, cancellation on target changes, and a visible loading state when a selected frame is missing.
 
+Draw grid pixels as crisp blocks and transparent (masked or uncovered) pixels with the documented no-data hatch and key; see [display rendering](display-rendering.md). Never let masked pixels show the page background.
+
 Do not retain images from one sequence under another sequence identifier. Do not display a new date over an old image while loading. Keep the previous complete view visibly labeled or show a loading state.
 
 ## Marking and evidence

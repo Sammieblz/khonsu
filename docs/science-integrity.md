@@ -27,7 +27,7 @@ Keep spatial WCS and spectral WCS handling separate. Respect FITS versus Python 
 
 ## Preserve measurements and quality
 
-Read the [SPHEREx data product guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-products/) for calibrated IMAGE, FLAGS, VARIANCE, modeled background and wavelength products. Decode release-specific flags using the current explanatory supplement. Do not guess bitmap values or reject every nonzero flag without checking its definition. Keep masked, missing and out-of-coverage values distinct from measured zero.
+Read the [SPHEREx data product guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-products/) for calibrated IMAGE, FLAGS, VARIANCE, modeled background and wavelength products. Decode release-specific flags using the current explanatory supplement. Do not guess bitmap values or reject every nonzero flag without checking its definition. Keep masked, missing and out-of-coverage values distinct from measured zero. The current flag table, resampling, stretch and no-data display are in [display rendering](display-rendering.md).
 
 Use uncertainty-aware comparisons when claiming significant change. Treat different point spread functions (PSFs), background levels, detector artifacts, saturation, persistence, resampling and noise as possible explanations. Record whether background subtraction or PSF matching was actually performed. Treat a simple difference image as exploratory when these corrections are absent.
 

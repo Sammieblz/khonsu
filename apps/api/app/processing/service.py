@@ -11,13 +11,14 @@ import json
 import math
 from pathlib import Path
 import re
+import statistics
 from typing import Callable
 
 from ..interfaces import ObservationInput, ProcessingOptions
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
-PIPELINE_VERSION = "khonsu-display-0.2.0"
+PIPELINE_VERSION = "khonsu-display-0.3.0"
 MAX_OBSERVATIONS = 96
 MAX_OUTPUT_PIXELS_TOTAL = 96 * 512 * 512
 
@@ -34,7 +35,7 @@ def _validate_options(options, observations, lower, upper):
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Target coordinates must be finite ICRS degrees.")
     if not math.isfinite(options.fov_arcmin) or not 0.5 <= options.fov_arcmin <= 60:
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Field of view must be between 0.5 and 60 arcminutes.")
-    if not isinstance(options.output_size_px, int) or not 32 <= options.output_size_px <= 1024:
+    if options.output_size_px is not None and (not isinstance(options.output_size_px, int) or not 32 <= options.output_size_px <= 1024):
         raise ProcessingError("RESOURCE_LIMIT", "Output width must be between 32 and 1024 pixels.")
     if len(observations) > MAX_OBSERVATIONS:
         raise ProcessingError("RESOURCE_LIMIT", "At most 96 observations can be processed in one job.")
@@ -68,7 +69,11 @@ class AstronomyProcessor:
         _check_cancelled(cancelled)
         _validate_options(options, observations, wavelength_min_um, wavelength_max_um)
         try:
-            from .alignment import output_wcs, reproject_observation, shared_limits, write_calibrated_grid, write_png
+            from .alignment import (
+                ASINH_A, GRID_OVERSAMPLE, MIN_GRID_PX, STRETCH_HIGH_PERCENTILE, STRETCH_MIN_SPAN_SIGMA,
+                STRETCH_SKY_SIGMA_BELOW, auto_grid_size, native_pixel_scale_arcsec, output_wcs,
+                reproject_observation, shared_limits, write_calibrated_grid, write_png,
+            )
             from .fits_reader import inspect_observation, read_observation
             from .spectral import MAX_CENTER_SPREAD_IN_BANDWIDTHS, select_compatible_frames
         except ModuleNotFoundError as exc:
@@ -96,13 +101,22 @@ class AstronomyProcessor:
             except ProcessingError as exc:
                 skipped[exc.code] += 1
 
-        wcs = output_wcs(options)
+        native_scale = None
+        if candidates:
+            native_scale = statistics.median(native_pixel_scale_arcsec(item.spatial_wcs) for item in candidates)
+        if options.output_size_px is not None:
+            size = options.output_size_px
+        elif native_scale is not None:
+            size = auto_grid_size(options.fov_arcmin, native_scale)
+        else:
+            size = MIN_GRID_PX  # No usable input; the epoch check below reports why.
+        wcs = output_wcs(options, size)
         projected = []
         while candidates:
             selected = select_compatible_frames(candidates)
             if len({item.observation.observed_start_utc for item in selected}) < 2:
                 break
-            if len(selected) * options.output_size_px ** 2 > MAX_OUTPUT_PIXELS_TOTAL:
+            if len(selected) * size ** 2 > MAX_OUTPUT_PIXELS_TOTAL:
                 raise ProcessingError("RESOURCE_LIMIT", "The requested image sequence exceeds the output pixel budget.")
             projected = []
             failed = set()
@@ -110,7 +124,7 @@ class AstronomyProcessor:
                 _check_cancelled(cancelled)
                 try:
                     loaded = read_observation(item.observation, options.ra_deg, options.dec_deg)
-                    image, valid = reproject_observation(loaded, wcs, options.output_size_px)
+                    image, valid = reproject_observation(loaded, wcs, size)
                     item.warnings = list(loaded.warnings)
                     projected.append((item, image, valid))
                     del loaded
@@ -142,17 +156,23 @@ class AstronomyProcessor:
         policies = {
             "pipeline_version": PIPELINE_VERSION,
             "science_unit": "MJy/sr",
-            "reprojection": "bilinear, common ICRS TAN grid",
-            "mask_interpolation": "nearest-neighbor plus finite bilinear footprint",
+            "reprojection": "validity-weighted bilinear over valid pixels only, common ICRS TAN grid",
+            "mask_interpolation": "nearest-neighbor: an output pixel is valid only when its nearest input pixel is valid and inside coverage",
+            "grid_width_px": size,
+            "grid_scale_arcsec": options.fov_arcmin * 60.0 / size,
+            "grid_oversample_target": GRID_OVERSAMPLE,
             "flags_policy": "IRSA SDT bad flags plus OUTLIER/PHANMISS; SOURCE/FULLSAMPLE retained; unknown excluded",
             "wavelength_policy": "same detector; target center spread <= 0.25 * smallest bandwidth",
             "wavelength_lookup": "WCS-WAVE alternate WCS W; display approximation, not calibrated spectroscopy",
             "target_wavelength_min_um": min(wavelengths),
             "target_wavelength_max_um": max(wavelengths),
             "maximum_center_spread_um": MAX_CENTER_SPREAD_IN_BANDWIDTHS * smallest_width,
-            "asinh_a": 0.1,
-            "stretch_percentile_low": 0.5,
-            "stretch_percentile_high": 99.5,
+            "native_pixel_scale_arcsec": native_scale,
+            "asinh_a": ASINH_A,
+            "stretch_reference": "sky median and robust sigma (1.4826 * MAD) of valid pixels across all frames",
+            "stretch_low_sigma_below_sky": STRETCH_SKY_SIGMA_BELOW,
+            "stretch_high_percentile": STRETCH_HIGH_PERCENTILE,
+            "stretch_min_span_sigma": STRETCH_MIN_SPAN_SIGMA,
             "background_subtracted": False,
             "zodiacal_light_subtracted": False,
             "psf_matched": False,
@@ -202,7 +222,7 @@ class AstronomyProcessor:
             disclosure="Real archive observations rendered on one celestial grid. Display wavelengths are approximate; unmatched PSFs/backgrounds can resemble change. Candidate annotations require independent investigation.",
             target=SkyTarget(ra_deg=options.ra_deg, dec_deg=options.dec_deg),
             requested_fov_arcmin=options.fov_arcmin,
-            grid=ImageGrid(width_px=options.output_size_px, height_px=options.output_size_px, wcs_header=header, raster_to_wcs="flip-y"),
+            grid=ImageGrid(width_px=size, height_px=size, wcs_header=header, raster_to_wcs="flip-y"),
             display=DisplaySettings(stretch="asinh", vmin=low, vmax=high),
             frames=frame_models,
             warnings=warnings,

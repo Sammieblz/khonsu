@@ -87,11 +87,17 @@ class RetrievalTests(unittest.TestCase):
             with self.assertRaises(RetrievalError):
                 validate_irsa_url(url)
 
-    def test_cutout_has_full_field_width_and_cannot_be_overridden(self):
+    def test_cutout_covers_rotated_field_corners_and_cannot_be_overridden(self):
         url = cutout_url(SOURCE + "?size=300&center=0,0", request())
         params = parse_qs(urlsplit(url).query)
-        self.assertEqual(params["size"], ["0.1000000000"])
+        # 1.5 x the 6 arcmin field, wider than the sqrt(2) any rotation needs.
+        self.assertEqual(params["size"], ["0.1500000000"])
         self.assertEqual(params["center"], ["269.0000000000,4.0000000000"])
+
+    def test_wide_cutouts_stay_within_previous_byte_bounds(self):
+        for fov, expected in ((40., "1.0000000000"), (50., "1.0000000000"), (60., "1.0000000000"), (.5, "0.0125000000")):
+            params = parse_qs(urlsplit(cutout_url(SOURCE, request(fov_arcmin=fov))).query)
+            self.assertEqual(params["size"], [expected], fov)
 
     def test_frame_selection_preserves_order_span_and_one_detector(self):
         t = datetime(2025, 1, 1, tzinfo=timezone.utc)
