@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function usePlayback(frameIds: string[], activeFrameId: string | null, onFrameChange: (frameId: string) => void) {
-  const [playing, setPlaying] = useState(false);
+export function usePlayback(frameIds: string[], activeFrameId: string | null, onFrameChange: (frameId: string) => void, ready = true) {
+  const [requested, setPlaying] = useState(false);
+  const callback = useRef(onFrameChange);
+  callback.current = onFrameChange;
+  const index = frameIds.indexOf(activeFrameId ?? "");
+  const atEnd = index >= frameIds.length - 1;
+  const playing = requested && frameIds.length > 1 && !atEnd;
   useEffect(() => {
-    if (!playing || frameIds.length < 2) return;
-    const index = frameIds.indexOf(activeFrameId ?? "");
-    if (index >= frameIds.length - 1) return;
-    const timer = window.setTimeout(() => {
-      const next = frameIds[index + 1];
-      if (next) onFrameChange(next);
-    }, 700);
+    if (!playing || !ready) return;
+    const timer = window.setTimeout(() => { const next = frameIds[index + 1]; if (next) callback.current(next); }, 1000);
     return () => window.clearTimeout(timer);
-  }, [playing, frameIds, activeFrameId, onFrameChange]);
-  const atEnd = frameIds.length > 0 && activeFrameId === frameIds[frameIds.length - 1];
-  return { playing: playing && !atEnd && frameIds.length > 1, setPlaying };
+  }, [playing, ready, frameIds, index]);
+  useEffect(() => { if (atEnd) setPlaying(false); }, [atEnd]);
+  useEffect(() => {
+    const pause = () => { if (document.hidden) setPlaying(false); };
+    document.addEventListener("visibilitychange", pause);
+    return () => document.removeEventListener("visibilitychange", pause);
+  }, []);
+  return { playing, setPlaying };
 }
