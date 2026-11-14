@@ -1,4 +1,6 @@
 -r requirements.txt
+# Official IRSA WCS-WAVE recipes require a full CPython Astropy installation.
+# Direct versions are pinned; CI exercises real FITS-TAB and reprojection tests.
 numpy==2.2.5
 astropy==7.0.1
 astroquery==0.4.10

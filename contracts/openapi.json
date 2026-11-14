@@ -183,8 +183,7 @@
         "additionalProperties": false,
         "properties": {
           "live_processing_available": {
-            "const": false,
-            "default": false,
+            "default": true,
             "type": "boolean"
           },
           "service": {
@@ -374,6 +373,22 @@
               }
             ]
           },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress": {
+            "default": 0.0,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
           "sequence_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
             "type": "string"
@@ -384,7 +399,9 @@
               "retrieving",
               "processing",
               "ready",
-              "failed"
+              "failed",
+              "cancelled",
+              "expired"
             ],
             "type": "string"
           }
@@ -424,6 +441,25 @@
           },
           "grid": {
             "$ref": "#/components/schemas/ImageGrid"
+          },
+          "processing": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object"
           },
           "requested_fov_arcmin": {
             "maximum": 60,

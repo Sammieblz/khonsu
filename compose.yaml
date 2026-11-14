@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
       args:
-        INSTALL_SCIENCE: ${INSTALL_SCIENCE:-false}
+        INSTALL_SCIENCE: ${INSTALL_SCIENCE:-true}
     ports:
       - "127.0.0.1:8000:8000"
     environment:
@@ -34,3 +34,4 @@ services:
       timeout: 10s
       retries: 12
       start_period: 10s
+
