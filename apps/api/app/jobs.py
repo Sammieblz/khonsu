@@ -173,7 +173,17 @@ class JobManager:
                       and (record.request.wavelength_max_um is None or frame.wavelength_um <= record.request.wavelength_max_um)]
             if len(frames) < 2:
                 raise JobError(422, "INSUFFICIENT_SPECTRAL_OVERLAP", "Fewer than two comparable frames meet the selected wavelength range.")
-            manifest = SequenceManifest.model_validate({**manifest.model_dump(), "frames": frames})
+            payload = {**manifest.model_dump(), "frames": frames}
+            # Optional retriever report: cutouts the archive would not serve.
+            skipped = list(getattr(retriever, "skipped_downloads", None) or [])
+            if skipped:
+                selected = getattr(retriever, "selected_count", len(observations) + len(skipped))
+                payload["warnings"] = [*payload["warnings"], {
+                    "code": "ARCHIVE_DOWNLOADS_SKIPPED",
+                    "message": f"{len(skipped)} of {selected} selected IRSA cutouts were left out because the archive was busy or returned an unusable response. This sequence uses only the observations that downloaded.",
+                }]
+                payload["processing"] = {**payload["processing"], "archive_downloads_skipped": len(skipped)}
+            manifest = SequenceManifest.model_validate(payload)
             (record.directory / "manifest.json").write_text(manifest.model_dump_json(indent=2), encoding="utf-8")
             if self._cache_bytes() > self.max_bytes:
                 raise JobError(507, "CACHE_FULL", "Temporary storage reached its size limit. Wait for cached jobs to expire.")

@@ -46,7 +46,7 @@ def write_report(report: dict, path: Path) -> None:
     lines.extend([
         "", "## Retrieval and scientific limits", "",
         "SIA searches a one-arcsecond cone at the centre, then requests a square FITS cutout of the requested full field width. Partial image edges are masked. One detector is selected, and actual exposures are sampled across the available time span. SIA BAND is an image-level overlap filter; the processor independently checks the wavelength at the target using WCS-WAVE and rejects incomparable epochs.", "",
-        "Metadata is capped at 5,000 rows and 8 MiB. Downloads are capped at 48 MiB per FITS file and 256 MiB per sequence, with finite timeouts, three attempts and cancellation checks. Only HTTPS IRSA DR1/QR3 level2 FITS paths are accepted, including redirects. Truncated, unsafe, failed or non-FITS responses produce actionable errors.", "",
+        "Metadata is capped at 5,000 rows and 8 MiB. Downloads are capped at 48 MiB per FITS file and 256 MiB per sequence, with finite timeouts, capped retry backoff with bounded Retry-After, disclosed skipping of persistently unavailable cutouts, and cancellation checks. Only HTTPS IRSA DR1/QR3 level2 FITS paths are accepted, including redirects. Truncated, unsafe, failed or non-FITS responses produce actionable errors.", "",
         "The probe records empty coverage separately from network errors. Processing requires at least two real, distinct exposure start times in a comparable spectral group. No available fixture means no successful real-data demonstration has been established.", "",
         "## Primary sources", "",
         "- [Official SPHEREx introduction and SIA columns](https://caltech-ipac.github.io/irsa-tutorials/spherex-intro/)",
