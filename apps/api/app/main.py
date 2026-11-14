@@ -120,29 +120,33 @@ def sequence_frame(sequence_id: SequencePath, filename: str):
 
 
 def real_examples():
-    result = []
-    for path in sorted((FIXTURES / "real").glob("*/manifest.json")):
-        try:
-            manifest = SequenceManifest.model_validate_json(path.read_text(encoding="utf-8"))
-            if manifest.data_mode != "cached-real" or path.parent.name != manifest.sequence_id:
-                continue
-            if not all((path.parent / Path(frame.image_url).name).is_file() for frame in manifest.frames):
-                continue
-            result.append(manifest)
-        except (OSError, ValueError):
-            continue
-    return result
+    from .examples import load_examples
+    return load_examples(FIXTURES)
 
 
-@app.get("/v1/examples", response_model=list[SequenceManifest], tags=["discovery"])
+def cached_example_failure():
+    return error_response(503, "CACHED_EXAMPLE_UNAVAILABLE",
+                          "A bundled cached observation example is missing or corrupt. Restore the reviewed bundle; no substitute data was loaded.")
+
+
+@app.get("/v1/examples", response_model=list[SequenceManifest], responses={503: {"model": ApiError}}, tags=["discovery"])
 def examples():
-    return real_examples()
+    from .examples import CachedExampleError
+    try:
+        return real_examples()
+    except CachedExampleError:
+        return cached_example_failure()
 
 
 @app.get("/v1/examples/{example_id}/frames/{filename}", response_class=FileResponse,
-         responses={404: {"model": ApiError}, 422: {"model": ApiError}}, tags=["discovery"])
+         responses={404: {"model": ApiError}, 422: {"model": ApiError}, 503: {"model": ApiError}}, tags=["discovery"])
 def example_frame(example_id: SequencePath, filename: str):
-    for manifest in real_examples():
+    from .examples import CachedExampleError
+    try:
+        available = real_examples()
+    except CachedExampleError:
+        return cached_example_failure()
+    for manifest in available:
         if manifest.sequence_id == example_id and filename in {Path(f.image_url).name for f in manifest.frames}:
             if Path(filename).name == filename and filename.endswith(".png"):
                 return FileResponse(FIXTURES / "real" / example_id / filename, media_type="image/png")

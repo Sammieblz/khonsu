@@ -22,6 +22,29 @@ interface Props {
   onLoadExample: () => void;
 }
 
+interface CachedExampleProps {
+  examples: SequenceManifest[];
+  selectedId: string;
+  error: string;
+  loading: boolean;
+  onSelect: (id: string) => void;
+  onLoad: () => void;
+}
+
+export function CachedExamplePicker({ examples, selectedId, error, loading, onSelect, onLoad }: CachedExampleProps) {
+  return <section className={styles.searchStatus} aria-labelledby="cached-example-title">
+    <span className={styles.eyebrow} id="cached-example-title">SAVED OBSERVATIONS</span>
+    <p className={styles.statusDetail}>Explore a previously acquired real field without contacting IRSA. The local observation service must still be running. Your form coordinates stay unchanged.</p>
+    {loading ? <p role="status">Checking cached examples...</p> : error ? <p role="alert">{error}</p> : examples.length === 0 ? <p>No verified cached observation example is bundled with this service.</p> : <>
+      <label htmlFor="cached-example">Cached real field</label>
+      <select id="cached-example" className={styles.secondaryButton} value={selectedId} onChange={event => onSelect(event.target.value)}>
+        {examples.map(example => <option key={example.sequence_id} value={example.sequence_id}>{example.title}</option>)}
+      </select>
+      <div className={styles.statusActions}><button type="button" className={styles.secondaryButton} onClick={onLoad}>LOAD CACHED REAL EXAMPLE</button></div>
+    </>}
+  </section>;
+}
+
 function fieldSummary(request: SequenceRequest): string {
   return `RA ${request.ra_deg.toFixed(5)}°, Dec ${request.dec_deg.toFixed(5)}°, ${request.fov_arcmin ?? 6}′ field`;
 }

@@ -7,7 +7,7 @@ import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
 import { ApiClientError, cancelSequence, listExamples, recoveryFor, runSequenceJob } from "@/lib/api/client";
 import { CoordinateForm } from "./CoordinateForm";
-import { SearchStatus, type SearchState } from "./SearchStatus";
+import { CachedExamplePicker, SearchStatus, type SearchState } from "./SearchStatus";
 import { TargetPresets } from "./TargetPresets";
 import type { ImageSelection, SequenceManifest, SequenceRequest } from "./interfaces";
 import styles from "./explorer.module.css";
@@ -26,7 +26,11 @@ export function ExplorerScreen() {
   const [selection, setSelection] = useState<ImageSelection | null>(null);
   const [search, setSearch] = useState<SearchState>({ phase: "idle" });
   const [examples, setExamples] = useState<SequenceManifest[]>([]);
+  const [selectedExampleId, setSelectedExampleId] = useState("");
+  const [exampleError, setExampleError] = useState("");
+  const [examplesLoading, setExamplesLoading] = useState(true);
   const activeRun = useRef<ActiveRun | null>(null);
+  const activeExampleLoad = useRef<AbortController | null>(null);
   const { annotations, addAnnotation, removeAnnotation } = useAnnotations();
 
   // Stop polling and release the single backend worker for an abandoned job.
@@ -41,9 +45,18 @@ export function ExplorerScreen() {
 
   useEffect(() => {
     const controller = new AbortController();
-    listExamples(controller.signal).then(setExamples, () => undefined);
+    listExamples(controller.signal).then(items => {
+      setExamples(items);
+      setSelectedExampleId(items[0]?.sequence_id ?? "");
+      setExamplesLoading(false);
+    }, error => {
+      if (controller.signal.aborted) return;
+      setExampleError(error instanceof ApiClientError ? error.message : "Cached observation examples could not be checked. Check the local observation service.");
+      setExamplesLoading(false);
+    });
     return () => {
       controller.abort();
+      activeExampleLoad.current?.abort();
       void stopActiveRun();
     };
   }, []);
@@ -55,6 +68,8 @@ export function ExplorerScreen() {
   }
 
   async function submit(request: SequenceRequest) {
+    activeExampleLoad.current?.abort();
+    activeExampleLoad.current = null;
     await stopActiveRun();
     const run: ActiveRun = { controller: new AbortController(), jobId: null, status: null };
     activeRun.current = run;
@@ -98,12 +113,31 @@ export function ExplorerScreen() {
     if (search.phase === "failed" || search.phase === "cancelled") void submit(search.request);
   }
 
-  function loadExample() {
-    const example = examples[0];
+  async function loadExample() {
+    const example = examples.find(item => item.sequence_id === selectedExampleId);
     if (!example) return;
-    void stopActiveRun();
-    showSequence(example);
-    setSearch({ phase: "example", manifest: example });
+    activeExampleLoad.current?.abort();
+    const controller = new AbortController();
+    activeExampleLoad.current = controller;
+    await stopActiveRun();
+    if (activeExampleLoad.current !== controller || controller.signal.aborted) return;
+    setSearch(state => state.phase === "running" ? { phase: "cancelled", request: state.request } : state);
+    // Recheck the selected bundle: a missing or corrupt asset must not load a
+    // different cached field under the user's selected example name.
+    try {
+      const available = await listExamples(controller.signal);
+      if (activeExampleLoad.current !== controller || controller.signal.aborted) return;
+      const verified = available.find(item => item.sequence_id === selectedExampleId);
+      if (!verified) throw new Error("The selected cached example is no longer available. Restore the reviewed bundle and reload this page.");
+      showSequence(verified);
+      setSearch({ phase: "example", manifest: verified });
+      setExampleError("");
+    } catch (error) {
+      if (activeExampleLoad.current !== controller || controller.signal.aborted) return;
+      setExampleError(error instanceof Error ? error.message : "The cached example could not be loaded.");
+    } finally {
+      if (activeExampleLoad.current === controller) activeExampleLoad.current = null;
+    }
   }
 
   return (
@@ -128,7 +162,8 @@ export function ExplorerScreen() {
           </div>
           <aside className={styles.sidePanel} aria-label="Field selection and candidate notes">
             <CoordinateForm onSubmit={request => void submit(request)} busy={search.phase === "running"} />
-            <SearchStatus state={search} canLoadExample={examples.length > 0} onCancel={() => void cancelSearch()} onRetry={retrySearch} onLoadExample={loadExample} />
+            <SearchStatus state={search} canLoadExample={false} onCancel={() => void cancelSearch()} onRetry={retrySearch} onLoadExample={() => void loadExample()} />
+            <CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id => { activeExampleLoad.current?.abort(); activeExampleLoad.current = null; setSelectedExampleId(id); setExampleError(""); }} onLoad={() => void loadExample()} />
             <AnnotationPanel selection={selection} annotations={annotations.filter(item => item.selection.sequenceId === sequence?.sequence_id)} onAdd={addAnnotation} onRemove={removeAnnotation} />
           </aside>
         </section>
