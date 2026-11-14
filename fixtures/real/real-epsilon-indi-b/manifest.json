@@ -54,7 +54,13 @@
       "observation_id": "2025W19_1B_0344_3",
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W19_1B/l2b-v27-2026-197/3/level2_2025W19_1B_0344_3D3_spx_l2b-v27-2026-197.fits?center=331.0986113345%2C-56.8008041403&size=0.1500000000",
       "masked_fraction": 0.031923442179852435,
-      "warnings": []
+      "warnings": [],
+      "raster": {
+        "encoding": "float32-le-mask8-v1",
+        "size_bytes": 68445,
+        "sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+        "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001.bin"
+      }
     },
     {
       "frame_id": "frame-0002",
@@ -69,7 +75,13 @@
       "observation_id": "2026W39_2A_0581_1",
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W39_2A/l2b-v27-2026-271/3/level2_2026W39_2A_0581_1D3_spx_l2b-v27-2026-271.fits?center=331.0986113345%2C-56.8008041403&size=0.1500000000",
       "masked_fraction": 0.028782233910438992,
-      "warnings": []
+      "warnings": [],
+      "raster": {
+        "encoding": "float32-le-mask8-v1",
+        "size_bytes": 68445,
+        "sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+        "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002.bin"
+      }
     }
   ],
   "warnings": [
@@ -123,6 +135,7 @@
     "version_pillow": "11.2.1",
     "cache_acquired_at_utc": "2026-11-14T20:37:09.240354+00:00",
     "cache_acquisition_reference": "docs/target-coverage.json target epsilon-indi-b; fresh bounded five-target probe",
-    "cache_role": "backup"
+    "cache_role": "backup",
+    "browser_raster_encoding": "float32-le-mask8-v1"
   }
 }

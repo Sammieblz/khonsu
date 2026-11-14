@@ -54,13 +54,13 @@ def validate_bundle(directory: Path) -> SequenceManifest:
             raise CachedExampleError("Cached lineage needs a dated acquisition reference.")
         if acquired != datetime.fromisoformat(acquisition['processing_timestamp_utc'].replace('Z', '+00:00')):
             raise CachedExampleError("The acquisition timestamp and recorded probe disagree.")
-        if lineage.get('source_observations') != [frame.model_dump(mode='json', exclude={'image_url'}) for frame in manifest.frames]:
+        if lineage.get('source_observations') != [frame.model_dump(mode='json', exclude={'image_url', 'raster'}) for frame in manifest.frames]:
             raise CachedExampleError("The lineage and observation metadata disagree.")
         if source.target != manifest.target or source.grid != manifest.grid or source.display != manifest.display:
             raise CachedExampleError("The cached grid, target or stretch differs from its source.")
         if source.requested_fov_arcmin != manifest.requested_fov_arcmin or source.warnings != manifest.warnings:
             raise CachedExampleError("The cached field or quality warnings differ from their source.")
-        if [frame.model_dump(exclude={'image_url'}) for frame in source.frames] != [frame.model_dump(exclude={'image_url'}) for frame in manifest.frames]:
+        if [frame.model_dump(exclude={'image_url', 'raster'}) for frame in source.frames] != [frame.model_dump(exclude={'image_url', 'raster'}) for frame in manifest.frames]:
             raise CachedExampleError("The cached observations differ from their source.")
         if any(manifest.processing.get(key) != value for key, value in source.processing.items()):
             raise CachedExampleError("The cached processing record differs from its source.")
@@ -81,6 +81,20 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                 raise CachedExampleError("A cached frame URL must identify its bundled local asset.")
             images[name] = frame
             expected.add(name)
+            if frame.raster:
+                raster_name = frame.frame_id + '.bin'
+                if frame.raster.url != f'/v1/examples/{manifest.sequence_id}/frames/{raster_name}':
+                    raise CachedExampleError("A prepared raster must identify its bundled local asset.")
+                expected.add(raster_name)
+                raw = read_bounded(directory / raster_name, 5 * 1024 * 1024)
+                if len(raw) != frame.raster.size_bytes or hashlib.sha256(raw).hexdigest() != frame.raster.sha256:
+                    raise CachedExampleError("A prepared raster failed its checksum or size check.")
+                import numpy as np
+                count = manifest.grid.width_px * manifest.grid.height_px
+                values = np.frombuffer(raw[:count * 4], dtype='<f4')
+                valid = np.frombuffer(raw[count * 4:], dtype=np.uint8)
+                if not np.isfinite(values).all() or not np.isin(valid, [0, 1]).all():
+                    raise CachedExampleError("Prepared values or mask disagree with the image grid.")
         entries = lineage.get('files')
         if not isinstance(entries, dict) or set(entries) != expected:
             raise CachedExampleError("The cached file inventory is incomplete.")
@@ -108,6 +122,11 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                             fraction = alpha[0] / (image.width * image.height)
                             if any(alpha[1:255]) or images[name].masked_fraction is None or abs(fraction - images[name].masked_fraction) > 1e-12:
                                 raise CachedExampleError("A cached PNG mask does not match the recorded quality metadata.")
+                            if images[name].raster:
+                                count = image.width * image.height
+                                raw = read_bounded(directory / (images[name].frame_id + '.bin'), 5 * 1024 * 1024)
+                                if not np.array_equal(np.frombuffer(raw[count * 4:], dtype=np.uint8) > 0, np.asarray(image.getchannel('A')).ravel() > 0):
+                                    raise CachedExampleError("Prepared raster and PNG validity disagree.")
                 except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
                     raise CachedExampleError("A cached PNG has unsafe dimensions.") from exc
         return manifest

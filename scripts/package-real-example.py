@@ -49,6 +49,13 @@ def package(manifest_path: Path, assets: Path, output: Path, sequence_id: str,
         name = frame['frame_id'] + '.png'
         files[name] = read_bounded(assets / old_name, MAX_BUNDLE_BYTES)
         frame['image_url'] = f'/v1/examples/{sequence_id}/frames/{name}'
+        if frame.get('raster'):
+            old_raster = frame['raster']['url'].rsplit('/', 1)[-1]
+            if not re.fullmatch(r'[a-zA-Z0-9_-]{1,80}\.bin', old_raster):
+                raise ValueError('Only local prepared raster filenames are accepted.')
+            raster_name = frame['frame_id'] + '.bin'
+            files[raster_name] = read_bounded(assets / old_raster, MAX_BUNDLE_BYTES)
+            frame['raster']['url'] = f'/v1/examples/{sequence_id}/frames/{raster_name}'
     validated = SequenceManifest.model_validate(payload)
     files['manifest.json'] = (validated.model_dump_json(indent=2) + '\n').encode()
     if sum(map(len, files.values())) > MAX_BUNDLE_BYTES:
@@ -61,7 +68,7 @@ def package(manifest_path: Path, assets: Path, output: Path, sequence_id: str,
         'acquired_at_utc': acquired_at, 'acquisition_reference': acquisition_reference,
         'packaged_at_utc': datetime.now(timezone.utc).isoformat(),
         'source_manifest_sha256': hashlib.sha256(original).hexdigest(),
-        'source_observations': [frame.model_dump(mode='json', exclude={'image_url'}) for frame in validated.frames],
+        'source_observations': [frame.model_dump(mode='json', exclude={'image_url', 'raster'}) for frame in validated.frames],
         'files': {name: {'size_bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for name, data in sorted(files.items())},
         'data_use_terms': 'https://irsa.ipac.caltech.edu/data_use_terms.html',
         'irsa_acknowledgements': 'https://irsa.ipac.caltech.edu/ack.html',
