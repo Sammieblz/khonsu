@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "sequence_id": "real-wise-0855",
+  "data_mode": "cached-real",
+  "title": "WISE 0855: real SPHEREx field observations",
+  "disclosure": "Cached real SPHEREx observations from IRSA. Original epochs, common WCS, masks and approximate wavelength matching are preserved. Field playback does not establish target detection, motion or variability.",
+  "target": {
+    "ra_deg": 133.7601213914074,
+    "dec_deg": -7.242127941212259,
+    "coordinate_frame": "ICRS"
+  },
+  "requested_fov_arcmin": 6.0,
+  "grid": {
+    "width_px": 118,
+    "height_px": 118,
+    "pixel_origin": "top-left",
+    "orientation": "north-up-east-left",
+    "pixel_center_convention": "zero-based-integer-centers",
+    "wcs_header": {
+      "WCSAXES": 2,
+      "CRPIX1": 59.5,
+      "CRPIX2": 59.5,
+      "CDELT1": -0.00084745762711864,
+      "CDELT2": 0.00084745762711864,
+      "CUNIT1": "deg",
+      "CUNIT2": "deg",
+      "CTYPE1": "RA---TAN",
+      "CTYPE2": "DEC--TAN",
+      "CRVAL1": 133.76012139141,
+      "CRVAL2": -7.2421279412123,
+      "LONPOLE": 180.0,
+      "LATPOLE": -7.2421279412123,
+      "MJDREF": 0.0,
+      "RADESYS": "ICRS"
+    },
+    "raster_to_wcs": "flip-y"
+  },
+  "display": {
+    "stretch": "asinh",
+    "vmin": 0.16723724629879,
+    "vmax": 2.1999423503875732
+  },
+  "frames": [
+    {
+      "frame_id": "frame-0001",
+      "label": "2025-11-07T20:31:27.206400+00:00",
+      "image_url": "/v1/examples/real-wise-0855/frames/frame-0001.png",
+      "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+      "observed_end_utc": "2025-11-07T20:33:22.377600Z",
+      "wavelength_um": 1.413164368794356,
+      "bandwidth_um": 0.03425144409136026,
+      "detector": 2,
+      "release": "DR1",
+      "observation_id": "2025W45_2A_0292_2",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "masked_fraction": 0.03167193335248497,
+      "warnings": []
+    },
+    {
+      "frame_id": "frame-0002",
+      "label": "2025-12-13T05:32:45.657600+00:00",
+      "image_url": "/v1/examples/real-wise-0855/frames/frame-0002.png",
+      "observed_start_utc": "2025-12-13T05:32:45.657600Z",
+      "observed_end_utc": "2025-12-13T05:34:40.828800Z",
+      "wavelength_um": 1.4130097019790342,
+      "bandwidth_um": 0.03424349735056228,
+      "detector": 2,
+      "release": "DR1",
+      "observation_id": "2025W50_2A_0479_1",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0479_1D2_spx_l2b-v27-2026-210.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "masked_fraction": 0.030163746049985618,
+      "warnings": []
+    },
+    {
+      "frame_id": "frame-0003",
+      "label": "2026-05-03T05:10:37.948800+00:00",
+      "image_url": "/v1/examples/real-wise-0855/frames/frame-0003.png",
+      "observed_start_utc": "2026-05-03T05:10:37.948800Z",
+      "observed_end_utc": "2026-05-03T05:12:33.033600Z",
+      "wavelength_um": 1.404985374104534,
+      "bandwidth_um": 0.03406050443996628,
+      "detector": 2,
+      "release": "DR1",
+      "observation_id": "2026W18_2A_0663_1",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W18_2A/l2b-v27-2026-244/2/level2_2026W18_2A_0663_1D2_spx_l2b-v27-2026-244.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "masked_fraction": 0.024705544383797795,
+      "warnings": []
+    }
+  ],
+  "warnings": [
+    {
+      "code": "DISPLAY_COMPARISON_ONLY",
+      "message": "Common WCS and stretch support visual inspection. PSFs and backgrounds are not matched; apparent change is not a confirmed detection or calibrated variability measurement."
+    },
+    {
+      "code": "TARGET_SPECTRAL_MATCH",
+      "message": "Spectral matching is checked at the requested target position using approximate WCS-WAVE values. Wavelength varies across each image; other positions can have different spectral responses."
+    },
+    {
+      "code": "VARIANCE_VALIDITY_ONLY",
+      "message": "Input VARIANCE excludes invalid pixels. Resampling uncertainty and covariance are not propagated; no flux significance or photometric error bars are claimed."
+    },
+    {
+      "code": "INPUTS_EXCLUDED",
+      "message": "Selected 3 of 16 supplied observations after spectral, provenance and coverage checks. Other detector/wavelength groups were not merged."
+    }
+  ],
+  "processing": {
+    "pipeline_version": "khonsu-display-0.3.0",
+    "science_unit": "MJy/sr",
+    "reprojection": "validity-weighted bilinear over valid pixels only, common ICRS TAN grid",
+    "mask_interpolation": "nearest-neighbor: an output pixel is valid only when its nearest input pixel is valid and inside coverage",
+    "grid_width_px": 118,
+    "grid_scale_arcsec": 3.0508474576271185,
+    "grid_oversample_target": 2.0,
+    "flags_policy": "IRSA SDT bad flags plus OUTLIER/PHANMISS; SOURCE/FULLSAMPLE retained; unknown excluded",
+    "wavelength_policy": "same detector; target center spread <= 0.25 * smallest bandwidth",
+    "wavelength_lookup": "WCS-WAVE alternate WCS W; display approximation, not calibrated spectroscopy",
+    "target_wavelength_min_um": 1.404985374104534,
+    "target_wavelength_max_um": 1.413164368794356,
+    "maximum_center_spread_um": 0.00851512610999157,
+    "native_pixel_scale_arcsec": 6.139110815096338,
+    "asinh_a": 0.1,
+    "stretch_reference": "sky median and robust sigma (1.4826 * MAD) of valid pixels across all frames",
+    "stretch_low_sigma_below_sky": 2.0,
+    "stretch_high_percentile": 99.5,
+    "stretch_min_span_sigma": 50.0,
+    "background_subtracted": false,
+    "zodiacal_light_subtracted": false,
+    "psf_matched": false,
+    "variance_policy": "input variance finite and positive for validity; no output uncertainty propagation",
+    "resampling_uncertainty_propagated": false,
+    "input_count": 16,
+    "selected_count": 3,
+    "version_numpy": "2.2.5",
+    "version_astropy": "7.0.1",
+    "version_reproject": "0.14.1",
+    "version_pillow": "11.2.1"
+  }
+}
