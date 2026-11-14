@@ -42,7 +42,7 @@ The working flow uses SPHEREx individual spectral-image FITS cutouts from NASA/I
 
 See the [five-target evidence](target-coverage.md), [display method](display-rendering.md), [scientific limitations](science-integrity.md) and [data-source register](data-sources.md). Cite the final selected example by its exact manifest, release, source IDs and acquisition record. Describe a cached example as previously acquired real observations, not a new live query.
 
-The November 14 validation pass selects the WISE 0855 field as primary (`real-wise-0855`, three comparable DR1 epochs) and the Epsilon Indi B field as backup (`real-epsilon-indi-b`, two comparable DR1/QR3 epochs). Exact query parameters and observation IDs are in the [demo runbook](demo.md). Neither sequence establishes recovery, motion or variability of its named target. Verify the bundles and their provenance in the final release before making a cached-demo claim.
+The November 14 validation pass selects the WISE 0855 field as primary (`real-wise-0855`, three comparable DR1 epochs) and the Epsilon Indi B field as backup (`real-epsilon-indi-b`, two comparable DR1/QR3 epochs). Both reviewed bundles are present and passed upstream-offline playback checks, repeated on merged build `fbe18a3e6f11b3870d9104b97d256e2caca6d695`. Exact queries, observation IDs, acquisition records, screenshots and acceptance results are in the [demo runbook](demo.md) and [acceptance report](demo-acceptance.md). Neither sequence establishes recovery, motion or variability of its named target.
 
 ### Tools and implemented scope
 
@@ -81,8 +81,8 @@ Code licensing does not replace terms for external data, fonts, imagery or media
 
 | Gate | Owner or evidence | Current handoff state |
 | --- | --- | --- |
-| Five-target coverage and primary/backup | Samuel, #8 | WISE 0855 field primary; Epsilon Indi B field backup; use the final report's actual successes and failures |
-| Authentic cached fallback | Samuel with Tyrone/Michael, #9 | Require bundled assets, provenance, checksums and upstream-offline verification |
+| Five-target coverage and primary/backup | Samuel, #8 | DONE: all five outcomes recorded; primary independently reproduced; WISE 0855 field primary and Epsilon Indi B field backup selected with explicit limits |
+| Authentic cached fallback | Samuel with Tyrone/Michael, #9 | DONE: both real bundles, provenance/checksums, explicit selection, upstream-offline replay and missing-asset recovery accepted; see the [evidence](demo-acceptance.md) |
 | Sky-coordinate annotations and versioned export | Aryan, #14/#15 | Current raster notes do not meet the full evidence requirement |
 | Public route or documented judging arrangement | Tyrone/Robel, #20 | Localhost is not a public demo link; no hosted URL is asserted here |
 | Scientific, functional and accessibility acceptance | Aryan with the team, #21 | Resolve or disclose release-blocking defects in the final report |
