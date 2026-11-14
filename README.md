@@ -14,7 +14,7 @@ The creative spark was the night-sky rewind gesture in *Moon Knight*. Our interp
 
 The minimum viable product (MVP) is a working end-to-end SPHEREx image explorer: bounded coordinate search, five validated example targets, registered chronological frames, time scrubbing and blink comparison, pan and zoom, provenance and quality details, and local candidate annotations with evidence export. [MVP acceptance criteria](docs/mvp.md) define completion.
 
-**This commit is the collaborative scaffold.** It provides the branded Next.js shell, Python API contracts and extension points, synthetic development fixtures, container setup, checks, documentation, and agent skills. Live archive retrieval and scientific processing remain implementation work. Synthetic fixtures are labelled and must never be presented as NASA observations or a discovery.
+**The backend foundation is implemented.** It supports bounded IRSA queries, temporary jobs, wavelength-aware FITS registration, masks and prepared images. The main frontend remains the team scaffold; viewer integration and the full observation-to-evidence journey still need team implementation. Synthetic fixtures are labelled and must never be presented as NASA observations or a discovery. See the [team handoff](docs/implementation-handoff.md).
 
 ## Start locally
 
@@ -24,7 +24,7 @@ Install Docker Desktop and start its Linux container engine. Then run:
 docker compose up --build
 ```
 
-Open http://localhost:3000. The API runs at http://localhost:8000 with interactive API documentation at http://localhost:8000/docs. The initial live-query route returns an explicit unavailable response until retrieval and processing are implemented.
+Open http://localhost:3000. The API runs at http://localhost:8000 with interactive API documentation at http://localhost:8000/docs. The backend accepts a bounded live query and returns a job to poll. The frontend shell still needs the team's job/viewer integration. Use the API documentation to exercise the completed backend independently.
 
 For native development, use Node.js 24 and Python 3.12:
 
@@ -37,7 +37,7 @@ python -m venv .venv
 Activate the virtual environment, then:
 
 ```sh
-python -m pip install -r apps/api/requirements-dev.txt
+python -m pip install -r apps/api/requirements-dev.txt -r apps/api/requirements-science.txt
 python -m uvicorn app.main:app --app-dir apps/api --reload --port 8000
 ```
 
@@ -81,3 +81,4 @@ SPHEREx data comes from the [NASA/IPAC Infrared Science Archive](https://irsa.ip
 NASA does not endorse any non-U.S. Government entity and is not responsible for information contained on non-U.S. Government websites. For non-U.S. Government websites, participants must comply with any data use parameters of that specific website.
 
 Code is MIT licensed. Data, fonts, external media, and third-party models retain their own terms and attribution requirements. NASA names and logos do not imply endorsement.
+

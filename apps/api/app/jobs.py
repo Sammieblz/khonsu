@@ -8,6 +8,7 @@ import json
 import logging
 from pathlib import Path
 import shutil
+import stat
 import threading
 import time
 import uuid
@@ -34,14 +35,22 @@ class Record:
     touched: float
     cancel: threading.Event = field(default_factory=threading.Event)
     manifest: SequenceManifest | None = None
+    # Cancellation changes the public state immediately. The executor slot
+    # remains occupied until the worker has actually acknowledged it.
+    worker_finished: bool = False
 
 
 class JobManager:
     def __init__(self, root: Path, *, ttl: float = 1800, limit: int = 8,
-                 max_bytes: int = 512 * 1024 * 1024, deadline: float = 240,
+                 max_bytes: int = 1024 * 1024 * 1024, deadline: float = 240,
+                 peak_bytes: int = 512 * 1024 * 1024,
                  retriever_factory=None, processor_factory=None, clock=time.monotonic):
         self.root, self.ttl, self.limit = root.resolve(), ttl, limit
         self.max_bytes, self.deadline, self.clock = max_bytes, deadline, clock
+        # Reserve room for the 256 MiB retrieval cap plus all bounded 96-frame,
+        # 512-pixel scientific/render artifacts and metadata. One worker means
+        # this reservation is needed only for the job about to run.
+        self.peak_bytes = peak_bytes
         self.root.mkdir(parents=True, exist_ok=True)
         self.records: dict[str, Record] = {}
         self.dedup: dict[str, str] = {}
@@ -62,7 +71,7 @@ class JobManager:
     def _cleanup(self):
         now = self.clock()
         for record in self.records.values():
-            if record.job.status in TERMINAL and now - record.touched > self.ttl:
+            if record.worker_finished and record.job.status in TERMINAL and now - record.touched > self.ttl:
                 record.job.status = "expired"
                 record.job.manifest_url = None
                 record.manifest = None
@@ -74,16 +83,32 @@ class JobManager:
         for key in expired[:-64]:
             del self.records[key]
 
+    def _cache_bytes(self):
+        total = 0
+        try:
+            for path in self.root.rglob("*"):
+                try:
+                    info = path.stat(follow_symlinks=False)
+                except FileNotFoundError:
+                    # The worker may finish deleting its downloaded inputs
+                    # between directory enumeration and this stat call.
+                    continue
+                if stat.S_ISREG(info.st_mode):
+                    total += info.st_size
+        except OSError as exc:
+            raise JobError(507, "CACHE_UNAVAILABLE", "Temporary storage could not be inspected safely. Retry later.") from exc
+        return total
+
     def submit(self, request: SequenceRequest) -> SequenceJob:
         key = hashlib.sha256(request.model_dump_json().encode()).hexdigest()
         with self.lock:
             self._cleanup()
             if key in self.dedup:
                 return self.records[self.dedup[key]].job.model_copy(deep=True)
-            active = sum(record.job.status not in TERMINAL for record in self.records.values())
+            active = sum(not record.worker_finished for record in self.records.values())
             if active >= self.limit:
                 raise JobError(429, "QUEUE_FULL", "The processing queue is full. Retry after a running job finishes.")
-            used = sum(path.stat().st_size for path in self.root.rglob("*") if path.is_file())
+            used = self._cache_bytes()
             if used > self.max_bytes:
                 raise JobError(507, "CACHE_FULL", "Temporary storage is full. Wait for cached jobs to expire.")
             identity = "job-" + uuid.uuid4().hex
@@ -100,6 +125,8 @@ class JobManager:
 
     def _update(self, record, **values):
         with self.lock:
+            if record.cancel.is_set() and values.get("status") in {"retrieving", "processing", "ready"}:
+                raise InterruptedError()
             for key, value in values.items():
                 setattr(record.job, key, value)
             record.touched = self.clock()
@@ -110,7 +137,11 @@ class JobManager:
             return record.cancel.is_set() or self.clock() - started > self.deadline
         try:
             if cancelled():
-                return
+                raise InterruptedError()
+            with self.lock:
+                self._cleanup()
+                if self._cache_bytes() + self.peak_bytes > self.max_bytes:
+                    raise JobError(507, "CACHE_FULL", "Temporary storage has insufficient room for another bounded science job. Wait for cached jobs to expire.")
             from .retrieval.service import IrsaRetriever
             from .processing.service import AstronomyProcessor
             retriever = (self.retriever_factory or IrsaRetriever)(cancelled=cancelled)
@@ -119,6 +150,8 @@ class JobManager:
             inputs = record.directory / "inputs"
             inputs.mkdir()
             observations = asyncio.run(retriever.retrieve(record.request, inputs))
+            if self._cache_bytes() > self.max_bytes:
+                raise JobError(507, "CACHE_FULL", "Temporary storage reached its size limit. Wait for cached jobs to expire.")
             if cancelled():
                 raise InterruptedError()
             if len(observations) < 2:
@@ -142,6 +175,8 @@ class JobManager:
                 raise JobError(422, "INSUFFICIENT_SPECTRAL_OVERLAP", "Fewer than two comparable frames meet the selected wavelength range.")
             manifest = SequenceManifest.model_validate({**manifest.model_dump(), "frames": frames})
             (record.directory / "manifest.json").write_text(manifest.model_dump_json(indent=2), encoding="utf-8")
+            if self._cache_bytes() > self.max_bytes:
+                raise JobError(507, "CACHE_FULL", "Temporary storage reached its size limit. Wait for cached jobs to expire.")
             shutil.rmtree(inputs, ignore_errors=True)
             with self.lock:
                 if cancelled():
@@ -161,6 +196,10 @@ class JobManager:
                              error=ApiError(code=exc.code if known else "PROCESSING_FAILED",
                                             message=getattr(exc, "message", str(exc)) if known else "Processing failed. Try another region or fewer frames."))
             shutil.rmtree(record.directory, ignore_errors=True)
+        finally:
+            with self.lock:
+                record.worker_finished = True
+                record.touched = self.clock()
 
     def get(self, identity: str) -> Record:
         with self.lock:

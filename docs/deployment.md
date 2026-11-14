@@ -2,7 +2,7 @@
 
 Status: deployment design and contributor guidance. A configuration file or health response does not mean the application is deployed or its SPHEREx processing is complete. Do not provision paid services, publish secrets or claim a live deployment as part of documentation work.
 
-The initial API scaffold advertises `live_processing_available=false`. Live processing endpoints return an explicit `501` response. The opt-in `/v1/demo/manifest` route serves synthetic demo assets, not SPHEREx measurements. Job execution, processing cache and a real-example fallback remain implementation work; the lifecycle below specifies their intended behavior.
+The API advertises `live_processing_available` according to installed scientific dependencies. The Docker image installs them by default. Live searches create HTTP 202 jobs; poll status, fetch the manifest, and then retrieve PNG frames. The opt-in `/v1/demo/manifest` remains synthetic. Cached-real examples are served only when verified files are actually bundled; the list can be empty. The frontend integration and production deployment remain team work.
 
 ## Supported arrangement
 
@@ -17,16 +17,16 @@ Use one backend instance and one process for the initial version because an in-m
 
 ## Local first
 
-Run `docker compose up --build` from the repository root for the declared local services. The web application uses port 3000 and the API uses port 8000. Follow the executable commands and environment examples in the [repository README](../README.md); verify that the compose services and ports match the current files. Install science dependencies inside the backend image so contributors share compatible versions. Use the API health check to establish process readiness, then verify one real search and completed frame sequence separately once live processing exists.
+Run `docker compose up --build` from the repository root for the declared local services. The web application uses port 3000 and the API uses port 8000. Follow the executable commands and environment examples in the [repository README](../README.md); verify that the compose services and ports match the current files. Install science dependencies inside the backend image so contributors share compatible versions. Use the API health check to establish process readiness, then verify one real search and completed frame sequence separately.
 
 | Environment variable | Meaning | Initial status |
 | --- | --- | --- |
 | `NEXT_PUBLIC_API_BASE_URL` | Public API origin compiled into the frontend. | Build-time configuration. |
 | `KHONSU_CORS_ORIGINS` | Comma-separated permitted browser origins. | Defaults to `http://localhost:3000,http://127.0.0.1:3000`. |
 | `KHONSU_FIXTURE_DIR` | Directory of allowlisted demo fixtures. | Uses repository fixtures locally and `/app/fixtures` in Docker. |
-| `KHONSU_CACHE_DIR` | Future bounded processing/cache directory. | Reserved; no processing cache is implemented. |
-| `KHONSU_JOB_TTL_SECONDS` | Future temporary job retention. | Reserved; not operational. |
-| `KHONSU_MAX_ACTIVE_JOBS` | Future active processing limit. | Reserved; not operational. |
+| `KHONSU_CACHE_DIR` | Temporary processing/cache directory. | Defaults under the operating system temp directory. |
+| `KHONSU_JOB_TTL_SECONDS` | Completed job retention, measured from completion. | Defaults to 1800 seconds; minimum 60. |
+| `KHONSU_QUEUE_LIMIT` | Maximum unfinished worker tasks, including cancelled tasks still unwinding. | Defaults to 8, bounded from 1 to 8; one science worker. |
 
 Keep the API process running while a job is active. Limit queued jobs, active processing, bytes, frame count, field size and execution duration. Clean temporary files after expiry and cancellation. Make cancellation cooperative between processing stages. Do not accept unlimited image processing from a public route.
 
@@ -52,9 +52,9 @@ Route only the intended API and frame paths through the gateway. Preserve docume
 
 Keep server secrets in the deployment environment or secret bindings. Log job identifiers, stage, timing and sanitized failures, not credentials. A static frontend needs no server secrets. Do not silently forward arbitrary user-selected hosts, download URLs or gateway paths.
 
-## Planned temporary job lifecycle
+## Temporary job lifecycle
 
-Implement temporary jobs and cache before enabling live processing. The planned first runtime uses temporary state, not durable scientific storage. Keep this limitation visible in API documentation and the UI:
+The backend uses temporary state, not durable scientific storage. Keep this limitation visible in API documentation and the UI:
 
 1. Accept a bounded job and return its identity according to the canonical API contract.
 2. Expose queued, running, completed, failed, cancelled and expired/reset outcomes as that contract defines them.
@@ -71,3 +71,6 @@ Ship a small public set of preprocessed real SPHEREx examples only if its proven
 ## Release check
 
 Verify a production frontend build, a backend container start, the public API origin, permitted browser origins, a cold start, a completed real sequence, cancellation/expiry, a restart with an old job identifier, upstream archive failure, and the optional example fallback. Recheck current host pricing and limits before deploying. Follow [integration.md](integration.md) and [testing.md](testing.md) for the team's merge and acceptance checks.
+
+The cache has a one GiB budget with a conservative 512 MiB reservation before each worker starts. An expired cache entry is removed only after its worker finishes. Jobs fail with CACHE_FULL when headroom is insufficient rather than silently evicting unexpired evidence. Cancellation remains cooperative; it does not create new queue capacity until the worker task exits.
+

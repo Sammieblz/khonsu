@@ -62,6 +62,11 @@ def write_report(report: dict, path: Path) -> None:
 
 async def run(args) -> int:
     started = time.monotonic()
+    deadline = started + args.max_seconds
+
+    def processing_deadline_reached() -> bool:
+        return time.monotonic() >= deadline
+
     report = {
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
         "collections": ["spherex_dr1", "spherex_qr3"],
@@ -111,7 +116,12 @@ async def run(args) -> int:
             with tempfile.TemporaryDirectory(prefix="khonsu-probe-") as tmp:
                 observations = await IrsaRetriever(timeout_seconds=20, deadline_seconds=min(remaining-5, 160)).retrieve(request, Path(tmp))
                 options = ProcessingOptions(sequence_id, request.ra_deg, request.dec_deg, request.fov_arcmin, output_size_px=args.output_size)
-                manifest = await asyncio.to_thread(AstronomyProcessor().process, observations, options, destination)
+                if processing_deadline_reached():
+                    raise TimeoutError("Probe time budget exhausted before scientific processing.")
+                manifest = await asyncio.to_thread(
+                    AstronomyProcessor().process, observations, options, destination,
+                    cancelled=processing_deadline_reached,
+                )
                 payload = manifest.model_dump(mode="json")
                 payload["data_mode"] = "cached-real"
                 payload["title"] = f"{entry['label']}: real SPHEREx observations"

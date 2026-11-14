@@ -5,15 +5,18 @@
         "additionalProperties": false,
         "properties": {
           "code": {
+            "title": "Code",
             "type": "string"
           },
           "details": {
             "items": {
               "type": "string"
             },
+            "title": "Details",
             "type": "array"
           },
           "message": {
+            "title": "Message",
             "type": "string"
           }
         },
@@ -21,6 +24,7 @@
           "code",
           "message"
         ],
+        "title": "ApiError",
         "type": "object"
       },
       "DisplaySettings": {
@@ -32,12 +36,15 @@
               "linear",
               "asinh"
             ],
+            "title": "Stretch",
             "type": "string"
           },
           "vmax": {
+            "title": "Vmax",
             "type": "number"
           },
           "vmin": {
+            "title": "Vmin",
             "type": "number"
           }
         },
@@ -45,6 +52,7 @@
           "vmin",
           "vmax"
         ],
+        "title": "DisplaySettings",
         "type": "object"
       },
       "Frame": {
@@ -53,44 +61,50 @@
           "bandwidth_um": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bandwidth Um"
           },
           "detector": {
             "anyOf": [
               {
-                "maximum": 6,
-                "minimum": 1,
+                "maximum": 6.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Detector"
           },
           "frame_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "title": "Frame Id",
             "type": "string"
           },
           "image_url": {
             "maxLength": 2048,
             "minLength": 1,
+            "title": "Image Url",
             "type": "string"
           },
           "label": {
             "maxLength": 160,
             "minLength": 1,
+            "title": "Label",
             "type": "string"
           },
           "masked_fraction": {
-            "default": 0,
-            "maximum": 1,
-            "minimum": 0,
+            "default": 0.0,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Masked Fraction",
             "type": "number"
           },
           "observation_id": {
@@ -102,7 +116,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Observation Id"
           },
           "observed_end_utc": {
             "anyOf": [
@@ -113,7 +128,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Observed End Utc"
           },
           "observed_start_utc": {
             "anyOf": [
@@ -124,7 +140,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Observed Start Utc"
           },
           "release": {
             "anyOf": [
@@ -138,7 +155,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Release"
           },
           "source_fits_url": {
             "anyOf": [
@@ -151,25 +169,28 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Source Fits Url"
           },
           "warnings": {
             "items": {
               "$ref": "#/components/schemas/QualityWarning"
             },
+            "title": "Warnings",
             "type": "array"
           },
           "wavelength_um": {
             "anyOf": [
               {
-                "maximum": 5,
+                "maximum": 5.0,
                 "minimum": 0.75,
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Wavelength Um"
           }
         },
         "required": [
@@ -177,6 +198,7 @@
           "label",
           "image_url"
         ],
+        "title": "Frame",
         "type": "object"
       },
       "HealthResponse": {
@@ -184,48 +206,57 @@
         "properties": {
           "live_processing_available": {
             "default": true,
+            "title": "Live Processing Available",
             "type": "boolean"
           },
           "service": {
             "const": "khonsu-api",
             "default": "khonsu-api",
+            "title": "Service",
             "type": "string"
           },
           "status": {
             "const": "ok",
             "default": "ok",
+            "title": "Status",
             "type": "string"
           },
           "version": {
+            "title": "Version",
             "type": "string"
           }
         },
         "required": [
           "version"
         ],
+        "title": "HealthResponse",
         "type": "object"
       },
       "ImageGrid": {
         "additionalProperties": false,
         "properties": {
           "height_px": {
-            "maximum": 4096,
-            "minimum": 1,
+            "maximum": 4096.0,
+            "minimum": 1.0,
+            "title": "Height Px",
             "type": "integer"
           },
           "orientation": {
             "const": "north-up-east-left",
             "default": "north-up-east-left",
+            "title": "Orientation",
             "type": "string"
           },
           "pixel_center_convention": {
             "const": "zero-based-integer-centers",
             "default": "zero-based-integer-centers",
+            "title": "Pixel Center Convention",
             "type": "string"
           },
           "pixel_origin": {
             "const": "top-left",
             "default": "top-left",
+            "title": "Pixel Origin",
             "type": "string"
           },
           "raster_to_wcs": {
@@ -240,7 +271,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Raster To Wcs"
           },
           "wcs_header": {
             "anyOf": [
@@ -263,11 +295,13 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Wcs Header"
           },
           "width_px": {
-            "maximum": 4096,
-            "minimum": 1,
+            "maximum": 4096.0,
+            "minimum": 1.0,
+            "title": "Width Px",
             "type": "integer"
           }
         },
@@ -275,6 +309,7 @@
           "width_px",
           "height_px"
         ],
+        "title": "ImageGrid",
         "type": "object"
       },
       "PresetTarget": {
@@ -283,43 +318,50 @@
           "coordinate_frame": {
             "const": "ICRS",
             "default": "ICRS",
+            "title": "Coordinate Frame",
             "type": "string"
           },
           "coordinate_note": {
+            "title": "Coordinate Note",
             "type": "string"
           },
           "dec_deg": {
             "anyOf": [
               {
-                "maximum": 90,
-                "minimum": -90,
+                "maximum": 90.0,
+                "minimum": -90.0,
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Dec Deg"
           },
           "label": {
+            "title": "Label",
             "type": "string"
           },
           "object_type": {
+            "title": "Object Type",
             "type": "string"
           },
           "preset_id": {
+            "title": "Preset Id",
             "type": "string"
           },
           "ra_deg": {
             "anyOf": [
               {
-                "exclusiveMaximum": 360,
-                "minimum": 0,
+                "exclusiveMaximum": 360.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Ra Deg"
           }
         },
         "required": [
@@ -328,6 +370,7 @@
           "object_type",
           "coordinate_note"
         ],
+        "title": "PresetTarget",
         "type": "object"
       },
       "QualityWarning": {
@@ -336,11 +379,13 @@
           "code": {
             "maxLength": 80,
             "minLength": 1,
+            "title": "Code",
             "type": "string"
           },
           "message": {
             "maxLength": 500,
             "minLength": 1,
+            "title": "Message",
             "type": "string"
           }
         },
@@ -348,6 +393,7 @@
           "code",
           "message"
         ],
+        "title": "QualityWarning",
         "type": "object"
       },
       "SequenceJob": {
@@ -371,7 +417,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Manifest Url"
           },
           "message": {
             "anyOf": [
@@ -381,16 +428,19 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Message"
           },
           "progress": {
             "default": 0.0,
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Progress",
             "type": "number"
           },
           "sequence_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "title": "Sequence Id",
             "type": "string"
           },
           "status": {
@@ -403,6 +453,7 @@
               "cancelled",
               "expired"
             ],
+            "title": "Status",
             "type": "string"
           }
         },
@@ -410,6 +461,7 @@
           "sequence_id",
           "status"
         ],
+        "title": "SequenceJob",
         "type": "object"
       },
       "SequenceManifest": {
@@ -421,11 +473,13 @@
               "cached-real",
               "live"
             ],
+            "title": "Data Mode",
             "type": "string"
           },
           "disclosure": {
             "maxLength": 500,
             "minLength": 1,
+            "title": "Disclosure",
             "type": "string"
           },
           "display": {
@@ -437,6 +491,7 @@
             },
             "maxItems": 96,
             "minItems": 2,
+            "title": "Frames",
             "type": "array"
           },
           "grid": {
@@ -459,20 +514,24 @@
                 }
               ]
             },
+            "title": "Processing",
             "type": "object"
           },
           "requested_fov_arcmin": {
-            "maximum": 60,
+            "maximum": 60.0,
             "minimum": 0.5,
+            "title": "Requested Fov Arcmin",
             "type": "number"
           },
           "schema_version": {
             "const": "1.0",
             "default": "1.0",
+            "title": "Schema Version",
             "type": "string"
           },
           "sequence_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "title": "Sequence Id",
             "type": "string"
           },
           "target": {
@@ -481,12 +540,14 @@
           "title": {
             "maxLength": 160,
             "minLength": 1,
+            "title": "Title",
             "type": "string"
           },
           "warnings": {
             "items": {
               "$ref": "#/components/schemas/QualityWarning"
             },
+            "title": "Warnings",
             "type": "array"
           }
         },
@@ -501,6 +562,7 @@
           "display",
           "frames"
         ],
+        "title": "SequenceManifest",
         "type": "object"
       },
       "SequenceRequest": {
@@ -509,24 +571,27 @@
           "coordinate_frame": {
             "const": "ICRS",
             "default": "ICRS",
+            "title": "Coordinate Frame",
             "type": "string"
           },
           "dec_deg": {
-            "maximum": 90,
-            "minimum": -90,
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Dec Deg",
             "type": "number"
           },
           "detector": {
             "anyOf": [
               {
-                "maximum": 6,
-                "minimum": 1,
+                "maximum": 6.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Detector"
           },
           "end_utc": {
             "anyOf": [
@@ -537,23 +602,27 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "End Utc"
           },
           "fov_arcmin": {
-            "default": 6,
-            "maximum": 60,
+            "default": 6.0,
+            "maximum": 60.0,
             "minimum": 0.5,
+            "title": "Fov Arcmin",
             "type": "number"
           },
           "max_frames": {
             "default": 24,
-            "maximum": 96,
-            "minimum": 2,
+            "maximum": 96.0,
+            "minimum": 2.0,
+            "title": "Max Frames",
             "type": "integer"
           },
           "ra_deg": {
-            "exclusiveMaximum": 360,
-            "minimum": 0,
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Ra Deg",
             "type": "number"
           },
           "start_utc": {
@@ -565,37 +634,41 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Start Utc"
           },
           "wavelength_max_um": {
             "anyOf": [
               {
-                "maximum": 5,
+                "maximum": 5.0,
                 "minimum": 0.75,
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Wavelength Max Um"
           },
           "wavelength_min_um": {
             "anyOf": [
               {
-                "maximum": 5,
+                "maximum": 5.0,
                 "minimum": 0.75,
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Wavelength Min Um"
           }
         },
         "required": [
           "ra_deg",
           "dec_deg"
         ],
+        "title": "SequenceRequest",
         "type": "object"
       },
       "SkyTarget": {
@@ -604,16 +677,19 @@
           "coordinate_frame": {
             "const": "ICRS",
             "default": "ICRS",
+            "title": "Coordinate Frame",
             "type": "string"
           },
           "dec_deg": {
-            "maximum": 90,
-            "minimum": -90,
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Dec Deg",
             "type": "number"
           },
           "ra_deg": {
-            "exclusiveMaximum": 360,
-            "minimum": 0,
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Ra Deg",
             "type": "number"
           }
         },
@@ -621,14 +697,15 @@
           "ra_deg",
           "dec_deg"
         ],
+        "title": "SkyTarget",
         "type": "object"
       }
     }
   },
   "info": {
-    "description": "Foundation API contract. Live SPHEREx retrieval and processing are not implemented.",
+    "description": "Explore genuine IRSA SPHEREx observations through bounded retrieval and scientific processing. Synthetic development imagery is opt-in.",
     "title": "Khonsu API",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -646,7 +723,11 @@
             },
             "description": "Successful Response"
           }
-        }
+        },
+        "summary": "Health",
+        "tags": [
+          "system"
+        ]
       }
     },
     "/v1/demo/frames/{filename}": {
@@ -658,21 +739,14 @@
             "name": "filename",
             "required": true,
             "schema": {
+              "title": "Filename",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "content": {
-              "image/svg+xml": {
-                "schema": {
-                  "format": "binary",
-                  "type": "string"
-                }
-              }
-            },
-            "description": "Allowlisted synthetic SVG asset"
+            "description": "Successful Response"
           },
           "404": {
             "content": {
@@ -682,7 +756,7 @@
                 }
               }
             },
-            "description": "Asset not found"
+            "description": "Not Found"
           },
           "422": {
             "content": {
@@ -692,9 +766,13 @@
                 }
               }
             },
-            "description": "Validation error"
+            "description": "Unprocessable Entity"
           }
-        }
+        },
+        "summary": "Synthetic Frame",
+        "tags": [
+          "synthetic development demo"
+        ]
       }
     },
     "/v1/demo/manifest": {
@@ -709,7 +787,7 @@
                 }
               }
             },
-            "description": "Explicit synthetic development graphics"
+            "description": "Successful Response"
           },
           "503": {
             "content": {
@@ -719,9 +797,93 @@
                 }
               }
             },
-            "description": "Fixture unavailable"
+            "description": "Service Unavailable"
           }
-        }
+        },
+        "summary": "Synthetic Manifest",
+        "tags": [
+          "synthetic development demo"
+        ]
+      }
+    },
+    "/v1/examples": {
+      "get": {
+        "operationId": "examples_v1_examples_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SequenceManifest"
+                  },
+                  "title": "Response Examples V1 Examples Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Examples",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/v1/examples/{example_id}/frames/{filename}": {
+      "get": {
+        "operationId": "example_frame_v1_examples__example_id__frames__filename__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "example_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Example Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "title": "Filename",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "summary": "Example Frame",
+        "tags": [
+          "discovery"
+        ]
       }
     },
     "/v1/presets": {
@@ -735,13 +897,18 @@
                   "items": {
                     "$ref": "#/components/schemas/PresetTarget"
                   },
+                  "title": "Response Presets V1 Presets Get",
                   "type": "array"
                 }
               }
             },
             "description": "Successful Response"
           }
-        }
+        },
+        "summary": "Presets",
+        "tags": [
+          "discovery"
+        ]
       }
     },
     "/v1/sequences": {
@@ -758,7 +925,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "202": {
             "content": {
               "application/json": {
                 "schema": {
@@ -768,6 +935,26 @@
             },
             "description": "Successful Response"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -776,9 +963,9 @@
                 }
               }
             },
-            "description": "Validation error"
+            "description": "Unprocessable Entity"
           },
-          "501": {
+          "429": {
             "content": {
               "application/json": {
                 "schema": {
@@ -786,9 +973,33 @@
                 }
               }
             },
-            "description": "Not implemented"
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
           }
-        }
+        },
+        "summary": "Create Sequence",
+        "tags": [
+          "sequences"
+        ]
       }
     },
     "/v1/sequences/{sequence_id}": {
@@ -801,6 +1012,7 @@
             "required": true,
             "schema": {
               "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Sequence Id",
               "type": "string"
             }
           }
@@ -816,6 +1028,26 @@
             },
             "description": "Successful Response"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -824,9 +1056,9 @@
                 }
               }
             },
-            "description": "Validation error"
+            "description": "Unprocessable Entity"
           },
-          "501": {
+          "429": {
             "content": {
               "application/json": {
                 "schema": {
@@ -834,9 +1066,231 @@
                 }
               }
             },
-            "description": "Not implemented"
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
           }
-        }
+        },
+        "summary": "Sequence Status",
+        "tags": [
+          "sequences"
+        ]
+      }
+    },
+    "/v1/sequences/{sequence_id}/cancel": {
+      "post": {
+        "operationId": "cancel_sequence_v1_sequences__sequence_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sequence_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Sequence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceJob"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Cancel Sequence",
+        "tags": [
+          "sequences"
+        ]
+      }
+    },
+    "/v1/sequences/{sequence_id}/frames/{filename}": {
+      "get": {
+        "operationId": "sequence_frame_v1_sequences__sequence_id__frames__filename__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sequence_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Sequence Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "title": "Filename",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Sequence Frame",
+        "tags": [
+          "sequences"
+        ]
       }
     },
     "/v1/sequences/{sequence_id}/manifest": {
@@ -849,6 +1303,7 @@
             "required": true,
             "schema": {
               "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Sequence Id",
               "type": "string"
             }
           }
@@ -864,6 +1319,26 @@
             },
             "description": "Successful Response"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -872,9 +1347,9 @@
                 }
               }
             },
-            "description": "Validation error"
+            "description": "Unprocessable Entity"
           },
-          "501": {
+          "429": {
             "content": {
               "application/json": {
                 "schema": {
@@ -882,11 +1357,34 @@
                 }
               }
             },
-            "description": "Not implemented"
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
           }
-        }
+        },
+        "summary": "Sequence Manifest",
+        "tags": [
+          "sequences"
+        ]
       }
     }
-  },
-  "x-khonsu-contract-status": "bootstrap-unverified: run python scripts/export-contracts.py in a dependency-enabled runtime to replace with actual FastAPI output"
+  }
 }
