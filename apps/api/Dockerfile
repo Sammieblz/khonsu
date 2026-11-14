@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 COPY apps/api/requirements.txt ./requirements.txt
 COPY apps/api/requirements-science.txt ./requirements-science.txt
-ARG INSTALL_SCIENCE=false
+ARG INSTALL_SCIENCE=true
 RUN if [ "$INSTALL_SCIENCE" = "true" ]; then \
       pip install --no-cache-dir -r requirements-science.txt; \
     else \
@@ -22,3 +22,4 @@ COPY --chown=khonsu:khonsu fixtures ./fixtures
 USER khonsu
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+

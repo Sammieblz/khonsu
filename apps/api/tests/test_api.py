@@ -26,19 +26,20 @@ def test_fixture_discovery_supports_container_and_repository_layouts(tmp_path, m
     assert fixture_directory(tmp_path.joinpath(*module_parts), None) == fixtures.resolve()
 
 
-def test_health_reports_scaffold_capability():
+def test_health_reports_runtime_capability():
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["live_processing_available"] is False
+    assert isinstance(response.json()["live_processing_available"], bool)
 
 
-def test_named_challenge_presets_do_not_invent_coordinates():
+def test_named_challenge_presets_have_explicit_coordinate_context():
     response = client.get("/v1/presets")
     assert response.status_code == 200
     assert {item["preset_id"] for item in response.json()} == {
         "barnards-star", "epsilon-indi-b", "wise-0855", "rw-aurigae", "r-draconis",
     }
-    assert all(item["ra_deg"] is None for item in response.json())
+    assert all(0 <= item["ra_deg"] < 360 and -90 <= item["dec_deg"] <= 90 for item in response.json())
+    assert all(item["coordinate_note"] for item in response.json())
 
 
 @pytest.mark.parametrize("overrides", [
@@ -55,10 +56,18 @@ def test_invalid_requests_have_stable_errors(overrides):
     assert response.json()["details"]
 
 
-def test_valid_request_is_not_misrepresented_as_a_successful_job():
+def test_valid_request_creates_a_job_and_does_not_claim_completed_data(monkeypatch):
+    from app import main
+    from app.schemas import SequenceJob
+    class PendingManager:
+        def submit(self, request):
+            return SequenceJob(sequence_id="job-test", status="queued")
+    monkeypatch.setattr(main, "get_manager", lambda: PendingManager())
+    monkeypatch.setattr(main, "science_available", lambda: True)
     response = client.post("/v1/sequences", json={"ra_deg": 120, "dec_deg": -10})
-    assert response.status_code == 501
-    assert response.json()["code"] == "LIVE_PROCESSING_NOT_IMPLEMENTED"
+    assert response.status_code == 202
+    assert response.json()["status"] == "queued"
+    assert response.json()["manifest_url"] is None
 
 
 def test_request_times_normalize_to_utc():

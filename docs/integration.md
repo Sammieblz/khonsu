@@ -1,12 +1,12 @@
 # Integration contracts
 
-The authoritative public models live in `apps/api/app/schemas.py`. Export them through FastAPI's OpenAPI document into `contracts/openapi.json`, then regenerate `apps/web/src/lib/api/generated.d.ts`. Read the contracts README for the current snapshot status and exporter commands. Any bootstrap snapshot must be regenerated and checked against a running dependency-enabled API before release.
+The authoritative public models live in `apps/api/app/schemas.py`. Export them through FastAPI's OpenAPI document into `contracts/openapi.json`, then regenerate `apps/web/src/lib/api/generated.d.ts`. Read the contracts README for the current snapshot status and exporter commands. The checked-in snapshot and declarations were exported from the actual dependency-enabled FastAPI app in CI. CI verifies semantic agreement and generated types without rewriting tracked files.
 
 ## Request lifecycle
 
 1. The frontend validates explicit RA and Dec units and converts the search to ICRS decimal degrees. The API independently validates every bound. Dates require timezone offsets; display observation times in UTC.
-2. `POST /v1/sequences` accepts a bounded search and returns a sequence/job identifier when the job implementation exists. The scaffold explicitly returns an unavailable response rather than claiming to have submitted a job.
-3. Poll `GET /v1/sequences/{sequence_id}` with capped backoff. The current job schema defines queued, retrieving, processing, ready and failed states. Cancellation and expiry need a coordinated schema update when implemented. Stop polling on terminal state, cancellation, route change or component unmount.
+2. `POST /v1/sequences` accepts a bounded search and returns a sequence/job identifier when the job implementation exists. The API returns HTTP 202 and a temporary sequence/job record; completion must be polled.
+3. Poll `GET /v1/sequences/{sequence_id}` with capped backoff. The job schema defines queued, retrieving, processing, ready, failed, cancelled and expired states. POST `/v1/sequences/{sequence_id}/cancel` cancels cooperatively; expired or unknown jobs return HTTP 410. Stop polling on terminal state, cancellation, route change or component unmount.
 4. On completion, fetch `GET /v1/sequences/{sequence_id}/manifest`. Load only the current frame and a small adjacent prefetch window through API-controlled artifact routes.
 5. Keep real dates on irregular time-axis positions. Select the nearest actual observation; never interpolate a new science image. A/B comparison references two real frame IDs.
 6. On expiry or restart, offer to repeat the saved query. A stable query URL contains source, units, coordinates, field of view and filters, not local files or an assumed permanent artifact ID.
@@ -20,10 +20,14 @@ The authoritative public models live in `apps/api/app/schemas.py`. Export them t
 | `POST /v1/sequences` | Validate and start a bounded retrieval/processing job |
 | `GET /v1/sequences/{sequence_id}` | Progress, actionable error or completed manifest reference |
 | `GET /v1/sequences/{sequence_id}/manifest` | Prepared chronological frame manifest |
+| `POST /v1/sequences/{sequence_id}/cancel` | Cooperative cancellation |
+| `GET /v1/sequences/{sequence_id}/frames/{filename}` | Manifest-allowlisted PNG frame |
+| `GET /v1/examples` | List of bundled, verified cached-real manifests, possibly empty |
+| `GET /v1/examples/{example_id}/frames/{filename}` | Allowlisted cached-real PNG frame |
 | `GET /v1/demo/manifest` | Explicit synthetic development manifest |
 | `GET /v1/demo/frames/{filename}` | Allowlisted synthetic assets only |
 
-The checked-in OpenAPI file is the exact field and status-code contract. Real frame delivery will use an API-controlled artifact route added with the live pipeline. Do not assume all planned routes are functional in the scaffold. Avoid returning internal paths, upstream credentials, or unbounded archive response bodies in errors.
+The checked-in OpenAPI file is the exact field and status-code contract. Real frame delivery uses API-controlled artifact routes. The frontend remains an integration task for the team. Avoid returning internal paths, upstream credentials, or unbounded archive response bodies in errors.
 
 ## Scientific handoff
 
@@ -44,3 +48,4 @@ The UI distinguishes live data, previously acquired real data, and synthetic dev
 ## Change procedure
 
 Agree field names and units in the linked issue. Change Python schemas, regenerate OpenAPI and TypeScript, update fixtures and examples, then adjust both client and server in the same PR. Tyrone reviews the public contract. Samuel reviews science fields. Robel reviews composition changes. Run the contract and API checks in `docs/testing.md` before merge.
+

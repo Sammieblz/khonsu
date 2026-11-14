@@ -168,6 +168,7 @@ class SequenceManifest(ApiModel):
     display: DisplaySettings
     frames: list[Frame] = Field(min_length=2, max_length=96)
     warnings: list[QualityWarning] = Field(default_factory=list)
+    processing: dict[str, str | float | int | bool] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_provenance(self) -> "SequenceManifest":
@@ -210,11 +211,13 @@ class HealthResponse(ApiModel):
     status: Literal["ok"] = "ok"
     service: Literal["khonsu-api"] = "khonsu-api"
     version: str
-    live_processing_available: Literal[False] = False
+    live_processing_available: bool = True
 
 
 class SequenceJob(ApiModel):
     sequence_id: SequenceId
-    status: Literal["queued", "retrieving", "processing", "ready", "failed"]
+    status: Literal["queued", "retrieving", "processing", "ready", "failed", "cancelled", "expired"]
+    progress: float = Field(default=0.0, ge=0, le=1)
+    message: str | None = None
     manifest_url: str | None = None
     error: ApiError | None = None

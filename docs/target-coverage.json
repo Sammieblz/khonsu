@@ -1,0 +1,181 @@
+{
+  "checked_at_utc": "2026-11-14T09:42:14.630716+00:00",
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "position_epoch_jyear": 2026.0,
+  "metadata_is_detection": false,
+  "targets": [
+    {
+      "preset_id": "barnards-star",
+      "label": "Barnard's Star",
+      "object_type": "High proper-motion star",
+      "reference_ra_deg": 269.45207695861876,
+      "reference_dec_deg": 4.693364966576667,
+      "reference_epoch_jyear": 2000.0,
+      "pm_ra_cosdec_mas_yr": -801.551,
+      "pm_dec_mas_yr": 10362.394,
+      "source_url": "https://simbad.cds.unistra.fr/simbad/sim-id?Ident=Barnard%27s+Star",
+      "coordinate_note": "SIMBAD ICRS position at J2000, with Gaia proper motion. Approximate J2026 field centre; not a precision ephemeris.",
+      "science_note": "Large proper motion is useful context; a short SPHEREx baseline need not show a perceptible shift.",
+      "ra_deg": 269.44626850265985,
+      "dec_deg": 4.768204478798888,
+      "coordinate_frame": "ICRS",
+      "search_epoch_jyear": 2026.0,
+      "observation_count": 358,
+      "detector_counts": {
+        "6": 58,
+        "3": 59,
+        "2": 61,
+        "5": 61,
+        "1": 60,
+        "4": 59
+      },
+      "releases": [
+        "DR1",
+        "QR3"
+      ],
+      "first_exposure_utc": "2025-08-15T20:45:11.376000+00:00",
+      "last_exposure_utc": "2026-09-22T15:04:21.014400+00:00",
+      "processing_status": "Failed: INSUFFICIENT_COMPARABLE_EPOCHS",
+      "processing_error": "Fewer than two usable, spectrally comparable observation epochs cover this field."
+    },
+    {
+      "preset_id": "epsilon-indi-b",
+      "label": "Epsilon Indi B",
+      "object_type": "Brown dwarf binary field",
+      "reference_ra_deg": 331.0438458333333,
+      "reference_dec_deg": -56.78272777777778,
+      "reference_epoch_jyear": 1999.855,
+      "pm_ra_cosdec_mas_yr": 4131.0,
+      "pm_dec_mas_yr": -2489.0,
+      "source_url": "https://arxiv.org/pdf/astro-ph/0212487",
+      "coordinate_note": "Discovery paper Table 1 Ks position: J2000 equatorial coordinates measured at epoch 1999.855. Approximate J2026 proper-motion field centre for the B pair, not primary A.",
+      "science_note": "The Ba/Bb pair is not expected to be resolved by SPHEREx; binary orbital motion is omitted from this field centre.",
+      "ra_deg": 331.0986113344776,
+      "dec_deg": -56.800804140277776,
+      "coordinate_frame": "ICRS",
+      "search_epoch_jyear": 2026.0,
+      "observation_count": 458,
+      "detector_counts": {
+        "2": 93,
+        "5": 84,
+        "4": 46,
+        "1": 46,
+        "6": 93,
+        "3": 96
+      },
+      "releases": [
+        "DR1",
+        "QR3"
+      ],
+      "first_exposure_utc": "2025-04-24T20:31:57.100800+00:00",
+      "last_exposure_utc": "2026-10-02T11:28:25.766400+00:00",
+      "processing_status": "Failed: archive_unavailable",
+      "processing_error": "IRSA could not complete the request. Retry later or narrow the query."
+    },
+    {
+      "preset_id": "wise-0855",
+      "label": "WISE 0855",
+      "object_type": "Cold brown dwarf field",
+      "reference_ra_deg": 133.787085,
+      "reference_dec_deg": -7.244451,
+      "reference_epoch_jyear": 2014.0528405201917,
+      "pm_ra_cosdec_mas_yr": -8060.0,
+      "pm_dec_mas_yr": 700.0,
+      "source_url": "https://arxiv.org/pdf/1404.6501",
+      "coordinate_note": "Luhman 2014 Table 2 Spitzer position at MJD 56677.3, J2000 equatorial coordinates, propagated with Table 1 proper motion to approximate J2026. Parallax omitted.",
+      "science_note": "Very faint, red and blended at shorter wavelengths. Archive coverage does not establish a detection or measurable motion.",
+      "ra_deg": 133.7601213914074,
+      "dec_deg": -7.242127941212259,
+      "coordinate_frame": "ICRS",
+      "search_epoch_jyear": 2026.0,
+      "observation_count": 258,
+      "detector_counts": {
+        "3": 45,
+        "6": 45,
+        "2": 48,
+        "5": 48,
+        "1": 36,
+        "4": 36
+      },
+      "releases": [
+        "DR1"
+      ],
+      "first_exposure_utc": "2025-05-05T16:48:02.419200+00:00",
+      "last_exposure_utc": "2026-05-14T06:53:35.635200+00:00",
+      "processing_status": "Failed: INSUFFICIENT_COMPARABLE_EPOCHS",
+      "processing_error": "Fewer than two usable, spectrally comparable observation epochs cover this field."
+    },
+    {
+      "preset_id": "r-draconis",
+      "label": "R Draconis",
+      "object_type": "Long-period variable star",
+      "reference_ra_deg": 248.16761083295,
+      "reference_dec_deg": 66.75497941722,
+      "reference_epoch_jyear": 2000.0,
+      "pm_ra_cosdec_mas_yr": -20.643,
+      "pm_dec_mas_yr": 6.149,
+      "source_url": "https://simbad.cds.unistra.fr/simbad/sim-id?Ident=R+Dra",
+      "coordinate_note": "SIMBAD ICRS position at J2000, with Gaia proper motion. Approximate J2026 field centre.",
+      "science_note": "Brightness comparisons require matching wavelength, quality and calibration; an animation alone is not a light curve.",
+      "ra_deg": 248.16723307280128,
+      "dec_deg": 66.75502382666444,
+      "coordinate_frame": "ICRS",
+      "search_epoch_jyear": 2026.0,
+      "observation_count": 539,
+      "detector_counts": {
+        "6": 91,
+        "3": 91,
+        "4": 88,
+        "1": 91,
+        "2": 89,
+        "5": 89
+      },
+      "releases": [
+        "DR1",
+        "QR3"
+      ],
+      "first_exposure_utc": "2025-05-16T22:56:23.625600+00:00",
+      "last_exposure_utc": "2026-07-16T20:57:27.417600+00:00",
+      "processing_status": "Ready: 2 comparable frames",
+      "example_sequence_id": "real-r-draconis",
+      "processing_timestamp_utc": "2026-11-14T09:43:56.287263+00:00"
+    },
+    {
+      "preset_id": "rw-aurigae",
+      "label": "RW Aurigae",
+      "object_type": "Young variable star field",
+      "reference_ra_deg": 76.95652603458333,
+      "reference_dec_deg": 30.401438173888888,
+      "reference_epoch_jyear": 2000.0,
+      "pm_ra_cosdec_mas_yr": 7.23,
+      "pm_dec_mas_yr": -20.33,
+      "source_url": "https://simbad.cds.unistra.fr/simbad/sim-id?Ident=RW+Aur",
+      "coordinate_note": "SIMBAD ICRS position at J2000, with catalogued proper motion. Approximate J2026 field centre.",
+      "science_note": "Complex young-star variability is a hypothesis for inspection, not an automated classification.",
+      "ra_deg": 76.95658657557826,
+      "dec_deg": 30.401291346111112,
+      "coordinate_frame": "ICRS",
+      "search_epoch_jyear": 2026.0,
+      "observation_count": 335,
+      "detector_counts": {
+        "1": 56,
+        "4": 56,
+        "2": 55,
+        "5": 56,
+        "3": 56,
+        "6": 56
+      },
+      "releases": [
+        "DR1",
+        "QR3"
+      ],
+      "first_exposure_utc": "2025-09-01T10:04:17.500800+00:00",
+      "last_exposure_utc": "2026-09-16T21:30:05.500800+00:00",
+      "processing_status": "Not attempted"
+    }
+  ],
+  "example_sequence_id": "real-r-draconis"
+}

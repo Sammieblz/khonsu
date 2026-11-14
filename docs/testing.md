@@ -1,13 +1,13 @@
 # Verification
 
-Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The initial scaffold cannot complete a live archive query.
+Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The backend can prepare live archive sequences; the frontend observation workflow remains team work.
 
 ## Automated commands
 
 From the repository root, with an activated Python 3.12 environment:
 
 ```sh
-python -m pip install -r apps/api/requirements-dev.txt
+python -m pip install -r apps/api/requirements-dev.txt -r apps/api/requirements-science.txt
 python -m pip install PyYAML==6.0.3
 python scripts/check-repository.py
 python -m pytest apps/api/tests -q
@@ -43,3 +43,4 @@ Verify invalid RA/Dec, no coverage, one usable frame, incompatible wavelength, f
 ## Release rehearsal
 
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.
+

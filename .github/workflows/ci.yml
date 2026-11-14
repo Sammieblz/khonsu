@@ -1,4 +1,4 @@
-name: Scaffold checks
+name: MVP checks
 on:
   push:
     branches: [main, "scaffold/**"]
@@ -24,6 +24,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install -r apps/api/requirements-dev.txt
+      - run: python -m pip install -r apps/api/requirements-science.txt
       - run: python -m pytest apps/api/tests -q
       - run: python scripts/export-contracts.py --check
   web:
@@ -76,3 +77,23 @@ jobs:
       - run: curl --fail http://localhost:8000/health && curl --fail http://localhost:3000/
       - if: always()
         run: docker compose logs && docker compose down
+  live-archive:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r apps/api/requirements-science.txt
+      - run: python scripts/probe-spherex.py --output fixtures/real --report docs/target-coverage.json --max-frames 8
+      - if: always()
+        run: python scripts/ci-artifacts.py 'fixtures/real/*/*.png' 'fixtures/real/*/*.json' docs/target-coverage.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-observation-probe
+          path: |
+            fixtures/real
+            docs/target-coverage.json
