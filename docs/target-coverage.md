@@ -49,6 +49,23 @@ The returned fields `obs_id`, `t_min`, `t_max`, `energy_bandpassname` and `acces
 
 Metadata is capped at 5,000 rows and 8 MiB. FITS responses are capped at 48 MiB each and 256 MiB per sequence. Requests have finite timeouts, a total retrieval deadline and cancellation checks between reads. Transient failures are retried with capped 1, 2, 4 and 8 second backoff: at most five attempts for the metadata query and three per FITS cutout. IRSA's `Retry-After` header (observed as 5 seconds) is honoured up to 15 seconds, and no wait crosses the deadline. A cutout that stays busy or unusable is skipped; the job continues with the remaining real observations and the manifest carries an `ARCHIVE_DOWNLOADS_SKIPPED` warning with the count. If fewer than two cutouts download, the job reports `archive_busy` (HTTP 429 or 503) or `archive_unavailable` rather than an epoch shortage. The recorded probe ran with the earlier three-attempt, no-skip policy. Downloads and redirects allow only HTTPS `irsa.ipac.caltech.edu/ibe/data/spherex/{dr1,qr3}/level2/...fits` paths. An overflow asks the user to narrow the date range; it is not silently reported as complete coverage.
 
+### Download speed (BYT-35)
+
+Cutouts download four at a time (`DOWNLOAD_CONCURRENCY`) instead of one by one. Each cutout's time is dominated by archive latency, not size. Downloads start in widest-gap order across the sampled time span (first, last, middle, then quarters), and results return in chronological order. The 256 MiB sequence cap counts bytes as they stream, so parallel downloads cannot exceed it together, and a failed attempt gives its bytes back. A fatal error (cancellation, deadline or size limit) interrupts the other downloads.
+
+After each file arrives, the job manager applies processing's own target-wavelength lookup and grouping rule. Once four distinct comparable epochs (or `max_frames`, if smaller) are present, no new downloads start. Files already in flight are kept, and the manifest carries an `ARCHIVE_SEARCH_STOPPED_EARLY` warning with the number not fetched. Processing still makes the final selection. The job reports "Downloaded k of n IRSA observations" as files arrive, and the manifest records `archive_busy_responses`.
+
+Measured on November 14, 2026, for the north ecliptic pole (RA 270.0, Dec +66.5607, 6 arcmin, 16 frames):
+
+| Policy | Total | Busy replies |
+| --- | --- | --- |
+| One at a time | 198 s (191 s downloading, 1.4 s processing) | 4 retry waits |
+| Four at a time, three runs | 62.6, 63.5 and 62.6 s | 0, 1 and 4 |
+
+All runs selected the same two exposures. The early stop did not trigger, because this field yields only two comparable epochs out of 16. Through the full app the search was ready in 85 s, down from 210 s.
+
+IRSA's SIA `BAND` filter matches each image's whole detector band, not the wavelength at the target. A 3.919 to 3.923 micrometre filter at this position still returned all 336 detector-5 images. Matching exposures therefore cannot be chosen before download from the SIA query alone. Predicting the target wavelength from image footprints and the fixed per-detector filter layout remains a possible follow-up.
+
 Re-run with `python scripts/probe-spherex.py --output fixtures/real --report docs/target-coverage.json --max-frames 8 --max-seconds 240`. The global time budget now reaches scientific processing through its cancellation callback, including time already spent querying and downloading. Cancellation is cooperative between processing operations; it does not forcibly terminate a running native-library call. This deadline wiring was added after the recorded probe and does not change its measured results.
 
 No preset promises visible motion, brightness variation, a brown dwarf detection, or a Planet X candidate. Keep WISE, Gaia DR3 and NEOSSat as future contextual integrations unless their real retrieval, registration and provenance have been implemented.
