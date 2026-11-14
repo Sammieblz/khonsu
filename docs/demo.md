@@ -17,18 +17,20 @@ The primary's observation IDs are `2025W45_2A_0292_2`, `2025W50_2A_0479_1`, and 
 
 The previously verified north ecliptic pole smoke field is RA `270.0`, Dec `+66.5607` ICRS degrees, field `6` arcminutes. [Display verification](display-rendering.md) records its two real DR1 exposures, `2025W19_2B_0431_1` and `2026W06_1A_0327_1`. This is an engineering benchmark, not a replacement for the five required target reports or a claim of a moving source.
 
-Fill this release record from the actual integrated build before the final recording:
+The local rehearsal record below is complete for coverage and cached playback. The final-media fields remain release work. See the [acceptance report and screenshots](demo-acceptance.md) for the exact checks and scientific limits.
 
 | Record | Required value |
 | --- | --- |
-| Tested commit | Full merged SHA, not a branch name |
-| Primary field | WISE 0855 field above; recheck against the merged coverage report |
-| Backup example | `real-epsilon-indi-b`; verify the bundle and its manifest in the release build |
-| Source identity | Release, observation IDs, source FITS URLs and original UTC epochs |
-| Data acquisition | Actual acquisition UTC and recorded asset checksums |
-| Science policy | Pipeline version, common WCS, stretch, spectral policy and limitations |
-| Validation | Acceptance report URL, rehearsal outcome and recording date |
-| Final media | Public video URL, measured duration and English-caption check |
+| Tested cached build | `fbe18a3e6f11b3870d9104b97d256e2caca6d695`; both services rebuilt and healthy |
+| Primary field | WISE 0855 query above; bundled `real-wise-0855`, three real DR1 epochs |
+| Backup example | Bundled `real-epsilon-indi-b`, two real DR1/QR3 epochs |
+| Source identity | Exact IDs/epochs above and source FITS URLs in each manifest, source manifest and lineage record |
+| Data acquisition | Bundle-recorded UTC: primary `2026-11-14T20:37:40.137173+00:00`; backup `2026-11-14T20:37:09.240354+00:00`; reviewed file checksums in each lineage record |
+| Science policy | `khonsu-display-0.3.0`; common ICRS grid, fixed recorded stretch, target-position spectral matching, masks and disclosed limitations |
+| Live reproduction | Separate revision `c3316e2814ba317eadc88795f9078042db006128`: ready at 38.448 s; browser checks finished at 41.247 s; exact science-metadata match to the primary |
+| Cached validation | November 14, 2026: primary and backup replayed with upstream blocked, zero outbound attempts, query inputs preserved, original dates/cached labels retained; merged-build repeat passed |
+| Recovery | Missing frame produced API 503 / `CACHED_EXAMPLE_UNAVAILABLE` and a readable browser error without a science frame; restoring the asset restored loading |
+| Final media | Not recorded or published; actual duration, English-caption check and public video URL remain required |
 
 Unfilled entries are release work. Do not replace them with plausible values or present this table as a completed rehearsal.
 
@@ -67,10 +69,10 @@ If a live search is recorded, identify any edited waiting interval with a captio
 
 ## Rehearsal acceptance
 
-- [ ] Start from a clean browser context and the exact intended release build.
-- [ ] Complete a real query and verify every frame has real provenance and a genuine UTC epoch.
-- [ ] Load a bundled cached example with upstream access blocked; preserve its label and the original query inputs.
-- [ ] Inspect a missing/corrupt cached asset and confirm an honest recoverable outcome.
+- [x] Start from a clean browser context and the recorded integrated cached build.
+- [x] Complete a real query and verify every frame has real provenance and a genuine UTC epoch; its separate processing revision is recorded above.
+- [x] Load both bundled cached examples with upstream access blocked; preserve labels and original query inputs.
+- [x] Inspect a missing cached asset and confirm an honest error followed by successful restoration.
 - [ ] Verify desktop and 390-pixel layouts, visible keyboard focus and access to warnings.
 - [ ] Exercise local notes without claiming raster x/y are sky coordinates.
 - [ ] Verify the actual evidence export once its feature ticket is accepted; keep this gate open until then.
