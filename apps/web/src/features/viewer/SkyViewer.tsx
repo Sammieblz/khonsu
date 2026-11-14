@@ -57,7 +57,7 @@ export function SkyViewer({ sequence, activeFrameId, annotations, onFrameChange,
             <div className={styles.reticle} aria-hidden="true"><span /><i /></div>
             <span className={styles.emptyEyebrow}>YOUR OBSERVATORY IS READY</span>
             <h2>Every observation<br />leaves a trace.</h2>
-            <p>Choose a field to begin.<br />Real observations will appear here once the data pipeline is connected.</p>
+            <p>Choose a field to begin.<br />Real observations appear here when a search finishes.</p>
             <span className={styles.emptyDisclosure}>NO SKY DATA IS BEING DISPLAYED</span>
           </div>
         )}

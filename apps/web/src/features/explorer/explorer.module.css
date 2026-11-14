@@ -25,7 +25,23 @@
 .primaryButton:hover:not(:disabled) { background: #eac794; }
 .formNote { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 12px 0 0; }
 .error { color: var(--danger); font-size: 11px; line-height: 1.6; }
-.serviceMessage { border-top: 1px solid var(--line); padding: 16px 28px; margin: 0; color: var(--amber); font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
+.searchStatus { border-top: 1px solid var(--line); padding: 20px 28px 24px; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.searchStatus > p { margin: 10px 0 0; }
+.statusDetail { color: var(--silver); font-size: 10px; line-height: 1.7; }
+.statusDetail code, .qualityNotes code { font-family: var(--font-data); color: var(--amber); }
+.progress { width: 100%; height: 4px; margin-top: 12px; appearance: none; border: 0; background: var(--line); accent-color: var(--amber); }
+.progress::-webkit-progress-bar { background: var(--line); }
+.progress::-webkit-progress-value { background: var(--amber); }
+.progress::-moz-progress-bar { background: var(--amber); }
+.statusActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.statusActions:empty { display: none; }
+.secondaryButton { min-height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: transparent; color: var(--ivory); border: 1px solid var(--line); font-family: var(--font-data); font-size: 10px; letter-spacing: .03em; transition: border-color 140ms ease; }
+.secondaryButton:hover { border-color: var(--amber); }
+.qualityNotes { margin-top: 12px; color: var(--silver); font-size: 10px; }
+.qualityNotes summary { cursor: pointer; color: var(--ivory); }
+.qualityNotes ul { margin: 8px 0 0; padding-left: 16px; }
+.qualityNotes li { margin-bottom: 6px; }
+@media (prefers-reduced-motion: reduce) { .secondaryButton { transition: none; } }
 .referenceTargets { padding: 24px 28px; border-top: 1px solid var(--line); }
 .referenceTargets p { color: var(--silver); font-size: 10px; line-height: 1.6; margin: 8px 0 18px; }
 .referenceTargets ol { display: flex; flex-wrap: wrap; gap: 12px 24px; list-style: none; margin: 0; padding: 0; }
@@ -61,7 +77,7 @@
   .introduction > p { max-width: 440px; font-size: 12px; }
   .workspace { grid-template-columns: 1fr; }
   .sidePanel { border-left: 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .serviceMessage { grid-column: 1 / -1; }
+  .searchStatus { grid-column: 1 / -1; }
   .guide { padding: 44px 0; }
   .guide ol { gap: 20px; }
   .footer { flex-wrap: wrap; gap: 14px; line-height: 1.8; }
