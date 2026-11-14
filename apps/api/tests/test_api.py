@@ -1,15 +1,29 @@
 """Behavior checks for implemented foundation and explicit missing live services."""
 
 import json
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 import pytest
 from pydantic import ValidationError
 
 from app.main import FIXTURES, app
+from app.paths import fixture_directory
 from app.schemas import SequenceManifest, SequenceRequest
 
 client = TestClient(app)
+
+
+def test_configured_fixture_path_wins_for_shallow_container_layout(tmp_path):
+    configured = tmp_path / "configured-fixtures"
+    assert fixture_directory(Path("/app/app/main.py"), str(configured)) == configured.resolve()
+
+
+@pytest.mark.parametrize("module_parts", [("app", "main.py"), ("apps", "api", "app", "main.py")])
+def test_fixture_discovery_supports_container_and_repository_layouts(tmp_path, module_parts):
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    assert fixture_directory(tmp_path.joinpath(*module_parts), None) == fixtures.resolve()
 
 
 def test_health_reports_scaffold_capability():

@@ -59,8 +59,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "detector": {
             "anyOf": [
@@ -72,8 +71,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "frame_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
@@ -104,8 +102,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "observed_end_utc": {
             "anyOf": [
@@ -116,8 +113,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "observed_start_utc": {
             "anyOf": [
@@ -128,8 +124,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "release": {
             "anyOf": [
@@ -143,8 +138,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "source_fits_url": {
             "anyOf": [
@@ -157,8 +151,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "warnings": {
             "items": {
@@ -176,8 +169,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           }
         },
         "required": [
@@ -249,8 +241,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "wcs_header": {
             "anyOf": [
@@ -273,8 +264,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "width_px": {
             "maximum": 4096,
@@ -309,8 +299,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "label": {
             "type": "string"
@@ -331,8 +320,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           }
         },
         "required": [
@@ -374,8 +362,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "manifest_url": {
             "anyOf": [
@@ -385,8 +372,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "sequence_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
@@ -504,8 +490,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "end_utc": {
             "anyOf": [
@@ -516,8 +501,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "fov_arcmin": {
             "default": 6,
@@ -545,8 +529,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "wavelength_max_um": {
             "anyOf": [
@@ -558,8 +541,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "wavelength_min_um": {
             "anyOf": [
@@ -571,8 +553,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           }
         },
         "required": [

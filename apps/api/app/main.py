@@ -10,14 +10,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
+from .paths import fixture_directory
 from .schemas import (
     ApiError, HealthResponse, PresetTarget, SequenceJob,
     SequenceManifest, SequenceRequest,
 )
 
 VERSION = "0.1.0"
-ROOT = Path(__file__).resolve().parents[3]
-FIXTURES = Path(os.environ.get("KHONSU_FIXTURE_DIR", str(ROOT / "fixtures"))).resolve()
+FIXTURES = fixture_directory(Path(__file__), os.environ.get("KHONSU_FIXTURE_DIR"))
 SequencePath = Annotated[str, ApiPath(pattern=r"^[a-zA-Z0-9_-]{1,80}$")]
 
 app = FastAPI(
