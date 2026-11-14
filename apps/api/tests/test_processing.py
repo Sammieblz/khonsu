@@ -9,11 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
-
-np = pytest.importorskip("numpy")
-pytest.importorskip("astropy")
-pytest.importorskip("reproject")
-pytest.importorskip("PIL")
+import numpy as np
 
 from astropy.io import fits
 from astropy.wcs import WCS

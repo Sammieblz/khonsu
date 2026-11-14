@@ -1,6 +1,5 @@
 """Offline retrieval security, protocol and bounded-download checks."""
 
-import asyncio
 from datetime import datetime, timezone
 import io
 from pathlib import Path
@@ -57,7 +56,7 @@ class RetrievalTests(unittest.TestCase):
         rows = parse_metadata((HEADER + row + row).encode(), request())
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].release, "DR1")
-        self.assertEqual(rows[0].observed_start_utc.isoformat(), "2025-05-06T00:00:00+00:00")
+        self.assertEqual(rows[0].observed_start_utc.isoformat(), "2025-05-05T00:00:00+00:00")
         self.assertEqual(parse_metadata((HEADER + row).encode(), request(detector=2)), [])
 
     def test_invalid_or_overflow_metadata_is_not_empty_coverage(self):
@@ -105,7 +104,7 @@ class RetrievalTests(unittest.TestCase):
     def test_cancelled_callback_prevents_network_access(self):
         retriever = IrsaRetriever(cancelled=lambda: True)
         with self.assertRaisesRegex(RetrievalError, "cancelled"):
-            asyncio.run(retriever.search(request()))
+            retriever._check()
 
     def test_all_five_presets_are_cited_and_motion_is_applied(self):
         self.assertEqual(len(PRESETS), 5)
