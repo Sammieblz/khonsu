@@ -1467,7 +1467,6 @@
   "backup_preset_id": "epsilon-indi-b",
   "elapsed_seconds": 137.652,
   "finished_at_utc": "2026-11-14T20:38:39.304027+00:00",
-  "source_revision": "c3316e2814ba317eadc88795f9078042db006128",
   "diagnostics": [
     {
       "code": "ASTROPY_SIP_CONVENTION",
@@ -1490,7 +1489,6 @@
       "start_utc": null,
       "end_utc": null
     },
-    "source_revision": "c3316e2814ba317eadc88795f9078042db006128",
     "ready_elapsed_seconds": 38.448,
     "browser_check_elapsed_seconds": 41.247,
     "compared_fields": [
@@ -1503,11 +1501,16 @@
       "grid",
       "display"
     ],
-    "result": "All three primary source frames and comparison metadata matched the independent live query exactly"
+    "result": "All three primary source frames and comparison metadata matched the independent live query exactly",
+    "processing_source_revision": "c3316e2814ba317eadc88795f9078042db006128",
+    "source_revision_scope": "The browser/API application running at this main commit; this independent replay did not execute the modified probe script."
   },
   "coordinate_reference_review": {
     "epsilon-indi-b": "Original discovery paper Table 1 Ks position, epoch and proper motions rechecked 2026-11-14",
     "wise-0855": "Luhman 2014 Tables 1 and 2 position, epoch and proper motions rechecked 2026-11-14",
     "simbad_targets": "Existing cited catalogue values retained; fresh browser access to SIMBAD unavailable during this pass; J2026 search centres remain approximate"
-  }
+  },
+  "processing_source_revision": "c3316e2814ba317eadc88795f9078042db006128",
+  "source_revision_scope": "The revision identifies the unchanged retrieval and scientific processing application modules. Acquisition used the modified probe worktree; it is not an immutable revision of the complete probe script.",
+  "probe_execution_context": "Target-validation worktree with uncommitted probe changes during acquisition. Report generation and diagnostic recording were completed after acquisition in this branch."
 }

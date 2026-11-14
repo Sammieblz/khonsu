@@ -32,7 +32,7 @@ from app.schemas import SequenceRequest
 HISTORICAL_VALIDATION = """
 # Earlier probe evidence
 
-Verified live probe: November 14, 2026, starting at 09:42:14 UTC. The [GitHub Actions job](https://github.com/Sammieblz/khonsu/actions/runs/43581772359/job/132407826811) completed successfully using commit `b5642120c8baab90701a029176ec6e2023692ba9`. Its `real-observation-probe` artifact contains the report and processed R Draconis field. The [machine-readable report](target-coverage.json) is copied exactly from that job's emitted artifact record.
+Verified live probe: November 14, 2026, starting at 09:42:14 UTC. The [GitHub Actions job](https://github.com/Sammieblz/khonsu/actions/runs/43581772359/job/132407826811) completed successfully using commit `b5642120c8baab90701a029176ec6e2023692ba9`. Its `real-observation-probe` artifact contains the report and processed R Draconis field. That historical artifact preserves the earlier machine-readable report. The current [machine-readable report](target-coverage.json) contains the later complete five-target run described above and is not a copy of the earlier artifact.
 
 All five searches returned real archive metadata. One bounded processing attempt produced two comparable real field frames. Both R Draconis target pixels were masked, so this is a field-playback demonstration and does not establish a measurement, detection, motion or variability of R Draconis itself. No Planet X discovery or target-recovery claim follows from these results.
 
@@ -85,7 +85,7 @@ Khonsu searches a one-arcsecond cone at the supplied field centre, selects the m
 
 The returned fields `obs_id`, `t_min`, `t_max`, `energy_bandpassname` and `access_url` supply provenance. FITS processing dates are not exposure dates. SIA image-level wavelength overlap is not proof of a comparable wavelength at the target. The processor checks the target's WCS-WAVE wavelength and bandwidth, flags, finite values and coverage as described by the [official data-products guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-products/).
 
-Metadata is capped at 5,000 rows and 8 MiB. FITS responses are capped at 48 MiB each and 256 MiB per sequence. Requests have finite timeouts, a total retrieval deadline and cancellation checks between reads. Transient failures are retried with capped 1, 2, 4 and 8 second backoff: at most five attempts for the metadata query and three per FITS cutout. IRSA's `Retry-After` header (observed as 5 seconds) is honoured up to 15 seconds, and no wait crosses the deadline. A cutout that stays busy or unusable is skipped; the job continues with the remaining real observations and the manifest carries an `ARCHIVE_DOWNLOADS_SKIPPED` warning with the count. If fewer than two cutouts download, the job reports `archive_busy` (HTTP 429 or 503) or `archive_unavailable` rather than an epoch shortage. The recorded probe ran with the earlier three-attempt, no-skip policy. Downloads and redirects allow only HTTPS `irsa.ipac.caltech.edu/ibe/data/spherex/{dr1,qr3}/level2/...fits` paths. An overflow asks the user to narrow the date range; it is not silently reported as complete coverage.
+Metadata is capped at 5,000 rows and 8 MiB. FITS responses are capped at 48 MiB each and 256 MiB per sequence. Requests have finite timeouts, a total retrieval deadline and cancellation checks between reads. Transient failures are retried with capped 1, 2, 4 and 8 second backoff: at most five attempts for the metadata query and three per FITS cutout. IRSA's `Retry-After` header (observed as 5 seconds) is honoured up to 15 seconds, and no wait crosses the deadline. A cutout that stays busy or unusable is skipped; the job continues with the remaining real observations and the manifest carries an `ARCHIVE_DOWNLOADS_SKIPPED` warning with the count. If fewer than two cutouts download, the job reports `archive_busy` (HTTP 429 or 503) or `archive_unavailable` rather than an epoch shortage. The earlier 09:42 UTC probe recorded above ran with the three-attempt, no-skip policy. The current complete five-target run uses the bounded parallel-download and skip policy described here. Downloads and redirects allow only HTTPS `irsa.ipac.caltech.edu/ibe/data/spherex/{dr1,qr3}/level2/...fits` paths. An overflow asks the user to narrow the date range; it is not silently reported as complete coverage.
 
 ### Download speed (BYT-35)
 
@@ -157,6 +157,7 @@ def write_report(report: dict, path: Path) -> None:
         json.dumps(report.get("diagnostics", []), indent=2), "",
         "## Independent reproduction", "",
         json.dumps(report.get("independent_reproduction", {}), indent=2), "",
+        f"Processing provenance: `{report.get('processing_source_revision', 'not recorded')}`. {report.get('source_revision_scope', 'No immutable processing revision recorded.')} {report.get('probe_execution_context', '')}", "",
         HISTORICAL_VALIDATION, "", REFERENCE_NOTES,
     ])
     path.with_suffix(".md").write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
