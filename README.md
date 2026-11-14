@@ -2,7 +2,7 @@
 
 **Find what time reveals.**
 
-Khonsu is a visual observatory for exploring real SPHEREx infrared observations across time. Drag the sky through observed epochs, blink between registered images, and record candidate changes with their scientific context. ByteBoyz is building it for NASA Space Apps 2026, [Planet X and SPHEREx](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/).
+Khonsu is a visual observatory for exploring real SPHEREx infrared observations across time. Enter a sky position, load registered observations, step through their actual dates, and keep local notes about features worth investigating. ByteBoyz is building it for NASA Space Apps 2026, [Planet X and SPHEREx](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/).
 
 ## Why Khonsu?
 
@@ -12,9 +12,13 @@ The creative spark was the night-sky rewind gesture in *Moon Knight*. Our interp
 
 ## MVP and current state
 
-The minimum viable product (MVP) is a working end-to-end SPHEREx image explorer: bounded coordinate search, five validated example targets, registered chronological frames, time scrubbing and blink comparison, pan and zoom, provenance and quality details, and local candidate annotations with evidence export. [MVP acceptance criteria](docs/mvp.md) define completion.
+The minimum viable product (MVP) targets a complete SPHEREx image explorer: bounded coordinate search, five validated example targets, registered chronological frames, time scrubbing and blink comparison, pan and zoom, provenance and quality details, and local candidate annotations with evidence export. [MVP acceptance criteria](docs/mvp.md) define completion; this list is a delivery goal, not a claim that every feature is finished.
 
-**The backend foundation is implemented.** It supports bounded IRSA queries, temporary jobs, wavelength-aware FITS registration, masks and prepared images. The main frontend remains the team scaffold; viewer integration and the full observation-to-evidence journey still need team implementation. Synthetic fixtures are labelled and must never be presented as NASA observations or a discovery. See the [team handoff](docs/implementation-handoff.md).
+**The live coordinate-to-viewer path works locally.** The frontend submits bounded IRSA searches, displays download progress, and loads prepared real frames. The CPython backend reads FITS, selects comparable approximate wavelengths at the requested position, registers frames on a common celestial grid, preserves quality masks, and applies one recorded display stretch. The viewer supports dated frame selection, stepping, playback and local raster-pixel notes. See the [coverage evidence](docs/target-coverage.md) and [display method and limits](docs/display-rendering.md).
+
+Pan/zoom/reset, A/B blink, complete irregular-time interaction, reproducible query URLs, sky-coordinate annotations and a versioned evidence export remain separate feature work. Current notes contain local raster coordinates; they are not a scientific evidence bundle. Final accessibility acceptance, a public hosted demonstration and the official project submission are not established by a successful local build. The [initial backend handoff](docs/implementation-handoff.md) is historical; current tickets and acceptance evidence govern completion.
+
+Cached real observations and synthetic development fixtures are distinct. A cached example is usable only when its verified bundle is present and the interface labels it as previously acquired data. A failed live query must not silently load another field or synthetic imagery. Coverage alone does not prove a target detection, motion, brightness change or Planet X discovery.
 
 ## Start locally
 
@@ -25,6 +29,8 @@ docker compose up --build
 ```
 
 Open http://localhost:3000. The API runs at http://localhost:8000 with interactive API documentation at http://localhost:8000/docs. The backend accepts a bounded live query and returns a job to poll. The explorer form starts a live search, shows progress, and loads the finished sequence into the viewer; a 16-frame search typically takes about a minute, longer when IRSA is busy. Use the API documentation to exercise the backend directly.
+
+For a reproducible presentation, follow the [demo and rehearsal runbook](docs/demo.md). The [submission handoff](docs/submission.md) contains draft project text, source credits, release gates and the final portal checklist. It is not a submission receipt.
 
 For native development, use Node.js 24 and Python 3.12:
 
