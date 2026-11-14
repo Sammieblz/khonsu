@@ -16,6 +16,7 @@ from astropy.wcs import WCS
 from PIL import Image
 
 from app.interfaces import ObservationInput, ProcessingOptions
+from app.processing.alignment import auto_grid_size, output_wcs, reproject_observation, shared_limits, write_png
 from app.processing.errors import ProcessingCancelled, ProcessingError
 from app.processing.fits_reader import BAD_FLAG_NAMES, read_observation
 from app.processing.service import AstronomyProcessor
@@ -245,3 +246,62 @@ def test_cancelled_processing_does_not_publish_frames(tmp_path):
         AstronomyProcessor().process(observations, options(), output, cancelled=lambda: True)
     assert error.value.code == "PROCESSING_CANCELLED"
     assert not list(output.glob("*.png"))
+
+
+def test_masked_pixels_keep_their_true_size_and_position(tmp_path):
+    # A 0.3 px offset puts every output centre between four input pixels, so
+    # plain bilinear interpolation over NaN would spread each masked pixel into
+    # its neighbours. Nearest-pixel mapping is one-to-one at this offset.
+    loaded = read_observation(make_observation(tmp_path, 0, shift=(0.3, 0.3), defects=True), RA, DEC)
+    image, valid = reproject_observation(loaded, output_wcs(options(), SIZE), SIZE)
+    interior = np.zeros_like(valid)
+    interior[2:-2, 2:-2] = True
+    masked = {(int(y), int(x)) for y, x in zip(*np.nonzero(~valid & interior))}
+    assert masked == {(9, 8), (6, 6), (7, 7), (8, 7), (9, 7)}
+    assert np.all(np.isfinite(image[valid]))
+    assert np.all(np.isnan(image[~valid]))
+    # Neighbours of a masked pixel average valid inputs only: flat sky stays flat.
+    assert image[6, 5] == pytest.approx(5.0, abs=1e-4)
+    assert image[8, 8] == pytest.approx(5.0, abs=1e-4)
+
+
+def test_default_grid_samples_twice_the_native_pixel_scale(tmp_path):
+    first = make_observation(tmp_path, 0)
+    second = make_observation(tmp_path, 1, wavelength_um=1.005)
+    automatic = replace(options(), output_size_px=None)
+    manifest = AstronomyProcessor().process([first, second], automatic, tmp_path / "output")
+    # 3.3 arcmin field, 6 arcsec synthetic pixels: 198 * 2 / 6 = 66 grid pixels.
+    assert manifest.grid.width_px == manifest.grid.height_px == 66
+    assert manifest.processing["native_pixel_scale_arcsec"] == pytest.approx(6.0)
+    assert manifest.processing["grid_scale_arcsec"] == pytest.approx(3.0)
+    with Image.open(tmp_path / "output" / "frame-0001.png") as image:
+        assert image.size == (66, 66)
+    assert auto_grid_size(60.0, 6.15) == 512
+    assert auto_grid_size(0.5, 6.15) == 32
+    assert auto_grid_size(6.0, 6.145) == 118
+
+
+def test_stretch_keeps_empty_sky_dark_and_is_shared_across_frames(tmp_path):
+    # Explicitly synthetic arrays: Gaussian sky noise plus one bright point.
+    rng = np.random.default_rng(12)
+    frames = []
+    for index in range(2):
+        image = (10.0 + rng.normal(0.0, 1.0, (64, 64))).astype(np.float32)
+        image[20 + index, 30] = 200.0
+        frames.append((None, image, np.ones((64, 64), dtype=bool)))
+    low, high = shared_limits(frames)
+    assert shared_limits(list(reversed(frames))) == (low, high)
+    assert low == pytest.approx(8.0, abs=0.2)
+    assert high >= 10.0 + 50.0 * 0.9
+    write_png(tmp_path / "frame.png", frames[0][1], frames[0][2], low, high)
+    with Image.open(tmp_path / "frame.png") as png:
+        gray = np.asarray(png.convert("RGBA"))[:, :, 0]
+    assert np.median(gray) < 64
+    assert gray[63 - 20, 30] == 255
+
+    # A starless field is not stretched until its noise fills the gray range.
+    noise = [(None, (10.0 + rng.normal(0.0, 1.0, (64, 64))).astype(np.float32), np.ones((64, 64), dtype=bool))]
+    low, high = shared_limits(noise)
+    write_png(tmp_path / "noise.png", noise[0][1], noise[0][2], low, high)
+    with Image.open(tmp_path / "noise.png") as png:
+        assert np.asarray(png.convert("RGBA"))[:, :, 0].max() < 160

@@ -36,6 +36,8 @@ MAX_METADATA_ROWS = 5000
 MAX_METADATA_BYTES = 8 * 1024 * 1024
 MAX_FITS_BYTES = 48 * 1024 * 1024
 MAX_TOTAL_BYTES = 256 * 1024 * 1024
+CUTOUT_FIELD_MARGIN = 1.5
+MAX_CUTOUT_ARCMIN = 60.0
 # IRSA answers "503 Server busy, retry later" under load. Retry transient
 # failures with capped exponential backoff (1, 2, 4, 8 s), honour a bounded
 # Retry-After, and never wait past the retrieval deadline.
@@ -105,8 +107,8 @@ def _datetime_mjd(value: str) -> datetime:
 
 
 def query_url(request: SequenceRequest) -> str:
-    # Search for detectors covering the centre; request a full-width square
-    # cutout afterwards. Partial edges are masked by scientific processing.
+    # Search for detectors covering the centre; request a square cutout wider
+    # than the field afterwards. Partial edges are masked by scientific processing.
     for value in (request.ra_deg, request.dec_deg, request.fov_arcmin):
         if not math.isfinite(value):
             raise RetrievalError("invalid_target", "Coordinates and field size must be finite.")
@@ -186,10 +188,22 @@ def select_observations(rows: list[ObservationMetadata], max_frames: int) -> lis
     return [rows[index] for index in indices]
 
 
+def cutout_size_arcmin(fov_arcmin: float) -> float:
+    """Cutout width that lets real pixels reach the north-up field's corners.
+
+    IRSA cuts squares aligned to the detector, which is rotated on the sky.
+    Any rotation of a square fits inside one sqrt(2) wider, so 1.5x covers the
+    corners. Wide fields stop growing at the previous 60 arcmin maximum, which
+    keeps worst-case download bytes unchanged; processing masks any gap.
+    """
+    return max(fov_arcmin, min(fov_arcmin * CUTOUT_FIELD_MARGIN, MAX_CUTOUT_ARCMIN))
+
+
 def cutout_url(source_url: str, request: SequenceRequest) -> str:
     validate_irsa_url(source_url)
     parts = urlsplit(source_url)
-    params = {"center": f"{request.ra_deg:.10f},{request.dec_deg:.10f}", "size": f"{request.fov_arcmin/60:.10f}"}
+    size_deg = cutout_size_arcmin(request.fov_arcmin) / 60
+    params = {"center": f"{request.ra_deg:.10f},{request.dec_deg:.10f}", "size": f"{size_deg:.10f}"}
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(params), ""))
 
 

@@ -31,7 +31,9 @@ class ProcessingOptions:
     dec_deg: float
     fov_arcmin: float
     coordinate_frame: Literal["ICRS"] = "ICRS"
-    output_size_px: int = 512
+    # None sizes the square grid from the inputs' native pixel scale
+    # (processing.alignment.auto_grid_size). An integer forces that width.
+    output_size_px: int | None = None
 
 
 class ObservationRetriever(Protocol):

@@ -23,6 +23,8 @@ Sequence `real-r-draconis` uses detector 1 and a common north-up, east-left ICRS
 | 2025-10-18 21:42:15.753600 | DR1 | 0.75905463 micrometers | 17.69% | `TARGET_MASKED` |
 | 2026-07-11 08:58:46.560000 | QR3 | 0.76235266 micrometers | 25.47% | `TARGET_MASKED` |
 
+These masked fractions were measured with display pipeline 0.2.0, which used a field-width cutout and spread each masked pixel into its neighbours. Pipeline 0.3.0 masks far less; see [display rendering](display-rendering.md).
+
 The wavelength-center difference is about 0.00329803 micrometers, below this group's 0.00446936-micrometer tolerance. Matching uses the approximate WCS-WAVE lookup at the requested position, with a maximum center spread of one quarter of the smallest bandwidth. It does not establish identical spectral responses throughout the field.
 
 The processor retained source metadata, quality masks and a shared celestial grid. Backgrounds and point-spread functions were not matched, and resampling uncertainty was not propagated. The emitted manifest explicitly records those limits and both `TARGET_MASKED` warnings. The measured outcome is successful retrieval and rendering of a real field sequence, with target-source validation still open.
@@ -43,7 +45,7 @@ The processor retained source metadata, quality masks and a shared celestial gri
 
 The [official introductory notebook](https://caltech-ipac.github.io/irsa-tutorials/spherex-intro/) queries the IRSA SIA service with `collection=['spherex_dr1','spherex_qr3']`. The [current access guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-access/) confirms those compatible releases. The [SIA service guide](https://irsa.ipac.caltech.edu/ibe/sia.html) defines `POS` in ICRS degrees, `TIME` in MJD, `BAND` in metres and `RESPONSEFORMAT=CSV`.
 
-Khonsu searches a one-arcsecond cone at the supplied field centre, selects the most populated detector when none was requested, and samples actual exposures across the available time span. It appends the documented `center` and `size` parameters to approved IRSA FITS URLs. Size is the full square field width in degrees. A detector footprint can cover the centre without covering the whole field; processing masks uncovered pixels.
+Khonsu searches a one-arcsecond cone at the supplied field centre, selects the most populated detector when none was requested, and samples actual exposures across the available time span. It appends the documented `center` and `size` parameters to approved IRSA FITS URLs. Size is 1.5 times the square field width in degrees, capped at 60 arcminutes and never below the field width, so the detector-aligned cutout covers the corners of the north-up field (see [display rendering](display-rendering.md)). A detector footprint can cover the centre without covering the whole field; processing masks uncovered pixels.
 
 The returned fields `obs_id`, `t_min`, `t_max`, `energy_bandpassname` and `access_url` supply provenance. FITS processing dates are not exposure dates. SIA image-level wavelength overlap is not proof of a comparable wavelength at the target. The processor checks the target's WCS-WAVE wavelength and bandwidth, flags, finite values and coverage as described by the [official data-products guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-products/).
 
