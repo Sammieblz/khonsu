@@ -11,6 +11,7 @@ import csv
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 import hashlib
 import io
 import math
@@ -35,6 +36,19 @@ MAX_METADATA_ROWS = 5000
 MAX_METADATA_BYTES = 8 * 1024 * 1024
 MAX_FITS_BYTES = 48 * 1024 * 1024
 MAX_TOTAL_BYTES = 256 * 1024 * 1024
+# IRSA answers "503 Server busy, retry later" under load. Retry transient
+# failures with capped exponential backoff (1, 2, 4, 8 s), honour a bounded
+# Retry-After, and never wait past the retrieval deadline.
+MAX_ATTEMPTS = 5
+# A single cutout can stay busy for minutes. Give each FITS file fewer
+# attempts, then skip it so one product cannot exhaust the job deadline.
+FITS_ATTEMPTS = 3
+SKIPPABLE_DOWNLOAD_ERRORS = frozenset({"archive_busy", "archive_unavailable", "invalid_fits", "empty_archive_response"})
+BACKOFF_BASE_SECONDS = 1.0
+BACKOFF_MAX_SECONDS = 8.0
+RETRY_AFTER_MAX_SECONDS = 15.0
+RETRYABLE_STATUS = frozenset({408, 429, 500, 502, 503, 504})
+BUSY_STATUS = frozenset({429, 503})
 _FITS_PATH = re.compile(r"^/ibe/data/spherex/(dr1|qr3)/level2/[A-Za-z0-9_./-]+\.fits$")
 _DETECTOR = re.compile(r"^SPHEREx-D([1-6])$", re.IGNORECASE)
 
@@ -197,9 +211,37 @@ class IrsaRetriever:
         if time.monotonic() >= self._deadline:
             raise RetrievalError("archive_timeout", "Archive retrieval exceeded its time budget. Try fewer frames.")
 
-    def _read(self, url: str, limit: int, destination: Path | None = None) -> bytes | int:
+    def _pause(self, seconds: float) -> None:
+        """Wait between attempts while staying responsive to cancellation."""
+        end = time.monotonic() + seconds
+        while True:
+            self._check()
+            remaining = end - time.monotonic()
+            if remaining <= 0:
+                return
+            self.cancel_event.wait(min(.25, remaining))
+
+    @staticmethod
+    def _retry_delay(attempt: int, exc: Exception) -> float:
+        delay = min(BACKOFF_MAX_SECONDS, BACKOFF_BASE_SECONDS * 2 ** attempt)
+        headers = getattr(exc, "headers", None) if isinstance(exc, HTTPError) else None
+        value = headers.get("Retry-After") if headers is not None else None
+        if value:
+            try:
+                requested = float(value)
+            except ValueError:
+                try:
+                    requested = (parsedate_to_datetime(value) - datetime.now(timezone.utc)).total_seconds()
+                except (TypeError, ValueError, OverflowError):
+                    requested = 0.0
+            if math.isfinite(requested):
+                delay = max(delay, min(requested, RETRY_AFTER_MAX_SECONDS))
+        return delay
+
+    def _read(self, url: str, limit: int, destination: Path | None = None, attempts: int = MAX_ATTEMPTS) -> bytes | int:
         validate_irsa_url(url, metadata=destination is None)
-        for attempt in range(3):
+        attempts = min(max(attempts, 1), MAX_ATTEMPTS)
+        for attempt in range(attempts):
             self._check()
             try:
                 req = Request(url, headers={"User-Agent": "Khonsu/0.1 (NASA Space Apps science prototype)", "Accept": "text/csv" if destination is None else "application/fits"})
@@ -239,11 +281,14 @@ class IrsaRetriever:
             except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
                 if destination:
                     destination.unlink(missing_ok=True)
-                retryable = not isinstance(exc, HTTPError) or exc.code in (408, 429, 500, 502, 503, 504)
-                if attempt == 2 or not retryable:
+                retryable = not isinstance(exc, HTTPError) or exc.code in RETRYABLE_STATUS
+                delay = self._retry_delay(attempt, exc)
+                if (attempt == attempts - 1 or not retryable
+                        or time.monotonic() + delay >= self._deadline):
+                    if isinstance(exc, HTTPError) and exc.code in BUSY_STATUS:
+                        raise RetrievalError("archive_busy", "The IRSA archive is busy and asked clients to retry later. Wait a minute, then retry the search or request fewer frames.") from exc
                     raise RetrievalError("archive_unavailable", "IRSA could not complete the request. Retry later or narrow the query.") from exc
-                if self.cancel_event.wait(.5 * (attempt + 1)):
-                    self._check()
+                self._pause(delay)
         raise AssertionError("unreachable")
 
     def _search(self, request: SequenceRequest) -> list[ObservationMetadata]:
@@ -262,16 +307,31 @@ class IrsaRetriever:
         download_dir.mkdir(parents=True, exist_ok=True)
         results = []
         total = 0
+        # Read by the job manager so a shorter sequence is disclosed, never
+        # presented as the full selection.
+        self.selected_count = len(rows)
+        self.skipped_downloads: list[str] = []
+        last_error: RetrievalError | None = None
         for row in rows:
             self._check()
             url = cutout_url(row.source_fits_url, request)
             name = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24] + ".fits"
             path = download_dir / name
             partial = path.with_suffix(".fits.part")
-            size = self._read(url, min(MAX_FITS_BYTES, MAX_TOTAL_BYTES-total), partial)
+            try:
+                size = self._read(url, min(MAX_FITS_BYTES, MAX_TOTAL_BYTES-total), partial, attempts=FITS_ATTEMPTS)
+            except RetrievalError as exc:
+                if exc.code not in SKIPPABLE_DOWNLOAD_ERRORS:
+                    raise
+                self.skipped_downloads.append(row.observation_id)
+                last_error = exc
+                continue
             total += size
             partial.replace(path)
             results.append(ObservationInput(path, row.observation_id, row.observed_start_utc, row.observed_end_utc, row.detector, row.release, url))
+        if last_error is not None and len(results) < 2:
+            # Report the archive problem rather than a misleading epoch count.
+            raise last_error
         return results
 
     async def retrieve(self, request: SequenceRequest, download_dir: Path) -> list[ObservationInput]:

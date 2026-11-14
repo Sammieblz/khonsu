@@ -63,6 +63,25 @@ def test_dedup_ready_assets_and_expiry(tmp_path):
         manager.close()
 
 
+def test_skipped_archive_downloads_are_disclosed_in_the_manifest(tmp_path):
+    class PartialRetriever(Retriever):
+        async def retrieve(self, request, directory):
+            self.selected_count, self.skipped_downloads = 3, ["obs-busy"]
+            return [object(), object()]
+    manager = JobManager(tmp_path, retriever_factory=PartialRetriever, processor_factory=Processor)
+    try:
+        job = manager.submit(SequenceRequest(ra_deg=10, dec_deg=20))
+        assert finish(manager, job.sequence_id).status == "ready"
+        manifest = manager.manifest(job.sequence_id)
+        warning = next(item for item in manifest.warnings if item.code == "ARCHIVE_DOWNLOADS_SKIPPED")
+        assert warning.message.startswith("1 of 3 selected IRSA cutouts")
+        assert manifest.processing["archive_downloads_skipped"] == 1
+        stored = json.loads((tmp_path / job.sequence_id / "manifest.json").read_text())
+        assert any(item["code"] == "ARCHIVE_DOWNLOADS_SKIPPED" for item in stored["warnings"])
+    finally:
+        manager.close()
+
+
 def test_bounded_queue_and_cooperative_cancellation(tmp_path):
     entered, release = threading.Event(), threading.Event()
     class WaitingRetriever(Retriever):

@@ -1,18 +1,21 @@
 """Offline retrieval security, protocol and bounded-download checks."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from email.utils import format_datetime
 import io
 from pathlib import Path
 import tempfile
+import threading
 import time
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlsplit
 
 from app.retrieval.presets import PRESETS, preset_position
 from app.retrieval.service import (
-    IrsaRetriever, MAX_METADATA_ROWS, ObservationMetadata, RetrievalError,
+    IrsaRetriever, MAX_ATTEMPTS, MAX_METADATA_ROWS, ObservationMetadata, RetrievalError,
     cutout_url, parse_metadata, query_url, select_observations, validate_irsa_url,
 )
 
@@ -34,6 +37,14 @@ class Response(io.BytesIO):
 
     def geturl(self):
         return self.url
+
+
+def busy(retry_after=None, code=503):
+    headers = {} if retry_after is None else {"Retry-After": retry_after}
+    return HTTPError(SOURCE, code, "Server busy, retry later.", headers, None)
+
+
+FITS = b"SIMPLE  =" + b" " * 30
 
 
 class RetrievalTests(unittest.TestCase):
@@ -100,6 +111,110 @@ class RetrievalTests(unittest.TestCase):
                     with self.assertRaises(RetrievalError):
                         retriever._read(SOURCE, limit, path)
                 self.assertFalse(path.exists())
+
+    def _download(self, responses, deadline=100, waits=None):
+        """Run one bounded cutout download against scripted archive responses."""
+        retriever = IrsaRetriever()
+        retriever._deadline = time.monotonic() + deadline
+        waits = [] if waits is None else waits
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(retriever, "_pause", side_effect=waits.append), \
+                patch.object(retriever._opener, "open", side_effect=responses) as opened:
+            path = Path(tmp) / "input.fits.part"
+            try:
+                size = retriever._read(SOURCE, 100, path)
+            except RetrievalError:
+                self.assertFalse(path.exists(), "A failed download must not leave a partial file")
+                raise
+            return size, path.read_bytes(), opened.call_count
+
+    def test_busy_archive_is_retried_with_backoff_and_retry_after(self):
+        waits = []
+        size, content, calls = self._download([busy(), busy(), busy("12"), Response(FITS, SOURCE)], waits=waits)
+        self.assertEqual((size, content, calls), (len(FITS), FITS, 4))
+        # Backoff 1 s then 2 s; the third wait honours Retry-After over the 4 s backoff.
+        self.assertEqual(waits, [1.0, 2.0, 12.0])
+
+    def test_persistent_busy_archive_reports_a_distinct_busy_error(self):
+        waits = []
+        with self.assertRaises(RetrievalError) as caught:
+            self._download([busy() for _ in range(MAX_ATTEMPTS)], waits=waits)
+        self.assertEqual(caught.exception.code, "archive_busy")
+        self.assertEqual(waits, [1.0, 2.0, 4.0, 8.0])
+
+    def test_retry_never_waits_past_the_retrieval_deadline(self):
+        waits = []
+        with self.assertRaises(RetrievalError) as caught:
+            self._download([busy("30"), Response(FITS, SOURCE)], deadline=5, waits=waits)
+        self.assertEqual(caught.exception.code, "archive_busy")
+        self.assertEqual(waits, [])
+
+    def test_non_retryable_status_fails_without_waiting(self):
+        waits = []
+        with self.assertRaises(RetrievalError) as caught:
+            self._download([busy(code=404), Response(FITS, SOURCE)], waits=waits)
+        self.assertEqual(caught.exception.code, "archive_unavailable")
+        self.assertEqual(waits, [])
+
+    def test_retry_after_accepts_http_dates_and_is_capped(self):
+        soon = format_datetime(datetime.now(timezone.utc) + timedelta(seconds=6), usegmt=True)
+        self.assertAlmostEqual(IrsaRetriever._retry_delay(0, busy(soon)), 6, delta=1.5)
+        self.assertEqual(IrsaRetriever._retry_delay(1, busy("soon")), 2.0)
+        self.assertEqual(IrsaRetriever._retry_delay(0, busy("600")), 15.0)
+        self.assertEqual(IrsaRetriever._retry_delay(9, busy()), 8.0)
+
+    def _retrieve_with(self, outcomes):
+        """Run _retrieve over three real-shaped rows; outcomes[i] is None or an error."""
+        t = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        rows = [ObservationMetadata(str(i), t + timedelta(days=i), t + timedelta(days=i), 1, "DR1", SOURCE) for i in range(3)]
+        retriever = IrsaRetriever()
+        retriever._deadline = time.monotonic() + 100
+        calls = iter(outcomes)
+
+        def fake_read(url, limit, destination=None, attempts=None):
+            error = next(calls)
+            if error is not None:
+                raise error
+            destination.write_bytes(FITS)
+            return len(FITS)
+
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(retriever, "_search", return_value=rows), \
+                patch.object(retriever, "_read", side_effect=fake_read):
+            result = retriever._retrieve(request(max_frames=3), Path(tmp))
+            self.assertTrue(all(item.fits_path.is_file() for item in result))
+        return retriever, result
+
+    def test_an_unavailable_cutout_is_skipped_and_reported(self):
+        retriever, result = self._retrieve_with([None, RetrievalError("archive_busy", "busy"), None])
+        self.assertEqual([item.observation_id for item in result], ["0", "2"])
+        self.assertEqual(retriever.skipped_downloads, ["1"])
+        self.assertEqual(retriever.selected_count, 3)
+
+    def test_too_few_downloads_reports_the_archive_error_not_an_epoch_count(self):
+        with self.assertRaises(RetrievalError) as caught:
+            self._retrieve_with([RetrievalError("archive_busy", "busy"), None, RetrievalError("archive_busy", "busy")])
+        self.assertEqual(caught.exception.code, "archive_busy")
+
+    def test_deadline_and_cancellation_still_abort_retrieval(self):
+        for code in ("archive_timeout", "cancelled", "archive_size_limit"):
+            with self.assertRaises(RetrievalError) as caught:
+                self._retrieve_with([None, RetrievalError(code, code), None])
+            self.assertEqual(caught.exception.code, code)
+
+    def test_job_cancellation_interrupts_a_backoff_wait(self):
+        flag = threading.Event()
+        retriever = IrsaRetriever(cancelled=flag.is_set)
+        retriever._deadline = time.monotonic() + 100
+        timer = threading.Timer(.1, flag.set)
+        timer.start()
+        started = time.monotonic()
+        try:
+            with self.assertRaisesRegex(RetrievalError, "cancelled"):
+                retriever._pause(8)
+        finally:
+            timer.cancel()
+        self.assertLess(time.monotonic() - started, 1.5)
 
     def test_cancelled_callback_prevents_network_access(self):
         retriever = IrsaRetriever(cancelled=lambda: True)
