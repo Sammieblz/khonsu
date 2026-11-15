@@ -67,6 +67,23 @@ storage is isolated from the user's notes. It also rejects an initial empty
 write over existing records and verifies unreadable storage is preserved until
 the visitor explicitly requests replacement.
 
+## Wide fields and consolidated display regression
+
+Run `python scripts/verify-hd-field.py --download` for the explicitly bounded
+two-exposure acquisition, then `node scripts/verify-hd-display.mjs` for the real
+2048-square products in Chromium and Firefox. The latter replays API transport;
+it verifies actual image checksums, displayed masks, native sampling, overview
+geometry/keyboard actions, A/B epochs, CPU worker recovery and candidate lineage.
+[Method, limits and reproduction](hd-fields.md) distinguish this from a live
+search or a public deployment. Its synthetic unit tests test bounds and values,
+not claimed source resolution.
+
+Also run `node scripts/verify-resolution-lab.mjs` to preserve the unmerged lab's
+real-image comparisons and controls. Browser display suites share
+`scripts/browser-display-modules.mjs`, which compiles the actual renderer and
+generated limits rather than maintaining independent copies. Candidate tests
+exercise the overview's anonymous-CORS cache behavior through eviction/reload.
+
 ## Release rehearsal
 
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.

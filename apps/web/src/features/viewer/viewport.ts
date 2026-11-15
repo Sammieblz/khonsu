@@ -2,6 +2,23 @@ export interface RasterPoint { x: number; y: number; }
 export interface DisplayRect { left: number; top: number; width: number; height: number; }
 export interface ViewTransform { zoom: number; x: number; y: number; }
 export const FIT: ViewTransform = { zoom: 1, x: 0, y: 0 };
+
+/** Fractions of the full field visible through the viewport, independent of DPR. */
+export function visibleField(view: ViewTransform, width: number, height: number) {
+  const safe = boundedView(view, width, height);
+  return { left: .5 - (.5 + safe.x / Math.max(1, width)) / safe.zoom,
+    top: .5 - (.5 + safe.y / Math.max(1, height)) / safe.zoom,
+    width: 1 / safe.zoom, height: 1 / safe.zoom };
+}
+
+export function centerField(view: ViewTransform, x: number, y: number, width: number, height: number): ViewTransform {
+  return boundedView({zoom: view.zoom, x: (.5 - x) * width * view.zoom, y: (.5 - y) * height * view.zoom}, width, height);
+}
+
+export function nativeSampling(fovArcmin: number, nativeScale: unknown): number | null {
+  return typeof nativeScale === 'number' && Number.isFinite(nativeScale) && nativeScale > 0
+    ? fovArcmin * 60 / nativeScale : null;
+}
 export function boundedView(view: ViewTransform, width: number, height: number): ViewTransform {
   const zoom = Math.max(1, Math.min(8, view.zoom));
   const boundX = width * (zoom - 1) / 2, boundY = height * (zoom - 1) / 2;

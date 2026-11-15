@@ -2,14 +2,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { ObservationFrame } from "@/features/explorer/interfaces";
 import { resolveAssetUrl } from "@/lib/api/client";
-import { frameWindow } from "./time";
+import { frameCacheWindow } from "./time";
 export function useFrameLoader(frames: ObservationFrame[], index = 0, pinned: number[] = []) {
   const cache = useRef(new Map<string, HTMLImageElement>());
   const identity = useRef(frames);
   const [images, setImages] = useState(new Map<string, HTMLImageElement>());
   const [failedIds, setFailedIds] = useState<string[]>([]);
   const [attempt, setAttempt] = useState(0);
-  const wanted = frameWindow(frames.length, index, pinned).map(i => frames[i]!.frame_id).join(",");
+  const wanted = frameCacheWindow(frames, index, pinned).map(i => frames[i]!.frame_id).join(",");
   useEffect(() => {
     let cancelled = false;
     if (identity.current !== frames) { cache.current.clear(); identity.current = frames; }

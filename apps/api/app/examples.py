@@ -10,6 +10,7 @@ import warnings
 
 from .retrieval.service import validate_irsa_url
 from .schemas import SequenceManifest
+from .limits import MAX_FITS_BYTES, MAX_RASTER_BYTES
 
 MAX_BUNDLE_BYTES = 8 * 1024 * 1024
 MAX_RECORD_BYTES = 1024 * 1024
@@ -72,7 +73,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                        if entry['source_fits_url'] == str(frame.source_fits_url)
                        and entry['observation_id'] == frame.observation_id
                        and entry['detector'] == frame.detector and entry['release'] == frame.release]
-            if len(matches) != 1 or not re.fullmatch(r'[a-f0-9]{64}', matches[0]['sha256']) or not 0 < matches[0]['bytes'] <= 48 * 1024 * 1024:
+            if len(matches) != 1 or not re.fullmatch(r'[a-f0-9]{64}', matches[0]['sha256']) or not 0 < matches[0]['bytes'] <= MAX_FITS_BYTES:
                 raise CachedExampleError("The acquired FITS checksum record is incomplete.")
             name = frame.frame_id + '.png'
             if not re.fullmatch(r'[A-Za-z0-9_-]{1,80}\.png', name):
@@ -86,7 +87,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                 if frame.raster.url != f'/v1/examples/{manifest.sequence_id}/frames/{raster_name}':
                     raise CachedExampleError("A prepared raster must identify its bundled local asset.")
                 expected.add(raster_name)
-                raw = read_bounded(directory / raster_name, 5 * 1024 * 1024)
+                raw = read_bounded(directory / raster_name, MAX_RASTER_BYTES)
                 if len(raw) != frame.raster.size_bytes or hashlib.sha256(raw).hexdigest() != frame.raster.sha256:
                     raise CachedExampleError("A prepared raster failed its checksum or size check.")
                 import numpy as np
@@ -124,7 +125,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                                 raise CachedExampleError("A cached PNG mask does not match the recorded quality metadata.")
                             if images[name].raster:
                                 count = image.width * image.height
-                                raw = read_bounded(directory / (images[name].frame_id + '.bin'), 5 * 1024 * 1024)
+                                raw = read_bounded(directory / (images[name].frame_id + '.bin'), MAX_RASTER_BYTES)
                                 if not np.array_equal(np.frombuffer(raw[count * 4:], dtype=np.uint8) > 0, np.asarray(image.getchannel('A')).ravel() > 0):
                                     raise CachedExampleError("Prepared raster and PNG validity disagree.")
                 except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:

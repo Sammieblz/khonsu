@@ -23,7 +23,8 @@ test("does not turn missing, non-decimal, or non-finite input into a valid query
 
 test("keeps field sizes inside the backend resource bound", () => {
   assert.equal(parseCoordinates("1", "2", ".49").ok, false);
-  assert.equal(parseCoordinates("1", "2", "60.1").ok, false);
+  assert.equal(parseCoordinates("1", "2", "120").ok, true);
+  assert.equal(parseCoordinates("1", "2", "120.1").ok, false);
 });
 
 test("a shared link reproduces the exact search and selected observation", () => {

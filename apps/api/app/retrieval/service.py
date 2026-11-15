@@ -27,6 +27,7 @@ from urllib.parse import urlencode, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from ..interfaces import ObservationInput
+from ..limits import MAX_CUTOUT_ARCMIN, MAX_DOWNLOAD_BYTES, MAX_FITS_BYTES, MAX_FOV_ARCMIN
 
 if TYPE_CHECKING:
     from ..schemas import SequenceRequest
@@ -36,10 +37,8 @@ COLLECTIONS = ("spherex_dr1", "spherex_qr3")
 MJD_ZERO = datetime(1858, 11, 17, tzinfo=timezone.utc)
 MAX_METADATA_ROWS = 5000
 MAX_METADATA_BYTES = 8 * 1024 * 1024
-MAX_FITS_BYTES = 48 * 1024 * 1024
-MAX_TOTAL_BYTES = 256 * 1024 * 1024
+MAX_TOTAL_BYTES = MAX_DOWNLOAD_BYTES
 CUTOUT_FIELD_MARGIN = 1.5
-MAX_CUTOUT_ARCMIN = 60.0
 # IRSA answers "503 Server busy, retry later" under load. Retry transient
 # failures with capped exponential backoff (1, 2, 4, 8 s), honour a bounded
 # Retry-After, and never wait past the retrieval deadline.
@@ -121,7 +120,7 @@ def query_url(request: SequenceRequest) -> str:
     for value in (request.ra_deg, request.dec_deg, request.fov_arcmin):
         if not math.isfinite(value):
             raise RetrievalError("invalid_target", "Coordinates and field size must be finite.")
-    if not 0 <= request.ra_deg < 360 or not -90 <= request.dec_deg <= 90 or not .5 <= request.fov_arcmin <= 60:
+    if not 0 <= request.ra_deg < 360 or not -90 <= request.dec_deg <= 90 or not .5 <= request.fov_arcmin <= MAX_FOV_ARCMIN:
         raise RetrievalError("invalid_target", "Coordinates or field size are outside supported bounds.")
     if not 2 <= request.max_frames <= 96:
         raise RetrievalError("invalid_target", "Request between 2 and 96 frames.")
@@ -202,8 +201,8 @@ def cutout_size_arcmin(fov_arcmin: float) -> float:
 
     IRSA cuts squares aligned to the detector, which is rotated on the sky.
     Any rotation of a square fits inside one sqrt(2) wider, so 1.5x covers the
-    corners. Wide fields stop growing at the previous 60 arcmin maximum, which
-    keeps worst-case download bytes unchanged; processing masks any gap.
+    corners. The cutout, per-file and total download budgets remain bounded;
+    processing masks any region outside actual detector coverage.
     """
     return max(fov_arcmin, min(fov_arcmin * CUTOUT_FIELD_MARGIN, MAX_CUTOUT_ARCMIN))
 

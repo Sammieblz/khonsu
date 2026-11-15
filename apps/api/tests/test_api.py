@@ -43,7 +43,7 @@ def test_named_challenge_presets_have_explicit_coordinate_context():
 
 
 @pytest.mark.parametrize("overrides", [
-    {"ra_deg": 360}, {"dec_deg": 91}, {"fov_arcmin": 61},
+    {"ra_deg": 360}, {"dec_deg": 91}, {"fov_arcmin": 121},
     {"max_frames": 97}, {"detector": 7}, {"unexpected": True},
     {"start_utc": "2026-11-14T10:00:00"},
     {"start_utc": "2026-11-15T00:00:00Z", "end_utc": "2026-11-14T00:00:00Z"},

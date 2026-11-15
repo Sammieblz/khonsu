@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { PresetTarget } from '@/lib/api/client';
 import { Icon } from "@/components/ui/Icon";
-import { parseCoordinates, type CoordinateValues } from "./coordinates";
+import { parseCoordinates, requestedFrames, MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, type CoordinateValues } from "./coordinates";
 import type { SequenceRequest } from "./interfaces";
 import styles from "./explorer.module.css";
 
@@ -29,9 +29,7 @@ export function CoordinateForm({ onSubmit, busy, target, shared = null }: { onSu
     const result = parseCoordinates(ra, dec, fov);
     if (!result.ok) { setError(result.message); return; }
     setError("");
-    // 16 frames completed a live IRSA search in about 214 s on 2026-11-14,
-    // inside the API's 240 s job budget; 24 risked JOB_TIMEOUT under load.
-    onSubmit({ ...result.value, coordinate_frame: "ICRS", max_frames: 16 });
+    onSubmit({ ...result.value, coordinate_frame: "ICRS", max_frames: requestedFrames(result.value.fov_arcmin) });
   }
 
   return (
@@ -45,10 +43,11 @@ export function CoordinateForm({ onSubmit, busy, target, shared = null }: { onSu
       </div><div><label htmlFor="dec">Declination <span>degrees</span></label>
       <input id="dec" name="dec" inputMode="decimal" type="number" step="any" min="-90" max="90" placeholder="+0.000000" value={dec} onChange={event => setDec(event.target.value)} required aria-invalid={!!error} />
       </div><div><label htmlFor="fov">Field of view <span>arcminutes</span></label>
-      <input id="fov" name="fov" inputMode="decimal" type="number" step="any" min="0.5" max="60" value={fov} onChange={event => setFov(event.target.value)} required aria-invalid={!!error} />
+      <input id="fov" name="fov" inputMode="decimal" type="number" step="any" min={MIN_FOV_ARCMIN} max={MAX_FOV_ARCMIN} value={fov} onChange={event => setFov(event.target.value)} required aria-invalid={!!error} />
       </div><button className={styles.primaryButton} type="submit" disabled={busy}>{busy ? "SEARCHING" : "EXPLORE THE SKY"}<Icon name="arrow" /></button>
       </div>{error && <p className={styles.error} role="alert">{error}</p>}
       <p className={styles.formNote}>Searches query real SPHEREx observations at NASA/IPAC IRSA and can take a few minutes. Results are temporary; repeat the search if it expires.</p>
+      <p className={styles.formNote}>Wider fields show more of the measured sky, with larger downloads. Fields over 30 arcmin request up to 8 exposures; over 60 arcmin, up to 4. Usable coverage can be smaller.</p>
     </form>
   );
 }

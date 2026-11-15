@@ -51,3 +51,36 @@ research script until their forward/noise model and artifact behavior support
 a validated product choice. Blind restoration was researched but not implemented.
 See [the experiment and evidence](enhancement-research.md). Retain the existing
 Khonsu controls, time arc and real-observation sky swipe.
+
+## November 15, 2026: Consolidated branch and native wide fields
+
+The user authorized consolidation of `feat/49-display-experiments`, its stacked
+`feat/57-resolution-lab` work, and Tyrone's newer main changes. The explicit
+testing hold still prohibits merging to main. #59 / BYT-44 tracks integration;
+#60 / BYT-45 tracks wider native acquisition and HD display. Both belong to
+Samuel for this pass, with Tyrone reviewing shared limits and contracts.
+
+Keep the lab's scientific experiments separate from production processing, while
+using one PR for the combined review. Retire its redundant stacked PR only after
+its complete history is reachable from the consolidated branch. Preserve team
+authorship and distinct CPU fallbacks. Centralize duplicated resource bounds,
+frame-cache policy and browser test compilation. Remove the redundant focus
+effect introduced by integration, retaining the canonical focus handoff.
+
+The [wide-field decision](hd-fields.md) raises the spatial grid and per-file
+bounds while retaining the total download and output-pixel budgets. It requires
+fewer frames for wide requests and truthful native/prepared/display readouts.
+This changes numeric contract limits without adding a runtime dependency.
+
+The next frontend phase has exactly three implementation tickets under #2 /
+BYT-14: #61 / BYT-46 for a dedicated console and docked controls, #62 / BYT-47
+for original sky-swipe entry and Khonsu loading feedback, and #63 / BYT-48 for
+landing-page scroll storytelling. These remain Backlog. Robel and Michael are
+named implementation owners; Tyrone temporarily tracks the tickets because only
+Samuel and Tyrone are present in the connected Linear workspace. Caltech Layers
+informs grouping, not unsupported astronomical layers.
+
+The requested pick-ui-library, animate and animation-performance skills were
+installed and read from Emil Kowalski's skills repository. Their guidance is
+recorded in the design tickets. Select the minimum suitable animation stack when
+implementation starts; no GSAP, Motion or Remotion dependency is added now.

@@ -23,7 +23,12 @@ for (const path of ['apps/web/src/features/viewer/SkyViewer.tsx', 'apps/web/src/
 }
 const button = (page, name) => page.getByRole('button', { name, exact: true });
 async function ready(page) {
-  await page.waitForFunction(() => document.querySelector('canvas')?.style.visibility === 'visible');
+  try { await page.waitForFunction(() => document.querySelector('canvas')?.style.visibility === 'visible'); }
+  catch(error) {
+    await page.screenshot({path:`${output}/failure.png`,fullPage:true});
+    console.error(await page.evaluate(()=>({canvas:document.querySelector('canvas')?.outerHTML,renderer:document.querySelector('[data-renderer]')?.textContent,status:[...document.querySelectorAll('[role="status"]')].map(e=>e.textContent)})));
+    throw error;
+  }
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 async function load(page) {
@@ -69,7 +74,7 @@ for (const engine of [chromium, firefox]) {
   const result = { browser: engine.name(), version: browser.version() };
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1050 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
-    const errors = []; page.on('pageerror', error => errors.push(String(error)));
+    const errors = []; page.on('pageerror', error => { errors.push(String(error)); console.error(error); });
     await page.addInitScript(() => {
       window.__candidateWrites = [];
       const set = Storage.prototype.setItem;
@@ -86,7 +91,7 @@ for (const engine of [chromium, firefox]) {
     const field = page.getByRole('group', { name: 'Observation canvas', exact: true });
     await field.focus(); await page.keyboard.press('ArrowRight');
     await mark(page, 59, 59);
-    assert.equal(await page.locator('canvas').evaluate(canvas => canvas.width), 1536);
+    assert.equal(await page.locator('canvas').evaluate(canvas => canvas.width), 2160);
     assert.equal(await page.locator('[data-detail]').getAttribute('data-detail'), 'off');
     await page.getByLabel('Observation note', { exact: true }).fill('Integration control: compare original intensities.');
     await button(page, 'SAVE CANDIDATE NOTE').click(); await ready(page);

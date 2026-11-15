@@ -1,0 +1,732 @@
+{
+  "testedAt": "2026-11-15T08:22:18.774Z",
+  "baseCommit": "a46b3bb42af50a7b70c13f532365bd58fcbdcbc4",
+  "workingTree": "M apps/api/app/examples.py\n M apps/api/app/jobs.py\n M apps/api/app/processing/alignment.py\n M apps/api/app/processing/service.py\n M apps/api/app/retrieval/service.py\n M apps/api/app/schemas.py\n M apps/api/tests/test_api.py\n M apps/api/tests/test_processing.py\n M apps/api/tests/test_retrieval.py\n M apps/web/next-env.d.ts\n M apps/web/src/features/explorer/CoordinateForm.tsx\n M apps/web/src/features/explorer/ExplorerScreen.tsx\n M apps/web/src/features/explorer/coordinates.ts\n M apps/web/src/features/viewer/SkyViewer.tsx\n M apps/web/src/features/viewer/display.ts\n M apps/web/src/features/viewer/time.ts\n M apps/web/src/features/viewer/useFrameLoader.ts\n M apps/web/src/features/viewer/usePreparedFrames.ts\n M apps/web/src/features/viewer/viewer.module.css\n M apps/web/src/features/viewer/viewport.ts\n M apps/web/tests/coordinates.test.ts\n M contracts/README.md\n M contracts/openapi.json\n M docs/browser-display.md\n M docs/display-rendering.md\n M docs/integration.md\n M scripts/export-contracts.py\n M scripts/verify-candidate-display.mjs\n M scripts/verify-enhancement.mjs\n M scripts/verify-observatory.mjs\n M scripts/verify-resolution-lab.mjs\n?? apps/api/app/limits.py\n?? apps/api/tests/test_hd_fields.py\n?? apps/web/src/lib/api/generated-limits.ts\n?? apps/web/tests/hd-view.test.ts\n?? docs/evidence/hd-field/\n?? scripts/browser-display-modules.mjs\n?? scripts/verify-hd-display.mjs\n?? scripts/verify-hd-field.py",
+  "timingScope": "12 warm render + 2D copy + synchronous readback samples after 2 warmups; excludes download and FITS processing. Headless browser on this machine, not a general performance guarantee.",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "viewport": {
+        "width": 1964,
+        "height": 1964,
+        "cssWidth": 982,
+        "dpr": 2
+      },
+      "sameFrameOriginalHoldCancelBlurAndMark": true,
+      "sharedSettingsAndReset": true,
+      "productionCpuWorker": true,
+      "mobileWidth": 390,
+      "renderers": {
+        "adapter": "ANGLE (AMD, Radeon RX 580 Series (0x000067DF) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "checks": [
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          }
+        ],
+        "timings": [
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 2.300000011920929,
+            "p95Ms": 2.900000035762787
+          },
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 2.4000000059604645,
+            "p95Ms": 3
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 4.8499999940395355,
+            "p95Ms": 8.299999952316284
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 5.100000023841858,
+            "p95Ms": 5.700000047683716
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 23.44999998807907,
+            "p95Ms": 25.599999964237213
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 24.600000023841858,
+            "p95Ms": 25.5
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 84.94999998807907,
+            "p95Ms": 86.59999996423721
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 87.75,
+            "p95Ms": 95.69999998807907
+          }
+        ],
+        "signedRectangularRamp": true,
+        "workerMode": "CPU worker",
+        "originalBuffersPreserved": true
+      },
+      "missingFloatTargetFallback": true,
+      "noGpuNoWorkerDetail": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "viewport": {
+        "width": 1964,
+        "height": 1964,
+        "cssWidth": 982,
+        "dpr": 2
+      },
+      "sameFrameOriginalHoldCancelBlurAndMark": true,
+      "sharedSettingsAndReset": true,
+      "productionCpuWorker": true,
+      "mobileWidth": 390,
+      "renderers": {
+        "adapter": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+        "checks": [
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          }
+        ],
+        "timings": [
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 3,
+            "p95Ms": 3
+          },
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 3,
+            "p95Ms": 4
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 9,
+            "p95Ms": 11
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 10.5,
+            "p95Ms": 12
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 32,
+            "p95Ms": 32
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 33,
+            "p95Ms": 34
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 135.5,
+            "p95Ms": 165
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 123.5,
+            "p95Ms": 173
+          }
+        ],
+        "signedRectangularRamp": true,
+        "workerMode": "CPU worker",
+        "originalBuffersPreserved": true
+      },
+      "missingFloatTargetFallback": true,
+      "noGpuNoWorkerDetail": true
+    }
+  ],
+  "sourceHashes": {
+    "apps/web/src/features/viewer/display.ts": "3277bb521f52aa62b970b4fa16665f47cdf4b4db19cc66ad7ae2f0766ad9f77d",
+    "apps/web/src/features/viewer/displayRenderer.ts": "012066b41158646eca3a70850c6d5845d8be7e1b5ef83101f551f8c51e4c3b67",
+    "apps/web/src/features/viewer/display.worker.ts": "0e7d92b806b41e60ac3c41c75cc2046f86985bd335fb4ddf49b11dc772fd491b",
+    "apps/web/src/features/viewer/SkyViewer.tsx": "957adcfd402e267b6c3705c479c0a91e14a21552f3bacfabfde48d92faa38e13",
+    "apps/web/src/features/viewer/viewer.module.css": "a29732c8a86c01d839a20e8a79ddbe004a2833e4c41b139356525db049578e36",
+    "scripts/verify-enhancement.mjs": "e59864c6982eb0af6062d1009295cd210ce4b9926243015ed7bdb7b7fd664fe9"
+  }
+}

@@ -14,6 +14,19 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 OPENAPI_PATH = ROOT / "contracts" / "openapi.json"
 TYPES_PATH = ROOT / "apps" / "web" / "src" / "lib" / "api" / "generated.d.ts"
+LIMITS_PATH = TYPES_PATH.with_name("generated-limits.ts")
+
+
+def render_limits(document: dict) -> str:
+    schemas = document["components"]["schemas"]
+    field = schemas["SequenceRequest"]["properties"]["fov_arcmin"]
+    raster = schemas["PreparedRaster"]["properties"]["size_bytes"]
+    return (
+        "// Generated from the authoritative OpenAPI schema. Do not edit by hand.\n"
+        f"export const MIN_FOV_ARCMIN = {field['minimum']:g};\n"
+        f"export const MAX_FOV_ARCMIN = {field['maximum']:g};\n"
+        f"export const MAX_RASTER_BYTES = {int(raster['maximum'])};\n"
+    )
 
 
 def ts_type(schema: dict) -> str:
@@ -156,7 +169,7 @@ def main() -> int:
         document = app.openapi()
     openapi_text = json.dumps(document, indent=2, sort_keys=True) + "\n"
     types_text = render_types(document)
-    expected = [(TYPES_PATH, types_text)]
+    expected = [(TYPES_PATH, types_text), (LIMITS_PATH, render_limits(document))]
     if args.check:
         if not args.from_snapshot:
             snapshot = json.loads(OPENAPI_PATH.read_text(encoding="utf-8"))

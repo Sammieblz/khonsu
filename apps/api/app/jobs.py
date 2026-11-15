@@ -84,8 +84,8 @@ class JobManager:
                  retriever_factory=None, processor_factory=None, clock=time.monotonic):
         self.root, self.ttl, self.limit = root.resolve(), ttl, limit
         self.max_bytes, self.deadline, self.clock = max_bytes, deadline, clock
-        # Reserve room for the 256 MiB retrieval cap plus all bounded 96-frame,
-        # 512-pixel scientific/render artifacts and metadata. One worker means
+        # Reserve room for the 256 MiB retrieval cap plus the total bounded
+        # output pixels, scientific/render artifacts and metadata. One worker means
         # this reservation is needed only for the job about to run.
         self.peak_bytes = peak_bytes
         self.root.mkdir(parents=True, exist_ok=True)

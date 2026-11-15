@@ -6,7 +6,7 @@ import { describeComparison } from "./comparison";
 import { useFrameLoader } from "./useFrameLoader";
 import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
-import { boundedView, clientPointToRaster, FIT, zoomAt } from "./viewport";
+import { boundedView, centerField, clientPointToRaster, FIT, nativeSampling, visibleField, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
 import { ObservationDetails } from '@/features/annotations/ObservationDetails';
 import { usePreparedFrames } from './usePreparedFrames';
@@ -25,6 +25,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'quiet',sampling:'smooth',detail:0};
   const [display,setDisplay]=useState<DisplayOptions>({...original,a:.3});
   const [originalHeld,setOriginalHeld]=useState(false),[outputSize,setOutputSize]=useState({width:1,height:1});
+  const [viewportSize,setViewportSize]=useState({width:1,height:1});
   const effectiveDisplay=useMemo(()=>({...display,detail:originalHeld||tool==='mark'?0:display.detail}),[display,originalHeld,tool]);
   const [forceCpu,setForceCpu]=useState(false),[rendererMode,setRendererMode]=useState('Preparing display'),[rendering,setRendering]=useState(false);
   const [adapter,setAdapter]=useState('');
@@ -45,6 +46,8 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const displayAvailable=!!raster&&!rendererMode.startsWith('Original PNG');
   const preparedFailed=!!active&&rasterFailed.includes(active.frame_id);
   const ready=!!active && images.has(active.frame_id)&&(!active.raster||!!raster||preparedFailed);
+  const nativeAcross=sequence?nativeSampling(sequence.requested_fov_arcmin,sequence.processing?.native_pixel_scale_arcsec):null;
+  const region=visibleField(view,viewportSize.width,viewportSize.height);
   const {playing,setPlaying}=usePlayback(frameIds,active?.frame_id ?? null,onFrameChange,speed,ready&&!rendering);
   useLayoutEffect(()=>{renderer.current=new DisplayRenderer(()=>setRendererRevision(value=>value+1),forceCpu);return()=>{revision.current++;latestDraw.current=null;renderer.current?.dispose();renderer.current=null;};},[forceCpu]);
 
@@ -62,6 +65,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     const element=viewport.current;if(!element)return;
     const resize=()=>{
       setView(current=>boundedView(current,element.clientWidth,element.clientHeight));
+      setViewportSize({width:element.clientWidth,height:element.clientHeight});
       const size=displaySize(Math.max(1,element.clientWidth*window.devicePixelRatio*view.zoom),Math.max(1,element.clientHeight*window.devicePixelRatio*view.zoom));
       setOutputSize(old=>old.width===size.width&&old.height===size.height?old:size);
     };
@@ -147,12 +151,22 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       {(['time','pan','mark'] as ViewerTool[]).map(value=><button key={value} aria-pressed={tool===value} disabled={!active} onClick={()=>{stop();setTool(value);}}>{value==='time'?'REWIND':value.toUpperCase()}</button>)}
       <button disabled={!active} onClick={()=>zoom(.8)} aria-label="Zoom out">−</button><button disabled={!active} onClick={()=>zoom(1.25)} aria-label="Zoom in">+</button>
       <button disabled={!active} onClick={()=>setView(FIT)}>FIT / RESET</button><button onClick={()=>setExpanded(!expanded)} aria-pressed={expanded}>{expanded?'CONTRACT':'EXPAND'}</button>
+      <button disabled={!active||nativeAcross===null} title="One native sample per display pixel when the field is large enough" onClick={()=>{stop();setView(boundedView({zoom:nativeAcross!/(viewportSize.width*window.devicePixelRatio),x:0,y:0},viewportSize.width,viewportSize.height));}}>NATIVE SCALE</button>
     </div>
     <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
+      {view.zoom>1&&active&&ready&&<button className={styles.overview} aria-label="Field overview: click to recenter, Enter to center the field" onPointerDown={event=>event.stopPropagation()} onKeyDown={event=>{if(event.key!=='Escape')event.stopPropagation();}} onClick={event=>{event.stopPropagation();stop();const rect=event.currentTarget.getBoundingClientRect();const x=event.detail===0 ? .5 : (event.clientX-rect.left)/rect.width,y=event.detail===0 ? .5 : (event.clientY-rect.top)/rect.height;setView(current=>centerField(current,x,y,viewportSize.width,viewportSize.height));}}>
+        <img src={images.get(active.frame_id)!.src} crossOrigin="anonymous" alt="" draggable={false}/>
+        <span className={styles.overviewRegion} style={{left:`${region.left*100}%`,top:`${region.top*100}%`,width:`${region.width*100}%`,height:`${region.height*100}%`}}/>
+        <span className={styles.overviewLabel}>FULL FIELD</span>
+      </button>}
       {sequence&&active?<><canvas ref={canvas} className={styles.canvas} data-sampling={displayAvailable?display.sampling:'pixels'} style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={outputSize.width} height={outputSize.height} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
     </div>
     <div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool==='pan'?'PAN':'MARK'} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
     <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
+    {sequence&&<p className={styles.samplingReadout} data-native-samples={nativeAcross??undefined}>
+      {nativeAcross===null?'Native sampling unavailable':`About ${Math.round(nativeAcross)} native samples across the full field`} · {sequence.grid.width_px} × {sequence.grid.height_px} prepared pixels · {outputSize.width} × {outputSize.height} display pixels.
+      {nativeAcross!==null&&<> Enlarging the view does not add measured detail.</>}
+    </p>}
     {active&&<div className={styles.imageModes}>
       <div role="group" aria-label="Image sampling">
         <button disabled={!displayAvailable} aria-pressed={displayAvailable&&display.sampling==='smooth'} onClick={()=>setDisplay(old=>({...old,sampling:'smooth'}))}>SMOOTH</button>

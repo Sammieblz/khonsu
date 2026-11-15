@@ -4,16 +4,13 @@ import { createRequire } from 'node:module';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { standaloneDisplayModule } from './browser-display-modules.mjs';
 const require = createRequire(import.meta.url);
 const { chromium, firefox } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const ts = createRequire(new URL('../apps/web/package.json', import.meta.url))('typescript');
 const base = process.env.KHONSU_TEST_URL || 'http://localhost:3001';
 const output = new URL('../.cache/resolution/browser/', import.meta.url);
 await mkdir(output, { recursive: true });
-const module = ts.transpileModule(await readFile(new URL('../apps/web/src/features/viewer/display.ts', import.meta.url), 'utf8'), {
-  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
-}).outputText;
-const moduleUrl = `data:text/javascript;base64,${Buffer.from(module).toString('base64')}`;
+const moduleUrl = await standaloneDisplayModule();
 const fixture = JSON.parse(await readFile(new URL('../fixtures/real/real-wise-0855/manifest.json', import.meta.url), 'utf8'));
 const raster = await readFile(new URL('../fixtures/real/real-wise-0855/frame-0001.bin', import.meta.url));
 const report = { testedAt: new Date().toISOString(), baseCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), browsers: [], sourceHashes: {} };

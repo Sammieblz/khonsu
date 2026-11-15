@@ -6,8 +6,8 @@ import { readFile, writeFile, mkdir, unlink, rmdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
+import { browserDisplayModules } from './browser-display-modules.mjs';
 const require = createRequire(import.meta.url);
-const ts = createRequire(new URL('../apps/web/package.json', import.meta.url))('typescript');
 const { chromium, firefox } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.KHONSU_TEST_URL || 'http://localhost:3001';
 const api = process.env.KHONSU_TEST_API || 'http://localhost:8000';
@@ -15,12 +15,7 @@ const output = resolve(process.env.KHONSU_TEST_OUTPUT || '.cache/enhancement/bro
 await mkdir(output, { recursive: true });
 const examples = await (await fetch(`${api}/v1/examples`)).json();
 const primary = examples.find(item => item.sequence_id === 'real-wise-0855');
-const modules = {};
-for (const name of ['display', 'displayRenderer', 'display.worker']) {
-  modules[`${name}.js`] = ts.transpileModule(await readFile(new URL(`../apps/web/src/features/viewer/${name}.ts`, import.meta.url), 'utf8'), {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
-  }).outputText.replaceAll("'./display'", "'./display.js'").replaceAll("'./display.worker.ts'", "'./display.worker.js'");
-}
+const modules = await browserDisplayModules();
 // Serve actual files: Firefox worker module imports bypass Playwright routing.
 // This directory is inside the ignored static export and removed after success.
 const moduleDirectory = new URL('../apps/web/out/__enhancement/', import.meta.url);

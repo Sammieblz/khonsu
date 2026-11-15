@@ -276,7 +276,9 @@ def test_default_grid_samples_twice_the_native_pixel_scale(tmp_path):
     assert manifest.processing["grid_scale_arcsec"] == pytest.approx(3.0)
     with Image.open(tmp_path / "output" / "frame-0001.png") as image:
         assert image.size == (66, 66)
-    assert auto_grid_size(60.0, 6.15) == 512
+    assert auto_grid_size(60.0, 6.15) == 1171
+    assert auto_grid_size(120.0, 6.15) == 2048
+    assert 120 * 60 / auto_grid_size(120, 6.15) <= 6.15
     assert auto_grid_size(0.5, 6.15) == 32
     assert auto_grid_size(6.0, 6.145) == 118
 

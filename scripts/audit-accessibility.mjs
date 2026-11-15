@@ -34,8 +34,8 @@ async function loadExample(page) {
 
 async function markCenter(page, note) {
   await button(page, 'MARK').click();
-  const box = await page.locator('canvas').boundingBox();
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  // Scroll the wider canvas center into view before clicking it.
+  await page.locator('canvas').click();
   await page.getByLabel('Observation note', { exact: true }).fill(note);
   await button(page, 'SAVE CANDIDATE NOTE').click();
 }

@@ -1,3 +1,6 @@
+import { MIN_FOV_ARCMIN, MAX_FOV_ARCMIN } from '../../lib/api/generated-limits.ts';
+export { MIN_FOV_ARCMIN, MAX_FOV_ARCMIN } from '../../lib/api/generated-limits.ts';
+
 export interface CoordinateValues {
   ra_deg: number;
   dec_deg: number;
@@ -28,10 +31,15 @@ export function parseCoordinates(ra: string, dec: string, fov: string): Coordina
   if (decValue < -90 || decValue > 90) {
     return { ok: false, message: "Declination must be between -90 and +90 degrees." };
   }
-  if (fovValue < .5 || fovValue > 60) {
-    return { ok: false, message: "For this prototype, choose a field from 0.5 to 60 arcminutes." };
+  if (fovValue < MIN_FOV_ARCMIN || fovValue > MAX_FOV_ARCMIN) {
+    return { ok: false, message: `Choose a field from ${MIN_FOV_ARCMIN} to ${MAX_FOV_ARCMIN} arcminutes.` };
   }
   return { ok: true, value: { ra_deg: raValue, dec_deg: decValue, fov_arcmin: fovValue } };
+}
+
+// Wide cutouts use fewer exposures within the same download/output budgets.
+export function requestedFrames(fovArcmin: number): number {
+  return fovArcmin > 60 ? 4 : fovArcmin > 30 ? 8 : 16;
 }
 
 // Shareable search links. Parameter names carry their units. A link restores

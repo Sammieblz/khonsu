@@ -15,12 +15,12 @@ import statistics
 from typing import Callable
 
 from ..interfaces import ObservationInput, ProcessingOptions
+from ..limits import MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OUTPUT_PIXELS_TOTAL
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
-PIPELINE_VERSION = "khonsu-display-0.3.0"
+PIPELINE_VERSION = "khonsu-display-0.4.0"
 MAX_OBSERVATIONS = 96
-MAX_OUTPUT_PIXELS_TOTAL = 96 * 512 * 512
 
 
 def _check_cancelled(cancelled):
@@ -33,10 +33,10 @@ def _validate_options(options, observations, lower, upper):
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Sequence identifier is invalid.")
     if options.coordinate_frame != "ICRS" or not (math.isfinite(options.ra_deg) and 0 <= options.ra_deg < 360 and math.isfinite(options.dec_deg) and -90 <= options.dec_deg <= 90):
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Target coordinates must be finite ICRS degrees.")
-    if not math.isfinite(options.fov_arcmin) or not 0.5 <= options.fov_arcmin <= 60:
-        raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Field of view must be between 0.5 and 60 arcminutes.")
-    if options.output_size_px is not None and (not isinstance(options.output_size_px, int) or not 32 <= options.output_size_px <= 1024):
-        raise ProcessingError("RESOURCE_LIMIT", "Output width must be between 32 and 1024 pixels.")
+    if not math.isfinite(options.fov_arcmin) or not 0.5 <= options.fov_arcmin <= MAX_FOV_ARCMIN:
+        raise ProcessingError("INVALID_PROCESSING_OPTIONS", f"Field of view must be between 0.5 and {MAX_FOV_ARCMIN:g} arcminutes.")
+    if options.output_size_px is not None and (not isinstance(options.output_size_px, int) or isinstance(options.output_size_px, bool) or not 32 <= options.output_size_px <= MAX_GRID_SIDE):
+        raise ProcessingError("RESOURCE_LIMIT", f"Output width must be between 32 and {MAX_GRID_SIDE} pixels.")
     if len(observations) > MAX_OBSERVATIONS:
         raise ProcessingError("RESOURCE_LIMIT", "At most 96 observations can be processed in one job.")
     if any(value is not None and (not math.isfinite(value) or not 0.75 <= value <= 5.0) for value in (lower, upper)):
@@ -117,7 +117,7 @@ class AstronomyProcessor:
             if len({item.observation.observed_start_utc for item in selected}) < 2:
                 break
             if len(selected) * size ** 2 > MAX_OUTPUT_PIXELS_TOTAL:
-                raise ProcessingError("RESOURCE_LIMIT", "The requested image sequence exceeds the output pixel budget.")
+                raise ProcessingError("RESOURCE_LIMIT", "The requested image sequence exceeds the output pixel budget. Request fewer frames or a smaller field.")
             projected = []
             failed = set()
             for item in selected:
