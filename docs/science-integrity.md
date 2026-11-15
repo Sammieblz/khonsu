@@ -37,6 +37,13 @@ Use approximate wavelength lookup for display only where documented. For quantit
 
 ## Distinguish motion and variability
 
+The user-authorized [Clean View](clean-view.md) can display explicitly labelled
+small-gap estimates by default. Keep that derivative separate from observations:
+preserve original masks and values, disclose the estimate, provide original and
+estimated-area views, and exclude estimates from measurements and candidate
+validity. Mark mode shows original data. Never borrow a different date to fill
+an observation, or present estimated brightness as a measured change.
+
 A moving source shifts relative to aligned background objects. A variable source changes brightness at approximately the same sky position. Both can appear in the challenge, so do not require every reference target to move. Account for proper motion and, where relevant, parallax and catalog epoch before declaring a catalog mismatch.
 
 The challenge names five validation targets:

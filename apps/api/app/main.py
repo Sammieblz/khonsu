@@ -149,6 +149,7 @@ def example_frame(example_id: SequencePath, filename: str):
     for manifest in available:
         allowed = {Path(f.image_url).name for f in manifest.frames}
         allowed.update(Path(f.raster.url).name for f in manifest.frames if f.raster)
+        allowed.update(Path(f.gap_fill.url).name for f in manifest.frames if f.gap_fill)
         if manifest.sequence_id == example_id and filename in allowed:
             if Path(filename).name == filename and filename.endswith((".png", ".bin")):
                 return FileResponse(FIXTURES / "real" / example_id / filename, media_type="image/png" if filename.endswith(".png") else "application/octet-stream")

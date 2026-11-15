@@ -32,6 +32,8 @@ test('large frames share a three-frame cache prioritizing current and A/B', () =
   const frames=Array.from({length:10},()=>({raster:{size_bytes:MAX_RASTER_BYTES}}));
   assert.deepEqual(frameCacheWindow(frames,5,[0,9]),[5,0,9]);
   assert.deepEqual(frameCacheWindow(frames,0,[0,9]),[0,9,1]);
+  const withEstimates=Array.from({length:10},()=>({raster:{size_bytes:3*1024*1024},gap_fill:{size_bytes:3*1024*1024}}));
+  assert.deepEqual(frameCacheWindow(withEstimates,5,[0,9]),[5,0,9], 'Estimate memory counts toward the same cache budget');
 });
 
 test('wide searches round trip without inflating the exposure request', () => {

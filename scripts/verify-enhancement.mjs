@@ -38,9 +38,15 @@ async function ready(page) {
   await page.waitForFunction(() => document.querySelector('canvas')?.style.visibility === 'visible');
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
+async function openDisplay(page) {
+  const summary=page.locator('summary').filter({hasText:'IMAGE DISPLAY'});
+  if(!await summary.evaluate(e=>e.parentElement.open))await summary.click();
+}
 async function load(page) {
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await button(page, 'LOAD CACHED REAL EXAMPLE').click(); await ready(page);
+  if(await button(page,'CLEAN VIEW').getAttribute('aria-pressed')==='true')await button(page,'CLEAN VIEW').click();
+  await openDisplay(page); await ready(page);
 }
 async function capture(page, name) {
   await ready(page);
@@ -100,7 +106,7 @@ for (const engine of [chromium, firefox]) {
     assert.equal(await button(page, 'DETAIL EXPERIMENT').isDisabled(), true);
     await button(page, 'REWIND').click(); assert.equal(await difference(page, '__detail'), 0);
     result.sameFrameOriginalHoldCancelBlurAndMark = true;
-    await page.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await openDisplay(page);
     await page.getByLabel('Detail amount', { exact: true }).fill('0.5');
     await page.locator('#observation-index').fill('1000'); await ready(page);
     assert.equal(await page.getByLabel('Detail amount', { exact: true }).inputValue(), '0.5');
@@ -219,7 +225,7 @@ for (const engine of [chromium, firefox]) {
       };
     });
     await load(slow);
-    await slow.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await openDisplay(slow);
     await slow.getByLabel('Rendering mode', { exact: true }).selectOption('cpu');
     await slow.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent === 'CPU worker');
     await ready(slow);

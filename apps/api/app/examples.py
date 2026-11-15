@@ -55,8 +55,8 @@ def validate_bundle(directory: Path) -> SequenceManifest:
             raise CachedExampleError("Cached lineage needs a dated acquisition reference.")
         if acquired != datetime.fromisoformat(acquisition['processing_timestamp_utc'].replace('Z', '+00:00')):
             raise CachedExampleError("The acquisition timestamp and recorded probe disagree.")
-        source_observations = [{"warning_fraction": 0.0, **entry} for entry in lineage.get('source_observations', [])]
-        if source_observations != [frame.model_dump(mode='json', exclude={'image_url', 'raster'}) for frame in manifest.frames]:
+        source_observations = [{"warning_fraction": 0.0, "estimated_fraction": 0.0, **entry} for entry in lineage.get('source_observations', [])]
+        if source_observations != [frame.model_dump(mode='json', exclude={'image_url', 'raster', 'gap_fill'}) for frame in manifest.frames]:
             raise CachedExampleError("The lineage and observation metadata disagree.")
         if source.target != manifest.target or source.grid != manifest.grid or source.display != manifest.display:
             raise CachedExampleError("The cached grid, target or stretch differs from its source.")
@@ -64,7 +64,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
             raise CachedExampleError("The cached field or quality warnings differ from their source.")
         # Warning-only display provenance can be added to a reviewed v1 bundle.
         # Its original strict PNG, frame facts and source manifest stay intact.
-        compared = {'image_url', 'raster', 'warning_fraction'}
+        compared = {'image_url', 'raster', 'warning_fraction', 'gap_fill', 'estimated_fraction'}
         if [frame.model_dump(exclude=compared) for frame in source.frames] != [frame.model_dump(exclude=compared) for frame in manifest.frames]:
             raise CachedExampleError("The cached observations differ from their source.")
         if any(manifest.processing.get(key) != value for key, value in source.processing.items()):
@@ -112,6 +112,26 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                     raise CachedExampleError("Prepared values or mask disagree with the image grid.")
                 if abs(float(np.mean(valid == 2)) - frame.warning_fraction) > 1e-12:
                     raise CachedExampleError("Prepared warning fraction disagrees with the manifest.")
+                if frame.gap_fill:
+                    fill_name = frame.frame_id + '-fill.bin'
+                    if frame.gap_fill.url != f'/v1/examples/{manifest.sequence_id}/frames/{fill_name}':
+                        raise CachedExampleError("Gap-fill asset must identify its bundled local file.")
+                    expected.add(fill_name)
+                    fill_raw = read_bounded(directory / fill_name, MAX_RASTER_BYTES)
+                    if len(fill_raw) != frame.gap_fill.size_bytes or hashlib.sha256(fill_raw).hexdigest() != frame.gap_fill.sha256:
+                        raise CachedExampleError("Gap-fill asset failed checksum or size verification.")
+                    fill_values = np.frombuffer(fill_raw[:count * 4], dtype='<f4')
+                    estimated = np.frombuffer(fill_raw[count * 4:], dtype=np.uint8)
+                    if (not np.isfinite(fill_values).all() or not np.isin(estimated, [0, 1]).all()
+                            or np.any((estimated == 1) & (valid == 1))
+                            or np.any(fill_values[estimated == 0] != 0)
+                            or abs(float(estimated.mean()) - frame.estimated_fraction) > 1e-12):
+                        raise CachedExampleError("Gap-fill estimates disagree with the original mask or fraction.")
+                    revision = lineage.get('gap_fill_revision', {}).get(frame.frame_id, {})
+                    if (revision.get('input_raster_sha256') != frame.raster.sha256
+                            or revision.get('method') != manifest.processing.get('gap_fill_method')
+                            or revision.get('estimated_fraction') != frame.estimated_fraction):
+                        raise CachedExampleError("Gap-fill derivative lacks matching input provenance.")
         entries = lineage.get('files')
         if not isinstance(entries, dict) or set(entries) != expected:
             raise CachedExampleError("The cached file inventory is incomplete.")

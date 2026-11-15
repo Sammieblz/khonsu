@@ -1,5 +1,11 @@
 # Observation console interactions
 
+[Clean View](clean-view.md) adds a compact control row beside the image. It starts
+on, remembers the visitor's choice and identifies estimated areas in plain language.
+Show original pauses playback and toggles the unfilled view; Show estimated areas
+highlights only the display estimates. Mark mode automatically shows original
+data. Sampling, detail, quality and renderer controls are inside Advanced.
+
 Samuel's user-authorized integration pass extends Michael's viewer and Robel's
 composition boundaries through GitHub #37 / Linear BYT-38. The parent
 owns the manifest and selected frame; the console owns temporary interaction

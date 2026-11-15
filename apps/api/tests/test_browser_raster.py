@@ -30,4 +30,13 @@ def test_cached_browser_assets_are_bounded_and_allowlisted():
             assert result.headers['content-type'] == 'application/octet-stream'
             assert len(result.content) == count * 5 == raster['size_bytes']
             assert hashlib.sha256(result.content).hexdigest() == raster['sha256']
+            if frame['gap_fill']:
+                fill = frame['gap_fill']
+                estimates = client.get(fill['url'])
+                assert estimates.status_code == 200
+                assert len(estimates.content) == count * 5
+                assert hashlib.sha256(estimates.content).hexdigest() == fill['sha256']
+                quality = np.frombuffer(result.content, np.uint8, offset=count*4)
+                mask = np.frombuffer(estimates.content, np.uint8, offset=count*4)
+                assert not ((quality == 1) & (mask == 1)).any()
     assert client.get('/v1/examples/real-wise-0855/frames/unknown.bin').status_code == 404

@@ -61,7 +61,14 @@
         "sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001.bin"
       },
-      "warning_fraction": 0.0
+      "warning_fraction": 0.0,
+      "gap_fill": {
+        "encoding": "float32-le-estimate8-v1",
+        "size_bytes": 68445,
+        "sha256": "234c6b3025dbed20682c77132bad0dd0b3cefd97491da52ba73243d6f3776c8e",
+        "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001-fill.bin"
+      },
+      "estimated_fraction": 0.007816494995982175
     },
     {
       "frame_id": "frame-0002",
@@ -83,7 +90,14 @@
         "sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002.bin"
       },
-      "warning_fraction": 0.0
+      "warning_fraction": 0.0,
+      "gap_fill": {
+        "encoding": "float32-le-estimate8-v1",
+        "size_bytes": 68445,
+        "sha256": "a129985c57b15c95f37d4639479d9dce645e1f7d8a2a85de46f76f0f4ff310f9",
+        "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002-fill.bin"
+      },
+      "estimated_fraction": 0.011469062751114032
     }
   ],
   "warnings": [
@@ -139,6 +153,13 @@
     "cache_acquisition_reference": "docs/target-coverage.json target epsilon-indi-b; fresh bounded five-target probe",
     "cache_role": "backup",
     "browser_raster_encoding": "float32-le-quality8-v2",
-    "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged."
+    "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged.",
+    "gap_fill_method": "small-gap-harmonic-v1",
+    "gap_fill_max_native_span": 4.0,
+    "gap_fill_max_native_area": 12.0,
+    "gap_fill_bright_boundary_sigma": 5.0,
+    "gap_fill_max_components": 2048,
+    "gap_fill_max_pixels": 65536,
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
   }
 }

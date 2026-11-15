@@ -179,7 +179,14 @@
         "cache_acquisition_reference": "docs/target-coverage.json target wise-0855; fresh bounded five-target probe",
         "cache_role": "primary",
         "browser_raster_encoding": "float32-le-quality8-v2",
-        "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged."
+        "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged.",
+        "gap_fill_method": "small-gap-harmonic-v1",
+        "gap_fill_max_native_span": 4,
+        "gap_fill_max_native_area": 12,
+        "gap_fill_bright_boundary_sigma": 5,
+        "gap_fill_max_components": 2048,
+        "gap_fill_max_pixels": 65536,
+        "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
       },
       "warnings": [
         {

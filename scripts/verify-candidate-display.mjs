@@ -31,6 +31,10 @@ async function ready(page) {
   }
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
+async function openDisplay(page) {
+  const summary=page.locator('summary').filter({hasText:'IMAGE DISPLAY'});
+  if(!await summary.evaluate(e=>e.parentElement.open))await summary.click();
+}
 async function load(page) {
   await page.getByLabel('Cached real field', { exact: true }).selectOption(primary.sequence_id);
   await button(page, 'LOAD CACHED REAL EXAMPLE').click(); await ready(page);
@@ -84,9 +88,9 @@ for (const engine of [chromium, firefox]) {
       };
     });
     await page.goto(base, { waitUntil: 'domcontentloaded' }); await load(page);
-    await page.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await openDisplay(page);
     await page.getByLabel('Display resolution', { exact: true }).selectOption('hd'); await ready(page);
-    await page.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await openDisplay(page);
     await button(page, 'DETAIL EXPERIMENT').click();
     await page.getByLabel('Comparison A', { exact: true }).selectOption('1');
     await button(page, 'PAN').click();
@@ -118,7 +122,7 @@ for (const engine of [chromium, firefox]) {
     const dashed = await ring(page, 59, 59, amber);
     assert(dashed > 15 && dashed < solid - 8, `Expected cross-epoch dashed marker: ${dashed} versus ${solid}`);
     await button(page, 'FIT / RESET').click(); assert(await ring(page, 59, 59, amber) > 15);
-    await page.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await openDisplay(page);
     await page.getByLabel('Rendering mode', { exact: true }).selectOption('cpu'); await ready(page);
     assert.equal(await page.locator('[data-renderer]').textContent(), 'CPU worker');
     assert(await ring(page, 59, 59, amber) > 15);

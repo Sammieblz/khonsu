@@ -83,10 +83,27 @@
             ],
             "title": "Detector"
           },
+          "estimated_fraction": {
+            "default": 0.0,
+            "maximum": 0.1,
+            "minimum": 0.0,
+            "title": "Estimated Fraction",
+            "type": "number"
+          },
           "frame_id": {
             "pattern": "^[a-zA-Z0-9_-]{1,80}$",
             "title": "Frame Id",
             "type": "string"
+          },
+          "gap_fill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreparedRaster"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "image_url": {
             "maxLength": 2048,
@@ -336,7 +353,8 @@
             "default": "float32-le-mask8-v1",
             "enum": [
               "float32-le-mask8-v1",
-              "float32-le-quality8-v2"
+              "float32-le-quality8-v2",
+              "float32-le-estimate8-v1"
             ],
             "title": "Encoding",
             "type": "string"
@@ -821,7 +839,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           }
         },
         "summary": "Synthetic Frame",
@@ -942,7 +960,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "503": {
             "content": {
@@ -1038,7 +1056,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1131,7 +1149,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1224,7 +1242,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1329,7 +1347,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1422,7 +1440,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {

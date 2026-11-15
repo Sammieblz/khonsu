@@ -319,6 +319,9 @@ for (const engine of [chromium, firefox]) {
       }) });
     });
     await recovery.goto(base, { waitUntil: 'domcontentloaded' });
+    // The static form exists before React hydrates. Wait for the fetched catalog
+    // before typing so initialization cannot replace the acceptance input.
+    await recovery.getByLabel('Cached real field', { exact: true }).selectOption(primary.sequence_id);
     await recovery.locator('#ra').fill('360'); await recovery.locator('#dec').fill('0');
     await button(recovery, 'EXPLORE THE SKY').click(); await recovery.locator('form [role="alert"]').waitFor();
     assert.equal(calls, 0, 'Invalid coordinates must not start a job');

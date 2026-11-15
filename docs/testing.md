@@ -89,6 +89,13 @@ exercise the overview's anonymous-CORS cache behavior through eviction/reload.
 
 ## Release rehearsal
 
+The [Clean View pass](clean-view.md) adds `node scripts/verify-clean-view.mjs` for
+real-image before/after differences, untouched measured pixels, original comparison,
+estimated-area overlays, CPU/GPU parity, preference, candidate and fallback checks.
+`python scripts/validate-clean-view.py` reproduces the real hidden-pixel evaluation;
+`test_gap_fill.py` covers bounds, bright cores and unchanged inputs. Existing
+enhancement controls now live inside Advanced and their suites open it explicitly.
+
 The [#64 image-quality pass](image-quality.md) adds
 `node scripts/verify-quality-display.mjs`. It checks real warning pixels,
 strict candidate exclusion, GPU/CPU parity, manual 4K and adaptive CPU fallback,
