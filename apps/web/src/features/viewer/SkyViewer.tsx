@@ -2,10 +2,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type KeyboardEvent } from "react";
 import type { ObservationFrame, SkyViewerProps, ViewerTool } from "@/features/explorer/interfaces";
 import { PlaybackControls } from "./PlaybackControls";
+import { describeComparison } from "./comparison";
 import { useFrameLoader } from "./useFrameLoader";
 import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
-import { describeComparison } from "./comparison";
 import { boundedView, clientPointToRaster, displayScale, FIT, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
 import { usePreparedFrames } from './usePreparedFrames';
