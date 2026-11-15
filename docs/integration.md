@@ -68,6 +68,10 @@ The UI distinguishes live data, previously acquired real data, and synthetic dev
 | LIVE SEARCH NOT AVAILABLE | `SCIENCE_UNAVAILABLE`, `SCIENCE_DEPENDENCIES_MISSING` | Cached example |
 | SEARCH CANCELLED | `CANCELLED` | Search again, edit search |
 
+![Six search panels captured from the production static build: not enough comparable observations, IRSA archive unavailable, the cached real example loaded from that failure, search expired after a backend restart, observation service unreachable, and search cancelled](images/search-recovery-states.png)
+
+The panels above were captured on November 14, 2026 from the production static build against live IRSA and a test backend on another origin. The archive outage was simulated by routing the backend's IRSA requests to a closed local port, and the restart by stopping and starting the API during a search.
+
 The cached example is not offered when the backend is unreachable, because the same backend serves it. A web test scans the API source for raised error codes and fails when one has no explicit state, so add the mapping when you add a code.
 
 ## Change procedure
