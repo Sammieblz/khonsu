@@ -1,0 +1,34 @@
+{
+  "testedAt": "2026-11-15T05:21:39.755Z",
+  "baseCommit": "b6970b2dd095165e0adf9cd8884596651e40d684",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "currentDisplayMaxByteDifference": 0,
+      "realAndSyntheticLabels": true,
+      "originalHoldCancelBlur": true,
+      "zoomPanReset": true,
+      "coverageAndTruth": true,
+      "narrowLayoutAnd44pxButtons": true,
+      "reportRetryAndImageFailure": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "currentDisplayMaxByteDifference": 0,
+      "realAndSyntheticLabels": true,
+      "originalHoldCancelBlur": true,
+      "zoomPanReset": true,
+      "coverageAndTruth": true,
+      "narrowLayoutAnd44pxButtons": true,
+      "reportRetryAndImageFailure": true
+    }
+  ],
+  "sourceHashes": {
+    "apps/web/src/features/viewer/ResolutionLab.tsx": "c569a7d54672cea491a45f44f2adda4409bf56a8a5161fbf40888e934f1b7f1f",
+    "apps/web/src/features/viewer/resolutionLab.module.css": "5ab67034ffeac5defa59ebc8ce144f67ffb32e17f94b5e9e3c12c7e4a65e43d4",
+    "apps/web/public/experiments/resolution/manifest.json": "fbf17ce45229d276e67a7b7924c4b20e611ef68db99fbe9f173171b5d6250667",
+    "scripts/verify-resolution-lab.mjs": "daf98081b3b587a42ef8444af8fe29196c6fef543285b1c08d84ca4b690a5c1e"
+  }
+}
