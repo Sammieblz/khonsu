@@ -2,6 +2,11 @@
 
 Updated November 14, 2026. [Pull request #23](https://github.com/Sammieblz/khonsu/pull/23) established the foundation on main.
 
+This page records that earlier foundation milestone. Current integrated viewer,
+display, cached-example and browser status is in [console acceptance](console-acceptance.md)
+and [target coverage](target-coverage.md). The historical remaining-work and
+board descriptions below are not the current task statuses.
+
 ## Verification evidence
 
 All five jobs passed in [Actions run 43576146148](https://github.com/Sammieblz/khonsu/actions/runs/43576146148) for the reviewed scaffold:

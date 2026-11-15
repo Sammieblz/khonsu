@@ -43,9 +43,9 @@ docker compose up --build --detach --wait
 docker compose ps
 ```
 
-Open http://localhost:3000 and http://localhost:8000/docs. Check http://localhost:8000/health reports a running service with scientific processing available. Enter the selected field in decimal degrees and select **Explore this field**. Keep actual progress messages visible during rehearsal. Search timing depends on the archive; one fast run is not an availability guarantee.
+Open http://localhost:3000 and http://localhost:8000/docs. Check http://localhost:8000/health reports a running service with scientific processing available. Enter the selected field in decimal degrees and select **EXPLORE THE SKY**. Keep actual progress messages visible during rehearsal. Search timing depends on the archive; one fast run is not an availability guarantee.
 
-Confirm at least two usable epochs before presenting a temporal comparison. Step forward and backward and read the original UTC dates. Open quality notes. Explain the shared grid and no-data hatch without claiming that resampling adds measured detail. Retain the warnings that wavelengths are approximate, PSFs/backgrounds are not matched and resampling uncertainty is not propagated.
+Confirm at least two usable epochs before presenting a temporal comparison. Step forward and backward or use Rewind, then read the original UTC dates. Open quality notes. Explain the shared grid and quiet slate no-data mask (optional hatch in Image display) without claiming that resampling adds measured detail. Use the same display settings for A/B. Retain the warnings that wavelengths are approximate, PSFs/backgrounds are not matched and resampling uncertainty is not propagated. The [console guide](console-acceptance.md) walks through the integrated controls and records the final local live-query check.
 
 For an archive-outage rehearsal, keep the local frontend and API running while blocking outbound IRSA access. Deliberately choose the bundled cached real example through the application's cached-example control. Confirm its cached label and original dates, confirm the query inputs remain unchanged, and confirm no successful live retrieval is claimed. Stopping the API also stops its cached-asset routes; an archive-offline demonstration does not establish a backend-free frontend.
 
@@ -73,8 +73,8 @@ If a live search is recorded, identify any edited waiting interval with a captio
 - [x] Complete a real query and verify every frame has real provenance and a genuine UTC epoch; its separate processing revision is recorded above.
 - [x] Load both bundled cached examples with upstream access blocked; preserve labels and original query inputs.
 - [x] Inspect a missing cached asset and confirm an honest error followed by successful restoration.
-- [ ] Verify desktop and 390-pixel layouts, visible keyboard focus and access to warnings.
-- [ ] Exercise local notes without claiming raster x/y are sky coordinates.
+- [x] Verify desktop and 390-pixel layouts, visible keyboard focus and access to warnings. See console acceptance; public-origin release verification remains separate.
+- [x] Exercise local notes without claiming raster x/y are sky coordinates. Transformed marks and reload persistence are checked in console acceptance.
 - [ ] Verify the actual evidence export once its feature ticket is accepted; keep this gate open until then.
 - [ ] Export a video within the verified portal limit, check English captions, and test its public link while signed out.
 - [ ] Record the tested commit and media URL in the submission handoff, GitHub #22 and Linear BYT-34.

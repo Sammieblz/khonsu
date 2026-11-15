@@ -1,0 +1,130 @@
+{
+  "testedAt": "2026-11-15T00:37:41.602Z",
+  "commit": "44e3beb2636e0930881650791cd31bf36c2eb50d",
+  "frontend": "http://localhost:3001",
+  "api": "http://localhost:8000",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "presets": 5,
+      "primaryCpuGpuDifference": 0,
+      "contextLossRecovery": true,
+      "holdCancelBlurAndBlink": true,
+      "transformedMarksAndLocalNotes": true,
+      "wheelZoom": true,
+      "chromiumTouchPinch": true,
+      "rewindDrag": true,
+      "backupCpuGpuDifference": 0,
+      "missionDateIsolation": true,
+      "mobileWidth": 390,
+      "syntheticRamp": [
+        {
+          "curve": "linear",
+          "mask": "quiet",
+          "difference": 0
+        },
+        {
+          "curve": "linear",
+          "mask": "hatch",
+          "difference": 0
+        },
+        {
+          "curve": "asinh",
+          "mask": "quiet",
+          "difference": 0
+        },
+        {
+          "curve": "asinh",
+          "mask": "hatch",
+          "difference": 0
+        }
+      ],
+      "notesSurviveReload": true,
+      "noGpuNoWorker": "CPU canvas",
+      "badChecksumPngRecovery": true,
+      "failedImageRetry": true,
+      "invalidInputAndCoverageRecovery": true,
+      "backendUnavailableHonestState": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "presets": 5,
+      "primaryCpuGpuDifference": 0,
+      "contextLossRecovery": true,
+      "holdCancelBlurAndBlink": true,
+      "transformedMarksAndLocalNotes": true,
+      "wheelZoom": true,
+      "rewindDrag": true,
+      "backupCpuGpuDifference": 0,
+      "missionDateIsolation": true,
+      "mobileWidth": 390,
+      "syntheticRamp": [
+        {
+          "curve": "linear",
+          "mask": "quiet",
+          "difference": 0
+        },
+        {
+          "curve": "linear",
+          "mask": "hatch",
+          "difference": 0
+        },
+        {
+          "curve": "asinh",
+          "mask": "quiet",
+          "difference": 0
+        },
+        {
+          "curve": "asinh",
+          "mask": "hatch",
+          "difference": 0
+        }
+      ],
+      "notesSurviveReload": true,
+      "noGpuNoWorker": "CPU canvas",
+      "badChecksumPngRecovery": true,
+      "failedImageRetry": true,
+      "invalidInputAndCoverageRecovery": true,
+      "backendUnavailableHonestState": true
+    }
+  ],
+  "realExamples": [
+    {
+      "sequence": "real-wise-0855",
+      "frames": [
+        {
+          "id": "2025W45_2A_0292_2",
+          "utc": "2025-11-07T20:31:27.206400Z",
+          "release": "DR1"
+        },
+        {
+          "id": "2025W50_2A_0479_1",
+          "utc": "2025-12-13T05:32:45.657600Z",
+          "release": "DR1"
+        },
+        {
+          "id": "2026W18_2A_0663_1",
+          "utc": "2026-05-03T05:10:37.948800Z",
+          "release": "DR1"
+        }
+      ]
+    },
+    {
+      "sequence": "real-epsilon-indi-b",
+      "frames": [
+        {
+          "id": "2025W19_1B_0344_3",
+          "utc": "2025-05-07T05:14:15.590400Z",
+          "release": "DR1"
+        },
+        {
+          "id": "2026W39_2A_0581_1",
+          "utc": "2026-09-27T05:58:12.172800Z",
+          "release": "QR3"
+        }
+      ]
+    }
+  ]
+}
