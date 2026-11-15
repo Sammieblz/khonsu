@@ -188,6 +188,65 @@ Timing includes rendering, a 2D copy and synchronous readback after warmup, usin
 timer precision, headless operation and the specific hardware limit generalization.
 The committed browser results and screenshots accompany this experiment.
 
+## Browser evidence
+
+[Browser report](evidence/enhancement/browser-report.json),
+[full console report](evidence/enhancement/observatory-report.json),
+[Smooth controls](evidence/enhancement/controls-smooth.png), and
+[Detail controls](evidence/enhancement/controls-detail.png) record the integrated
+static preview. Chromium 157.0.8103.50 and Firefox 153.0 passed. All five authentic
+cached frames, two sampling modes and three detail settings agree with the CPU
+reference within one 8-bit level per channel in both browsers. The signed
+rectangular ramp, original-buffer preservation, production module worker,
+missing float target and no-GPU/no-worker cases also passed.
+
+Chromium reported `ANGLE (AMD, Radeon RX 580 Series (0x000067DF) Direct3D11
+vs_5_0 ps_5_0, D3D11)`. Firefox reported `ANGLE (AMD, Radeon R9 200 Series
+Direct3D11 vs_5_0 ps_5_0), or similar`; this is the browser's reported adapter
+string, not independent identification of a second physical device.
+
+| Browser | Output side | WebGL2 detail median / p95, ms | CPU worker detail median / p95, ms |
+| --- | --- | --- | --- |
+| Chromium | 440 | 2.70 / 3.20 | 27.45 / 36.30 |
+| Chromium | 880 | 5.75 / 7.50 | 99.35 / 116.50 |
+| Firefox | 440 | 4.00 / 5.00 | 68.00 / 86.00 |
+| Firefox | 880 | 13.00 / 15.00 | 124.00 / 152.00 |
+
+Detail alternates between 0.35 and 0.40 to exercise recalculation, after two
+warmups. These are 12-sample measurements on this machine, including copy and
+readback, not pure shader timings or guaranteed playback frame rates. Both
+browsers additionally passed the full existing console suite: rewind, A/B,
+transformed marking, notes, context loss, recovery and 390px layout.
+
+## Candidate integration
+
+Main's [#50](https://github.com/Sammieblz/khonsu/pull/50), revision `c9748ae`,
+was incorporated into the experiment branch. Its candidate overlays use the
+new horizontal/vertical display scales; selecting a candidate triggers a redraw
+without requiring an epoch change. A/B IDs and the verified original mask
+accompany selections. Mark still pauses the optional detail adjustment.
+
+The browser reload check exposed an initial empty write before the loaded
+candidate store was committed. Write permission now commits with that store
+using React state. The existing format, snapshots, unknown-data preservation
+and explicit replacement action are retained.
+
+[verify-candidate-display.mjs](../scripts/verify-candidate-display.mjs) passes in
+both browsers. Its [report](evidence/enhancement/candidate-display-report.json)
+and [desktop](evidence/enhancement/candidate-desktop.png) /
+[mobile](evidence/enhancement/candidate-mobile.png) screenshots cover DPR 2,
+the 1536-pixel cap, pan/zoom, actual overlay pixels, same-frame cyan selection,
+dashed cross-epoch positions, an independent Astropy sky-coordinate reference,
+A/B and source metadata, missing-data selections, CPU rendering and resizing.
+Saved notes reload and migrate without an intermediate empty write. Incompatible
+saved data remains untouched until an explicit replacement action.
+
+The integrated frontend has 63 passing unit tests; TypeScript, static export and
+repository checks pass. The unchanged Python experiment/API suite passed 99
+tests during this pass. Reports identify their base Git revision and, for the
+enhancement and candidate suites, hashes of the working files actually tested.
+User testing approval is still required before merging this feature into main.
+
 ## Next scientific step
 
 Before shipping PSF restoration, build and validate a detector-space forward

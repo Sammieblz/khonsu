@@ -57,6 +57,14 @@ across sampling/detail modes, checks fallbacks and records warm rendering times.
 The [research report](enhancement-research.md) includes scientific controls and
 manual steps. GPU/CPU agreement and display speed do not validate deconvolution.
 
+Run `node scripts/verify-candidate-display.mjs` for the #50/#49 integration.
+It checks real rendered markers at DPR 2 and the display-size cap, astropy-reference
+sky positions, A/B and mask metadata, cross-epoch dashes, same-frame selection
+highlights, CPU rendering, resizing and candidate reload/migration. Browser
+storage is isolated from the user's notes. It also rejects an initial empty
+write over existing records and verifies unreadable storage is preserved until
+the visitor explicitly requests replacement.
+
 ## Release rehearsal
 
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.

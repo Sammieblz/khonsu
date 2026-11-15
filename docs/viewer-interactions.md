@@ -64,3 +64,11 @@ Candidate records, their ICRS conversion and local storage are described in
 [candidate marks](integration.md#candidate-marks). Review source quality,
 spectral compatibility and unmatched PSFs/backgrounds before interpreting
 apparent change.
+
+The display experiment incorporates #50's candidate contract on its feature
+branch. Marker centers use independent horizontal and vertical display scales;
+selection highlights trigger a redraw even when the active frame is unchanged.
+The original validity plane and selected A/B IDs accompany each mark. Detail
+remains paused in Mark mode. Candidate persistence begins only after the loaded
+store is committed to React state, avoiding an initial empty write on reload.
+See the [combined acceptance evidence](enhancement-research.md#candidate-integration).

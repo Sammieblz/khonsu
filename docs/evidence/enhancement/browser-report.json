@@ -1,0 +1,732 @@
+{
+  "testedAt": "2026-11-15T03:58:21.624Z",
+  "baseCommit": "99c9247df0ddc6c46fe1b899bd5eda76ff350831",
+  "workingTree": "M apps/web/src/features/annotations/useAnnotations.ts\n?? scripts/verify-candidate-display.mjs",
+  "timingScope": "12 warm render + 2D copy + synchronous readback samples after 2 warmups; excludes download and FITS processing. Headless browser on this machine, not a general performance guarantee.",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "viewport": {
+        "width": 1020,
+        "height": 1020,
+        "cssWidth": 510,
+        "dpr": 2
+      },
+      "sameFrameOriginalHoldCancelBlurAndMark": true,
+      "sharedSettingsAndReset": true,
+      "productionCpuWorker": true,
+      "mobileWidth": 390,
+      "renderers": {
+        "adapter": "ANGLE (AMD, Radeon RX 580 Series (0x000067DF) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "checks": [
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          }
+        ],
+        "timings": [
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 2.7000000178813934,
+            "p95Ms": 3.600000023841858
+          },
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 2.699999988079071,
+            "p95Ms": 3.199999988079071
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 4.4000000059604645,
+            "p95Ms": 5.300000011920929
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 5.75,
+            "p95Ms": 7.5
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 24.400000035762787,
+            "p95Ms": 28.69999998807907
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 27.450000017881393,
+            "p95Ms": 36.299999952316284
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 92.05000001192093,
+            "p95Ms": 139.0999999642372
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 99.34999999403954,
+            "p95Ms": 116.5
+          }
+        ],
+        "signedRectangularRamp": true,
+        "workerMode": "CPU worker",
+        "originalBuffersPreserved": true
+      },
+      "missingFloatTargetFallback": true,
+      "noGpuNoWorkerDetail": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "viewport": {
+        "width": 1020,
+        "height": 1020,
+        "cssWidth": 510,
+        "dpr": 2
+      },
+      "sameFrameOriginalHoldCancelBlurAndMark": true,
+      "sharedSettingsAndReset": true,
+      "productionCpuWorker": true,
+      "mobileWidth": 390,
+      "renderers": {
+        "adapter": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+        "checks": [
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          }
+        ],
+        "timings": [
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 3.5,
+            "p95Ms": 4
+          },
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 4,
+            "p95Ms": 5
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 11,
+            "p95Ms": 15
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 13,
+            "p95Ms": 15
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 45,
+            "p95Ms": 69
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 68,
+            "p95Ms": 86
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 126.5,
+            "p95Ms": 159
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 124,
+            "p95Ms": 152
+          }
+        ],
+        "signedRectangularRamp": true,
+        "workerMode": "CPU worker",
+        "originalBuffersPreserved": true
+      },
+      "missingFloatTargetFallback": true,
+      "noGpuNoWorkerDetail": true
+    }
+  ],
+  "sourceHashes": {
+    "apps/web/src/features/viewer/display.ts": "550947a530bd1915da42719b7ba0f7c4777c7ea0ebfc1d8f006cf0773e1fcbc9",
+    "apps/web/src/features/viewer/displayRenderer.ts": "012066b41158646eca3a70850c6d5845d8be7e1b5ef83101f551f8c51e4c3b67",
+    "apps/web/src/features/viewer/display.worker.ts": "0e7d92b806b41e60ac3c41c75cc2046f86985bd335fb4ddf49b11dc772fd491b",
+    "apps/web/src/features/viewer/SkyViewer.tsx": "c91eb8463790db9e1cf2a9485fadc84d4aee55c049f2a30e00516e4f8c16164d",
+    "apps/web/src/features/viewer/viewer.module.css": "79dfba2d262aed699c1d0958796853a93b2a10dc08bee742ea1df7b82da3cb15",
+    "scripts/verify-enhancement.mjs": "e9b61560ef0eda1ddd7d9c1cac5398aab885974628e43f3cb70d9e86dcadfb43"
+  }
+}
