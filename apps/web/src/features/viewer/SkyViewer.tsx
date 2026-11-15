@@ -7,6 +7,7 @@ import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
 import { boundedView, clientPointToRaster, displayScale, FIT, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
+import { ObservationDetails } from '@/features/annotations/ObservationDetails';
 import { usePreparedFrames } from './usePreparedFrames';
 import type { DisplayOptions } from './display';
 import styles from "./viewer.module.css";
@@ -153,6 +154,6 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
       <label className={styles.rendererChoice}>Rendering <select aria-label="Rendering mode" value={forceCpu?'cpu':'auto'} onChange={event=>setForceCpu(event.target.value==='cpu')}><option value="auto">Automatic GPU / CPU</option><option value="cpu">CPU</option></select></label>
       <p className={styles.hint}>One display setting across all epochs. Black {display.low.toPrecision(4)} / white {display.high.toPrecision(4)} MJy/sr | {display.curve} {display.a.toFixed(2)} | gamma {display.gamma.toFixed(2)}. Display changes do not add measured detail.</p>
     </details>}
-    {sequence&&<details className={styles.provenance}><summary>Observation details & quality</summary><p>{sequence.disclosure}</p><p>{active?.observation_id} · {active?.release} · {active?.wavelength_um?.toFixed(4)} μm · {((active?.masked_fraction ?? 0)*100).toFixed(1)}% masked</p>{active?.source_fits_url&&<a href={active.source_fits_url} target="_blank" rel="noreferrer">Source FITS at IRSA</a>}{[...(sequence.warnings??[]),...(active?.warnings??[])].map((warning,i)=><p key={i}>{warning.message}</p>)}</details>}
+    {sequence&&<ObservationDetails sequence={sequence} activeFrameId={active?.frame_id ?? null} comparison={frames.length?{a,b}:null} />}
   </section>;
 }
