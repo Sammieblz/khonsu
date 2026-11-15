@@ -58,7 +58,7 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(params["MAXREC"], [str(MAX_METADATA_ROWS + 1)])
 
     def test_nonfinite_or_out_of_range_targets_rejected(self):
-        for value in (request(ra_deg=float("nan")), request(fov_arcmin=100), request(max_frames=1)):
+        for value in (request(ra_deg=float("nan")), request(fov_arcmin=121), request(max_frames=1)):
             with self.assertRaises(RetrievalError):
                 query_url(value)
 
@@ -94,8 +94,8 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(params["size"], ["0.1500000000"])
         self.assertEqual(params["center"], ["269.0000000000,4.0000000000"])
 
-    def test_wide_cutouts_stay_within_previous_byte_bounds(self):
-        for fov, expected in ((40., "1.0000000000"), (50., "1.0000000000"), (60., "1.0000000000"), (.5, "0.0125000000")):
+    def test_wide_cutouts_cover_rotation_within_the_bounded_request(self):
+        for fov, expected in ((40., "1.0000000000"), (50., "1.2500000000"), (60., "1.5000000000"), (120., "3.0000000000"), (.5, "0.0125000000")):
             params = parse_qs(urlsplit(cutout_url(SOURCE, request(fov_arcmin=fov))).query)
             self.assertEqual(params["size"], [expected], fov)
 

@@ -55,7 +55,7 @@ The address bar describes the live search on screen, so copying it, or using **C
 | --- | --- | --- |
 | `ra_deg` | Right Ascension, ICRS decimal degrees, at least 0 and less than 360 | Nothing is restored, and the form explains why |
 | `dec_deg` | Declination, ICRS decimal degrees, from -90 to +90 | Nothing is restored, and the form explains why |
-| `fov_arcmin` | Field of view in arcminutes, from 0.5 to 60 | The default 6′ is used, with a note |
+| `fov_arcmin` | Field of view in arcminutes, from 0.5 to 120 | The default 6′ is used, with a note |
 | `frame` | `ICRS`, the only supported frame | Any other frame restores nothing |
 | `obs` | IRSA observation ID to select | Ignored unless it is a plain identifier; selected only if the returned sequence contains it |
 

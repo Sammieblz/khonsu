@@ -1,18 +1,18 @@
 # Display rendering
 
-How the processor turns SPHEREx cutouts into the frames the viewer shows, and what the viewer may and may not do with them. Display pipeline `khonsu-display-0.3.0` (BYT-12). The rules in [scientific integrity](science-integrity.md) still apply.
+How the processor turns SPHEREx cutouts into the frames the viewer shows, and what the viewer may and may not do with them. Display pipeline `khonsu-display-0.4.0` (#60 / BYT-45). The rules in [scientific integrity](science-integrity.md) still apply.
 
 ## What the image can show
 
-A SPHEREx pixel covers about 6.15 arcseconds. A 6 arcminute field is about 58 native pixels across, from one exposure. Khonsu never shows detail finer than that: no upscaling model, sharpening, super-resolution, inpainting, stacking of epochs or interpolated epochs. Pan and zoom ([viewer interactions](viewer-interactions.md)) are the way to look closer.
+A SPHEREx pixel covers about 6.15 arcseconds. A 6 arcminute field is about 58 native pixels across, from one exposure. Enlarging the display does not add measured resolution. The scientific products use no upscaling model, sharpening, super-resolution, inpainting, stacking of epochs or interpolated epochs. The separately labelled [browser detail experiment](enhancement-research.md) modifies a visual copy only; it is not a new science product. Pan and zoom ([viewer interactions](viewer-interactions.md)) are the way to look closer.
 
 ## Cutout
 
-The retriever requests a square cutout 1.5 times the field width. IRSA aligns cutouts to the detector, which is rotated on the sky. Any rotation of a square fits inside one about 1.41 times wider, so real pixels reach the corners of the north-up field. Cutouts stop growing at 60 arcminutes, the previous maximum, so worst-case download bytes do not change. Most of a cutout's bytes are fixed-size extensions: a 9 arcminute cutout of the north ecliptic pole was 4,066,560 bytes, the same as a 6 arcminute one.
+The retriever requests a square cutout 1.5 times the field width. IRSA aligns cutouts to the detector, which is rotated on the sky. Any rotation of a square fits inside one about 1.41 times wider. The requested field may be up to 120 arcminutes and its padded cutout up to 180 arcminutes; detector edges and masks can still leave gaps. Individual FITS downloads are bounded to 64 MiB and all downloads for one job to 256 MiB. The frontend requests fewer exposures for wide fields. Most bytes in small cutouts are fixed-size extensions: a 9 arcminute cutout of the north ecliptic pole was 4,066,560 bytes, the same as a 6 arcminute one.
 
 ## Grid and resampling
 
-The default grid samples the field at half the native pixel scale, read from the inputs' WCS (`GRID_OVERSAMPLE = 2`). A 6 arcminute field becomes 118 x 118 pixels of about 3 arcseconds. Fields wider than about 26 arcminutes are capped at 512 pixels, slightly coarser than native, to respect the per-job output pixel budget. Earlier pipelines used a fixed 512 pixel grid, about 9 grid pixels per native pixel at 6 arcminutes, which smeared each measured pixel into a soft blob.
+The default grid samples the field at half the native pixel scale, read from the inputs' WCS (`GRID_OVERSAMPLE = 2`), capped at 2048 pixels. A 6 arcminute field remains 118 x 118 pixels of about 3 arcseconds. A 60 arcminute field is about 1171 pixels and a 120 arcminute field reaches the 2048 cap, depending on the measured native scale. The previous 25,165,824 total output-pixel budget is retained: larger frames mean fewer frames, and excessive requests fail explicitly. Earlier pipelines used a fixed 512 grid, then a 512 cap, which either oversampled narrow fields or discarded sampling on wide ones. See [the real wide-field verification](hd-fields.md).
 
 Each frame is resampled onto the common ICRS TAN grid with validity-weighted bilinear interpolation. The image (masked pixels set to zero) and the validity weights are interpolated separately and divided, so every value is an average of valid neighbouring pixels only. A grid pixel is valid only when its nearest source pixel is valid and inside coverage. Masked areas therefore keep their true size and position, and no value is created for them.
 
@@ -43,9 +43,13 @@ The manifest's `display.vmin`, `display.vmax` and `processing` fields record the
 
 ## No-data display
 
-Masked and uncovered pixels are transparent in each PNG. The viewer draws them as a neutral hatch (fill `#2E3440`, diagonal lines `#5C6474`) and shows a "No data" key beside the orientation marks. They never show the page background, and the hatch cannot be mistaken for dark sky. Because the hatch is identical in every frame, a mask that changes between epochs stays visible as missing data during stepping or blink.
+Masked and uncovered pixels are transparent in each PNG. The current viewer fills them with slate `#273140`, optionally with detailed hatch lines `#465263`, and shows a "No data" key beside the orientation marks. They never show the page background. The same style applies in every frame, so a mask that changes between epochs stays visible during stepping or blink.
 
-The viewer draws each grid pixel as an equal, crisp block: the canvas is an integer multiple of the grid with image smoothing off, and CSS uses `image-rendering: pixelated`.
+The viewer now offers Smooth and Pixels modes and renders at the bounded display
+size. Smooth interpolates valid intensities before the display stretch; the
+nearest source validity still decides the mask. Pixels selects nearest samples
+for inspecting the prepared grid. This replaces the former integer canvas
+enlargement and mandatory CSS pixelation. See [browser display](browser-display.md).
 
 ## Verification
 

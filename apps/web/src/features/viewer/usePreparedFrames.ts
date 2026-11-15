@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ObservationFrame } from '@/features/explorer/interfaces';
 import { resolveAssetUrl } from '@/lib/api/client';
 import { decodeRaster, MAX_RASTER_BYTES, type Raster } from './display';
-import { frameWindow } from './time';
+import { frameCacheWindow } from './time';
 export async function readPrepared(frame:ObservationFrame,width:number,height:number,signal:AbortSignal):Promise<Raster>{
   const meta=frame.raster;
   if(!meta||meta.encoding!=='float32-le-mask8-v1'||meta.size_bytes!==width*height*5||meta.size_bytes>MAX_RASTER_BYTES||!/^\/v1\/(sequences|examples)\/[a-zA-Z0-9_-]+\/frames\/[a-zA-Z0-9_-]+\.bin$/.test(meta.url))throw Error('Prepared asset metadata is invalid.');
@@ -19,7 +19,7 @@ export async function readPrepared(frame:ObservationFrame,width:number,height:nu
 export function usePreparedFrames(frames:ObservationFrame[],width:number,height:number,index:number,pinned:number[]){
   const cache=useRef(new Map<string,Raster>()),identity=useRef(frames);
   const [rasters,setRasters]=useState(new Map<string,Raster>()),[failed,setFailed]=useState<string[]>([]);
-  const wanted=frameWindow(frames.length,index,pinned).map(i=>frames[i]!.frame_id).join(',');
+  const wanted=frameCacheWindow(frames,index,pinned).map(i=>frames[i]!.frame_id).join(',');
   useEffect(()=>{const controller=new AbortController();if(identity.current!==frames){cache.current.clear();identity.current=frames;}const ids=new Set(wanted.split(','));for(const id of cache.current.keys())if(!ids.has(id))cache.current.delete(id);setRasters(new Map(cache.current));setFailed([]);
     for(const frame of frames.filter(frame=>ids.has(frame.frame_id)&&frame.raster))if(!cache.current.has(frame.frame_id))void readPrepared(frame,width,height,controller.signal).then(raster=>{if(!controller.signal.aborted){cache.current.set(frame.frame_id,raster);setRasters(new Map(cache.current));}},()=>{if(!controller.signal.aborted)setFailed(old=>[...old,frame.frame_id]);});
     return()=>controller.abort();

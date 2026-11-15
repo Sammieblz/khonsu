@@ -27,3 +27,9 @@ export function nearestObservation(positions: number[], value: number): number {
 export function frameWindow(count: number, index: number, pinned: number[] = []): number[] {
   return [...new Set([index, index - 1, index + 1, ...pinned])].filter(i => i >= 0 && i < count).slice(0, 5);
 }
+
+/** One cache policy for PNGs and prepared intensities. Keep A/B at HD sizes. */
+export function frameCacheWindow(frames: { raster?: { size_bytes: number } | null }[], index: number, pinned: number[] = []): number[] {
+  if (!frames.some(frame => (frame.raster?.size_bytes ?? 0) > 5 * 1024 * 1024)) return frameWindow(frames.length, index, pinned);
+  return [...new Set([index, ...pinned, index - 1, index + 1])].filter(i => i >= 0 && i < frames.length).slice(0, 3);
+}

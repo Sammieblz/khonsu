@@ -1,0 +1,39 @@
+{
+  "testedAt": "2026-11-15T05:18:09.356Z",
+  "commit": "b6970b2dd095165e0adf9cd8884596651e40d684",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "zoomPanAndBoundedCanvas": true,
+      "astropyPositionAndComparisonMetadata": true,
+      "solidSelectedAndDashedMarkers": {
+        "solidSamples": 64,
+        "dashedSamples": 36
+      },
+      "cpuGpuResizeAndMaskValidity": true,
+      "notesSurviveReloadWithoutEmptyWrite": true,
+      "legacyMigration": true,
+      "unreadablePreservedUntilExplicitReplacement": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "zoomPanAndBoundedCanvas": true,
+      "astropyPositionAndComparisonMetadata": true,
+      "solidSelectedAndDashedMarkers": {
+        "solidSamples": 64,
+        "dashedSamples": 36
+      },
+      "cpuGpuResizeAndMaskValidity": true,
+      "notesSurviveReloadWithoutEmptyWrite": true,
+      "legacyMigration": true,
+      "unreadablePreservedUntilExplicitReplacement": true
+    }
+  ],
+  "sourceHashes": {
+    "apps/web/src/features/viewer/SkyViewer.tsx": "c91eb8463790db9e1cf2a9485fadc84d4aee55c049f2a30e00516e4f8c16164d",
+    "apps/web/src/features/annotations/useAnnotations.ts": "3cf2d987b9a1925cf6f2b4b08a63fbd97e128580283d1b411d738297d8c261b7",
+    "scripts/verify-candidate-display.mjs": "dd16596916e841086f44349c520d47895109f0f82340ec20fa6ddb90d054ab15"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "testedAt": "2026-11-15T16:48:39.363Z",
+  "baseCommit": "973d66c299783ce6e9b698b2b9347787eff11c86",
+  "scope": "Production static viewer; controlled job/asset transport replay of two real 2-degree CPython products. Not a live archive query or public deployment.",
+  "sourceHashes": {
+    "apps/web/src/features/viewer/SkyViewer.tsx": "93ab144a70d8de36ae9c181349238b202ce436281e4336cc3241151539ca83a4",
+    "apps/web/src/features/viewer/display.ts": "3277bb521f52aa62b970b4fa16665f47cdf4b4db19cc66ad7ae2f0766ad9f77d",
+    "apps/web/src/features/viewer/viewport.ts": "38f78bbbfa31959069daaa0d66e112e54221fa50e029a28cc284c1b924fe71eb",
+    "scripts/verify-hd-display.mjs": "a0374d1ad43da365a621853e33e25d5a3f604f050d7e53141fbc7abcba0ab742"
+  },
+  "observations": [
+    {
+      "id": "2025W45_2A_0292_2",
+      "utc": "2025-11-07T20:31:27.206400Z",
+      "sha256": "c88c60bbc9186bfdfc2159dddb6befab38adbee3e51b0a765404c0e5b28e3dd1"
+    },
+    {
+      "id": "2025W50_2A_0479_1",
+      "utc": "2025-12-13T05:32:45.657600Z",
+      "sha256": "df489b119b92ff695175a59532057903677fb2c8ccdf3cd5ace28a19cd88f6ff"
+    }
+  ],
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "nativeDisplay": {
+        "width": 1174,
+        "height": 1174
+      },
+      "nativeSamples": 1173.8005278621195,
+      "automaticRenderer": "WebGL2",
+      "requestAndUrl": true,
+      "overviewKeyboardAndPointer": true,
+      "actualEpochSwitch": true,
+      "maskProbes": 1080,
+      "cpuWorker": true,
+      "restoredImageSignalPixels": 23046,
+      "candidateLineage": true,
+      "mobileNoOverflow": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "nativeDisplay": {
+        "width": 1174,
+        "height": 1174
+      },
+      "nativeSamples": 1173.8005278621195,
+      "automaticRenderer": "WebGL2",
+      "requestAndUrl": true,
+      "overviewKeyboardAndPointer": true,
+      "actualEpochSwitch": true,
+      "maskProbes": 1080,
+      "cpuWorker": true,
+      "restoredImageSignalPixels": 23046,
+      "candidateLineage": true,
+      "mobileNoOverflow": true
+    }
+  ]
+}

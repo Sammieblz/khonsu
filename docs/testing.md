@@ -49,6 +49,44 @@ both authentic cached bundles plus explicitly synthetic display ramps and
 transport failures. It does not claim the outstanding query-URL/export features
 pass or replace public-origin deployment acceptance.
 
+For the optional smooth/detail renderer, also run
+`node scripts/verify-enhancement.mjs` against the static export served from
+`apps/web/out/` on the configured test URL. It temporarily writes isolated
+renderer modules under the ignored export's `__enhancement/` directory so both
+browsers can execute real module Workers, then removes those files on success.
+The suite asserts the production CPU worker starts, compares every cached frame
+across sampling/detail modes, checks fallbacks and records warm rendering times.
+The [research report](enhancement-research.md) includes scientific controls and
+manual steps. GPU/CPU agreement and display speed do not validate deconvolution.
+
+Run `node scripts/verify-candidate-display.mjs` for the #50/#49 integration.
+It checks real rendered markers at DPR 2 and the display-size cap, astropy-reference
+sky positions, A/B and mask metadata, cross-epoch dashes, same-frame selection
+highlights, CPU rendering, resizing and candidate reload/migration. Browser
+storage is isolated from the user's notes. It also rejects an initial empty
+write over existing records and verifies unreadable storage is preserved until
+the visitor explicitly requests replacement.
+
+## Wide fields and consolidated display regression
+
+The [final PR #54 acceptance](merge-54-acceptance.md) records the authorized
+integration and the slow-CPU A/B regression in both browsers.
+
+Run `python scripts/verify-hd-field.py --download` for the explicitly bounded
+two-exposure acquisition, then `node scripts/verify-hd-display.mjs` for the real
+2048-square products in Chromium and Firefox. The latter replays API transport;
+it verifies actual image checksums, displayed masks, native sampling, overview
+geometry/keyboard actions, A/B epochs, CPU worker recovery and candidate lineage.
+[Method, limits and reproduction](hd-fields.md) distinguish this from a live
+search or a public deployment. Its synthetic unit tests test bounds and values,
+not claimed source resolution.
+
+Also run `node scripts/verify-resolution-lab.mjs` to preserve the resolution lab's
+real-image comparisons and controls. Browser display suites share
+`scripts/browser-display-modules.mjs`, which compiles the actual renderer and
+generated limits rather than maintaining independent copies. Candidate tests
+exercise the overview's anonymous-CORS cache behavior through eviction/reload.
+
 ## Release rehearsal
 
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.

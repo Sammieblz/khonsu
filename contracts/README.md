@@ -10,7 +10,7 @@ python scripts/export-contracts.py
 python scripts/export-contracts.py --check
 ```
 
-The normal check compares runtime schema and endpoint semantics against the committed snapshot and checks generated TypeScript exactly. It ignores generated documentation titles and descriptions. The check does not rewrite files.
+The normal check compares runtime schema and endpoint semantics against the committed snapshot and checks generated TypeScript exactly. It also generates/checks `apps/web/src/lib/api/generated-limits.ts` from the FOV and prepared-raster constraints, so browser validation uses the authoritative numeric bounds. It ignores generated documentation titles and descriptions. The check does not rewrite files.
 
 `--from-snapshot` can regenerate declarations offline, but does not verify the runtime. A contract change must update Python models, the exported OpenAPI document and generated TypeScript together.
 

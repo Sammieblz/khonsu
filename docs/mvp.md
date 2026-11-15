@@ -45,6 +45,13 @@ A lightweight NASA Eyes mission-context link or embed may be included only after
 
 ## Working schedule
 
+The November 15 design follow-up is planning only: [#61](https://github.com/Sammieblz/khonsu/issues/61)
+for the dedicated console, [#62](https://github.com/Sammieblz/khonsu/issues/62)
+for sky-swipe entry and loading feedback, and [#63](https://github.com/Sammieblz/khonsu/issues/63)
+for landing storytelling. These do not replace the live-data, release or submission
+acceptance gates. Samuel authorized integrating the display work through PR #54
+after the final cleanup and regression checks.
+
 | Window, America/New_York | Exit condition |
 | --- | --- |
 | Saturday morning | Contracts agreed, owners claim folders, archive access and first real FITS confirmed |

@@ -7,9 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
-const webRequire = createRequire(new URL('../apps/web/package.json', import.meta.url));
 const { chromium, firefox } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const ts = webRequire('typescript');
 const base = process.env.KHONSU_TEST_URL || 'http://localhost:3001';
 const api = process.env.KHONSU_TEST_API || 'http://localhost:8000';
 const output = resolve(process.env.KHONSU_TEST_OUTPUT || '.cache/console');
@@ -74,7 +72,7 @@ async function cpuGpu(page) {
   await openDisplay(page);
   await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent !== 'Preparing display');
   const initialMode = await page.locator('[data-renderer]').textContent();
-  assert.equal(initialMode, 'GPU WebGL2', 'This parity run requires WebGL2; fallback runs are separate');
+  assert.equal(initialMode, 'WebGL2', 'This parity run requires WebGL2; fallback runs are separate');
   await capture(page, '__gpu');
   await page.getByLabel('Rendering mode', { exact: true }).selectOption('cpu');
   await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent?.startsWith('CPU'));
@@ -85,13 +83,8 @@ async function cpuGpu(page) {
 
 // Transpile the actual renderer into isolated browser modules for a controlled,
 // explicitly synthetic ramp. The app's bundled path is tested with real data.
-const modules = {};
-for (const name of ['display', 'displayRenderer', 'display.worker']) {
-  const source = await readFile(new URL(`../apps/web/src/features/viewer/${name}.ts`, import.meta.url), 'utf8');
-  modules[`${name}.js`] = ts.transpileModule(source, {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
-  }).outputText.replaceAll("'./display'", "'./display.js'").replaceAll("'./display.worker.ts'", "'./display.worker.js'");
-}
+const { browserDisplayModules } = await import('./browser-display-modules.mjs');
+const modules = await browserDisplayModules();
 async function rampCheck(page) {
   await page.route('**/__acceptance/*.js', route => route.fulfill({
     contentType: 'text/javascript', body: modules[new URL(route.request().url()).pathname.split('/').at(-1)],
@@ -109,7 +102,7 @@ async function rampCheck(page) {
       for (const curve of ['linear', 'asinh']) for (const mask of ['quiet', 'hatch']) {
         const options = { low: 0, high: 1, a: .3, gamma: 1.35, curve, mask };
         const result = await renderer.render(raster, options);
-        if (renderer.mode !== 'GPU WebGL2') throw Error('Ramp did not use GPU');
+        if (renderer.mode !== 'WebGL2') throw Error('Ramp did not use WebGL2');
         context.drawImage(result, 0, 0);
         const gpu = context.getImageData(0, 0, 64, 8).data, cpu = renderPixels(raster, options);
         let difference = 0;
@@ -179,7 +172,7 @@ for (const engine of [chromium, firefox]) {
     assert.equal(await page.getByLabel('Asinh softness', { exact: true }).inputValue(), '0.1');
     await button(page, 'QUIET PRESET').click();
     await page.getByLabel('Rendering mode', { exact: true }).selectOption('auto');
-    await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent === 'GPU WebGL2');
+    await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent === 'WebGL2');
     await page.evaluate(() => window.__glContexts.findLast(gl => !gl.isContextLost()).getExtension('WEBGL_lose_context').loseContext());
     await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent?.startsWith('CPU'));
     await waitRender(page); result.contextLossRecovery = true;
@@ -251,7 +244,8 @@ for (const engine of [chromium, firefox]) {
     // Real pointer drag rewinds to the earliest actual observation.
     await button(page, 'REWIND').click(); await date(page).fill('1000'); await field.scrollIntoViewIfNeeded();
     const box = await field.boundingBox();
-    await page.mouse.move(box.x + box.width * .9, box.y + box.height / 2); await page.mouse.down();
+    // Cross the first epoch's midpoint decisively, including rounded pointer coordinates.
+    await page.mouse.move(box.x + box.width * .98, box.y + box.height / 2); await page.mouse.down();
     await page.mouse.move(box.x, box.y + box.height / 2, { steps: 6 }); await page.mouse.up();
     assert.equal(await date(page).getAttribute('aria-valuetext'), firstDate);
     result.rewindDrag = true;

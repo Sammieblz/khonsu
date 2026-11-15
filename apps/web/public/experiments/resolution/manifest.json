@@ -1,0 +1,656 @@
+{
+  "schema_version": 2,
+  "generated_at_utc": "2026-11-15T06:12:12.686248+00:00",
+  "versions": {
+    "numpy": "2.2.5",
+    "scipy": "1.18.1",
+    "astropy": "7.0.1",
+    "reproject": "0.14.1",
+    "Pillow": "11.2.1"
+  },
+  "source_hashes": {
+    "scripts/experiment-resolution.py": "634381eb826f195e199a63c3c490bfb74f736ea964d09b2babdc3e64afa392fd",
+    "scripts/probe-resolution.py": "52aa63df112ecd0961e13b332e7ddce72d2bc05faabc4d9282c7f2da35f21f58",
+    "apps/api/app/processing/resolution.py": "af360249f46f6a6d18cb4322eab9205604490804766147329a7eeae013ac865b"
+  },
+  "acquisition_sha256": "8bab5ac3cb4c83379046273ed334d5070ce59909a25d74f6ffce05d9d80fb8f0",
+  "audit": [
+    {
+      "id": "real-wise-0855",
+      "title": "WISE 0855 field (primary)",
+      "inspected": 12,
+      "failed": 0,
+      "triples_checked": 220,
+      "rejections": {
+        "Target wavelength spread exceeds the allowed band fraction": 220
+      },
+      "candidate_groups": [],
+      "status": "insufficient_compatible_coverage",
+      "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+    },
+    {
+      "id": "real-epsilon-indi-b",
+      "title": "Epsilon Indi B field (backup)",
+      "inspected": 12,
+      "failed": 0,
+      "triples_checked": 220,
+      "rejections": {
+        "Target wavelength spread exceeds the allowed band fraction": 220
+      },
+      "candidate_groups": [],
+      "status": "insufficient_compatible_coverage",
+      "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+    },
+    {
+      "id": "north-ecliptic-pole",
+      "title": "North ecliptic pole field",
+      "inspected": 12,
+      "failed": 0,
+      "triples_checked": 220,
+      "rejections": {
+        "Target wavelength spread exceeds the allowed band fraction": 220
+      },
+      "candidate_groups": [],
+      "status": "insufficient_compatible_coverage",
+      "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+    },
+    {
+      "id": "north-pole-deep",
+      "title": "North ecliptic pole deep survey",
+      "inspected": 7,
+      "failed": 5,
+      "triples_checked": 35,
+      "rejections": {
+        "Target wavelength spread exceeds the allowed band fraction": 35
+      },
+      "candidate_groups": [],
+      "status": "insufficient_compatible_coverage",
+      "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+    }
+  ],
+  "fields": [
+    {
+      "id": "real-wise-0855-overview",
+      "title": "WISE 0855 field / 20 arcmin overview",
+      "kind": "real",
+      "fov_arcmin": 20,
+      "native_scale_arcsec": 6.139110815096338,
+      "prepared_side": 391,
+      "display_side": 768,
+      "target": {
+        "ra_deg": 133.7601213914074,
+        "dec_deg": -7.242127941212259,
+        "coordinate_frame": "ICRS"
+      },
+      "grid_wcs": {
+        "WCSAXES": 2,
+        "CRPIX1": 384.5,
+        "CRPIX2": 384.5,
+        "CDELT1": -0.00043402777777778,
+        "CDELT2": 0.00043402777777778,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 133.76012139141,
+        "CRVAL2": -7.2421279412123,
+        "LONPOLE": 180.0,
+        "LATPOLE": -7.2421279412123,
+        "MJDREF": 0.0,
+        "RADESYS": "ICRS"
+      },
+      "limits_mjy_sr": [
+        0.16723724629879,
+        2.1999423503875732
+      ],
+      "asinh_softness": 0.3,
+      "source": {
+        "observation_id": "2025W45_2A_0292_2",
+        "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+        "observed_end_utc": "2025-11-07T20:33:22.377600Z",
+        "release": "DR1",
+        "detector": 2,
+        "wavelength_um": 1.413164368794356,
+        "bandwidth_um": 0.03425144409136026,
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.5000000000",
+        "raw_sha256": "d108c3ec7dba8fa795430cd9895ed6d3126c2d19f19fe31917a6a9888a98a093",
+        "raw_bytes": 5325120,
+        "raw_shape": [
+          293,
+          294
+        ],
+        "epsf_zone_count": 441
+      },
+      "assets": {
+        "current": {
+          "standard": "/experiments/resolution/real-wise-0855-overview-current-standard.png",
+          "shoulder": "/experiments/resolution/real-wise-0855-overview-current-shoulder.png"
+        },
+        "native": {
+          "standard": "/experiments/resolution/real-wise-0855-overview-native-standard.png",
+          "shoulder": "/experiments/resolution/real-wise-0855-overview-native-shoulder.png"
+        },
+        "denoised": {
+          "standard": "/experiments/resolution/real-wise-0855-overview-denoised-standard.png",
+          "shoulder": "/experiments/resolution/real-wise-0855-overview-denoised-shoulder.png"
+        }
+      },
+      "metrics": {
+        "background_mad_original": 0.00865869875997305,
+        "background_mad_trial": 0.00988852887258583,
+        "reference_peaks": 15,
+        "max_centroid_change_arcsec": 0.31813151064209844,
+        "median_moment_width_original_arcsec": 9.09254450872483,
+        "median_moment_width_trial_arcsec": 8.343316280400398,
+        "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution.",
+        "display_valid_fraction_current": 0.9691958957248263,
+        "display_valid_fraction_native": 0.9638671875,
+        "display_white_fraction_standard": 0.007090439603737476,
+        "display_white_fraction_shoulder": 0.00019524653833164472
+      },
+      "noise_reduction": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.85,
+        "kernel": "3x3 binomial",
+        "robust_haar_sigma": 0.022724383310973643,
+        "archive_sky_sigma": 0.018139837342327304,
+        "used_sigma": 0.018139837342327304,
+        "maximum_correction_sigma": 2,
+        "validity_unchanged": true,
+        "note": "Display only. Faint sources and diffuse structure can be attenuated; use Original for evidence.",
+        "diagnostics": {
+          "background_mad_original": 0.009565323867948299,
+          "background_mad_trial": 0.007044644540753965,
+          "reference_peaks": 15,
+          "max_centroid_change_arcsec": 0.00253016654101938,
+          "median_moment_width_original_arcsec": 8.343512088127694,
+          "median_moment_width_trial_arcsec": 8.341462135057345,
+          "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution."
+        }
+      },
+      "quality_flags": {
+        "scope": "Entire padded source FITS cutout; flags can overlap",
+        "counts": {
+          "TRANSIENT": 271,
+          "OVERFLOW": 15,
+          "SUR_ERROR": 188,
+          "NONFUNC": 164,
+          "COLD": 27,
+          "PERSIST": 428,
+          "OUTLIER": 1331,
+          "BLOOM": 53,
+          "HALO": 599
+        }
+      },
+      "coverage": {
+        "id": "real-wise-0855",
+        "title": "WISE 0855 field (primary)",
+        "inspected": 12,
+        "failed": 0,
+        "triples_checked": 220,
+        "rejections": {
+          "Target wavelength spread exceeds the allowed band fraction": 220
+        },
+        "candidate_groups": [],
+        "status": "insufficient_compatible_coverage",
+        "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+      },
+      "stack_available": false,
+      "note": "A wider crop of the same authentic exposure. More measured sky pixels, at the same native angular sampling. Native resampling can emphasize square detector footprints; compare both views. No recovered resolution is claimed."
+    },
+    {
+      "id": "real-epsilon-indi-b-overview",
+      "title": "Epsilon Indi B field / 20 arcmin overview",
+      "kind": "real",
+      "fov_arcmin": 20,
+      "native_scale_arcsec": 6.154810811417333,
+      "prepared_side": 390,
+      "display_side": 768,
+      "target": {
+        "ra_deg": 331.0986113344776,
+        "dec_deg": -56.800804140277776,
+        "coordinate_frame": "ICRS"
+      },
+      "grid_wcs": {
+        "WCSAXES": 2,
+        "CRPIX1": 384.5,
+        "CRPIX2": 384.5,
+        "CDELT1": -0.00043402777777778,
+        "CDELT2": 0.00043402777777778,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 331.09861133448,
+        "CRVAL2": -56.800804140278,
+        "LONPOLE": 180.0,
+        "LATPOLE": -56.800804140278,
+        "MJDREF": 0.0,
+        "RADESYS": "ICRS"
+      },
+      "limits_mjy_sr": [
+        0.13013322823643686,
+        2.5772631482779977
+      ],
+      "asinh_softness": 0.3,
+      "source": {
+        "observation_id": "2025W19_1B_0344_3",
+        "observed_start_utc": "2025-05-07T05:14:15.590400Z",
+        "observed_end_utc": "2025-05-07T05:16:10.761600Z",
+        "release": "DR1",
+        "detector": 3,
+        "wavelength_um": 1.6850815019655676,
+        "bandwidth_um": 0.04013507966355219,
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W19_1B/l2b-v27-2026-197/3/level2_2025W19_1B_0344_3D3_spx_l2b-v27-2026-197.fits?center=331.0986113345%2C-56.8008041403&size=0.5000000000",
+        "raw_sha256": "499483bd8f9adf67992c8fa9e74947369b04ee1c164e7ea0ff96c6d2c4f936ac",
+        "raw_bytes": 5397120,
+        "raw_shape": [
+          293,
+          292
+        ],
+        "epsf_zone_count": 451
+      },
+      "assets": {
+        "current": {
+          "standard": "/experiments/resolution/real-epsilon-indi-b-overview-current-standard.png",
+          "shoulder": "/experiments/resolution/real-epsilon-indi-b-overview-current-shoulder.png"
+        },
+        "native": {
+          "standard": "/experiments/resolution/real-epsilon-indi-b-overview-native-standard.png",
+          "shoulder": "/experiments/resolution/real-epsilon-indi-b-overview-native-shoulder.png"
+        },
+        "denoised": {
+          "standard": "/experiments/resolution/real-epsilon-indi-b-overview-denoised-standard.png",
+          "shoulder": "/experiments/resolution/real-epsilon-indi-b-overview-denoised-shoulder.png"
+        }
+      },
+      "metrics": {
+        "background_mad_original": 0.013909236527979374,
+        "background_mad_trial": 0.01428346841546057,
+        "reference_peaks": 15,
+        "max_centroid_change_arcsec": 0.13546959904629802,
+        "median_moment_width_original_arcsec": 9.38176607349033,
+        "median_moment_width_trial_arcsec": 8.599523277412134,
+        "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution.",
+        "display_valid_fraction_current": 0.9363674587673612,
+        "display_valid_fraction_native": 0.9295366075303819,
+        "display_white_fraction_standard": 0.02849544835234185,
+        "display_white_fraction_shoulder": 2.9183074546339985e-05
+      },
+      "noise_reduction": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.85,
+        "kernel": "3x3 binomial",
+        "robust_haar_sigma": 0.019543113027513027,
+        "archive_sky_sigma": 0.014903795696067122,
+        "used_sigma": 0.014903795696067122,
+        "maximum_correction_sigma": 2,
+        "validity_unchanged": true,
+        "note": "Display only. Faint sources and diffuse structure can be attenuated; use Original for evidence.",
+        "diagnostics": {
+          "background_mad_original": 0.014168748389169449,
+          "background_mad_trial": 0.012436700593601798,
+          "reference_peaks": 15,
+          "max_centroid_change_arcsec": 0.003441115511769585,
+          "median_moment_width_original_arcsec": 8.5997107072743,
+          "median_moment_width_trial_arcsec": 8.600295395429063,
+          "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution."
+        }
+      },
+      "quality_flags": {
+        "scope": "Entire padded source FITS cutout; flags can overlap",
+        "counts": {
+          "TRANSIENT": 1675,
+          "OVERFLOW": 45,
+          "SUR_ERROR": 1004,
+          "NONFUNC": 213,
+          "COLD": 37,
+          "PERSIST": 641,
+          "OUTLIER": 1529,
+          "BLOOM": 183,
+          "HALO": 4405
+        }
+      },
+      "coverage": {
+        "id": "real-epsilon-indi-b",
+        "title": "Epsilon Indi B field (backup)",
+        "inspected": 12,
+        "failed": 0,
+        "triples_checked": 220,
+        "rejections": {
+          "Target wavelength spread exceeds the allowed band fraction": 220
+        },
+        "candidate_groups": [],
+        "status": "insufficient_compatible_coverage",
+        "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+      },
+      "stack_available": false,
+      "note": "A wider crop of the same authentic exposure. More measured sky pixels, at the same native angular sampling. Native resampling can emphasize square detector footprints; compare both views. No recovered resolution is claimed."
+    },
+    {
+      "id": "real-wise-0855",
+      "title": "WISE 0855 field / 6 arcmin close-up",
+      "kind": "real",
+      "fov_arcmin": 6.0,
+      "native_scale_arcsec": 6.139110815096338,
+      "prepared_side": 118,
+      "display_side": 768,
+      "target": {
+        "ra_deg": 133.7601213914074,
+        "dec_deg": -7.242127941212259,
+        "coordinate_frame": "ICRS"
+      },
+      "grid_wcs": {
+        "WCSAXES": 2,
+        "CRPIX1": 384.5,
+        "CRPIX2": 384.5,
+        "CDELT1": -0.00013020833333333,
+        "CDELT2": 0.00013020833333333,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 133.76012139141,
+        "CRVAL2": -7.2421279412123,
+        "LONPOLE": 180.0,
+        "LATPOLE": -7.2421279412123,
+        "MJDREF": 0.0,
+        "RADESYS": "ICRS"
+      },
+      "limits_mjy_sr": [
+        0.16723724629879,
+        2.1999423503875732
+      ],
+      "asinh_softness": 0.3,
+      "source": {
+        "observation_id": "2025W45_2A_0292_2",
+        "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+        "observed_end_utc": "2025-11-07T20:33:22.377600Z",
+        "release": "DR1",
+        "detector": 2,
+        "wavelength_um": 1.413164368794356,
+        "bandwidth_um": 0.03425144409136026,
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+        "raw_sha256": "307eb03fde7cce141a5875f235ec296dbd14dad08cadf9b6cf879f49bc5e5888",
+        "raw_bytes": 4069440,
+        "raw_shape": [
+          88,
+          88
+        ],
+        "epsf_zone_count": 441
+      },
+      "assets": {
+        "current": {
+          "standard": "/experiments/resolution/real-wise-0855-current-standard.png",
+          "shoulder": "/experiments/resolution/real-wise-0855-current-shoulder.png"
+        },
+        "native": {
+          "standard": "/experiments/resolution/real-wise-0855-native-standard.png",
+          "shoulder": "/experiments/resolution/real-wise-0855-native-shoulder.png"
+        },
+        "denoised": {
+          "standard": "/experiments/resolution/real-wise-0855-denoised-standard.png",
+          "shoulder": "/experiments/resolution/real-wise-0855-denoised-shoulder.png"
+        }
+      },
+      "metrics": {
+        "background_mad_original": 0.007858111523091793,
+        "background_mad_trial": 0.009060411280337875,
+        "reference_peaks": 15,
+        "max_centroid_change_arcsec": 0.23004665105653707,
+        "median_moment_width_original_arcsec": 9.34726002245137,
+        "median_moment_width_trial_arcsec": 8.636637778486934,
+        "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution.",
+        "display_valid_fraction_current": 0.9682888454861112,
+        "display_valid_fraction_native": 0.9625922309027778,
+        "display_white_fraction_standard": 0.004591728899535015,
+        "display_white_fraction_shoulder": 0.0
+      },
+      "noise_reduction": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.85,
+        "kernel": "3x3 binomial",
+        "robust_haar_sigma": 0.021228270766139028,
+        "archive_sky_sigma": 0.018004795645808404,
+        "used_sigma": 0.018004795645808404,
+        "maximum_correction_sigma": 2,
+        "validity_unchanged": true,
+        "note": "Display only. Faint sources and diffuse structure can be attenuated; use Original for evidence.",
+        "diagnostics": {
+          "background_mad_original": 0.0087724007251928,
+          "background_mad_trial": 0.006508057129246307,
+          "reference_peaks": 15,
+          "max_centroid_change_arcsec": 0.09552103183174523,
+          "median_moment_width_original_arcsec": 8.746864597835192,
+          "median_moment_width_trial_arcsec": 8.605125147272444,
+          "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution."
+        }
+      },
+      "quality_flags": {
+        "scope": "Entire padded source FITS cutout; flags can overlap",
+        "counts": {
+          "TRANSIENT": 18,
+          "SUR_ERROR": 15,
+          "NONFUNC": 13,
+          "COLD": 3,
+          "PERSIST": 77,
+          "OUTLIER": 137,
+          "HALO": 62
+        }
+      },
+      "coverage": {
+        "id": "real-wise-0855",
+        "title": "WISE 0855 field (primary)",
+        "inspected": 12,
+        "failed": 0,
+        "triples_checked": 220,
+        "rejections": {
+          "Target wavelength spread exceeds the allowed band fraction": 220
+        },
+        "candidate_groups": [],
+        "status": "insufficient_compatible_coverage",
+        "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+      },
+      "stack_available": false,
+      "note": "One authentic exposure. Native resampling can emphasize square detector footprints; compare both views. No recovered resolution is claimed."
+    },
+    {
+      "id": "real-epsilon-indi-b",
+      "title": "Epsilon Indi B field / 6 arcmin close-up",
+      "kind": "real",
+      "fov_arcmin": 6.0,
+      "native_scale_arcsec": 6.154810811417333,
+      "prepared_side": 117,
+      "display_side": 768,
+      "target": {
+        "ra_deg": 331.0986113344776,
+        "dec_deg": -56.800804140277776,
+        "coordinate_frame": "ICRS"
+      },
+      "grid_wcs": {
+        "WCSAXES": 2,
+        "CRPIX1": 384.5,
+        "CRPIX2": 384.5,
+        "CDELT1": -0.00013020833333333,
+        "CDELT2": 0.00013020833333333,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 331.09861133448,
+        "CRVAL2": -56.800804140278,
+        "LONPOLE": 180.0,
+        "LATPOLE": -56.800804140278,
+        "MJDREF": 0.0,
+        "RADESYS": "ICRS"
+      },
+      "limits_mjy_sr": [
+        0.13013322823643686,
+        2.5772631482779977
+      ],
+      "asinh_softness": 0.3,
+      "source": {
+        "observation_id": "2025W19_1B_0344_3",
+        "observed_start_utc": "2025-05-07T05:14:15.590400Z",
+        "observed_end_utc": "2025-05-07T05:16:10.761600Z",
+        "release": "DR1",
+        "detector": 3,
+        "wavelength_um": 1.6850815019655676,
+        "bandwidth_um": 0.04013507966355219,
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W19_1B/l2b-v27-2026-197/3/level2_2025W19_1B_0344_3D3_spx_l2b-v27-2026-197.fits?center=331.0986113345%2C-56.8008041403&size=0.1500000000",
+        "raw_sha256": "41b1e38bcfede38700bb8fd719301a4f51df92cbc7252459562657b9e114d8a1",
+        "raw_bytes": 4152960,
+        "raw_shape": [
+          88,
+          88
+        ],
+        "epsf_zone_count": 451
+      },
+      "assets": {
+        "current": {
+          "standard": "/experiments/resolution/real-epsilon-indi-b-current-standard.png",
+          "shoulder": "/experiments/resolution/real-epsilon-indi-b-current-shoulder.png"
+        },
+        "native": {
+          "standard": "/experiments/resolution/real-epsilon-indi-b-native-standard.png",
+          "shoulder": "/experiments/resolution/real-epsilon-indi-b-native-shoulder.png"
+        },
+        "denoised": {
+          "standard": "/experiments/resolution/real-epsilon-indi-b-denoised-standard.png",
+          "shoulder": "/experiments/resolution/real-epsilon-indi-b-denoised-shoulder.png"
+        }
+      },
+      "metrics": {
+        "background_mad_original": 0.018856357783079147,
+        "background_mad_trial": 0.019565277835521876,
+        "reference_peaks": 14,
+        "max_centroid_change_arcsec": 0.18987949440013513,
+        "median_moment_width_original_arcsec": 10.958713746915222,
+        "median_moment_width_trial_arcsec": 10.419964221268451,
+        "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution.",
+        "display_valid_fraction_current": 0.9681650797526041,
+        "display_valid_fraction_native": 0.9645843505859375,
+        "display_white_fraction_standard": 0.0034397602538075527,
+        "display_white_fraction_shoulder": 0.0
+      },
+      "noise_reduction": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.85,
+        "kernel": "3x3 binomial",
+        "robust_haar_sigma": 0.023219641068577764,
+        "archive_sky_sigma": 0.01603916853889646,
+        "used_sigma": 0.01603916853889646,
+        "maximum_correction_sigma": 2,
+        "validity_unchanged": true,
+        "note": "Display only. Faint sources and diffuse structure can be attenuated; use Original for evidence.",
+        "diagnostics": {
+          "background_mad_original": 0.019447471591226024,
+          "background_mad_trial": 0.017507968233955312,
+          "reference_peaks": 15,
+          "max_centroid_change_arcsec": 0.08507937402989954,
+          "median_moment_width_original_arcsec": 10.165615312501876,
+          "median_moment_width_trial_arcsec": 10.164798839333871,
+          "note": "Same fixed sky pixels and peak patches. Width is a moment diagnostic, not a fitted PSF FWHM or validated resolution."
+        }
+      },
+      "quality_flags": {
+        "scope": "Entire padded source FITS cutout; flags can overlap",
+        "counts": {
+          "TRANSIENT": 98,
+          "SUR_ERROR": 54,
+          "NONFUNC": 23,
+          "COLD": 2,
+          "PERSIST": 36,
+          "OUTLIER": 24,
+          "HALO": 257
+        }
+      },
+      "coverage": {
+        "id": "real-epsilon-indi-b",
+        "title": "Epsilon Indi B field (backup)",
+        "inspected": 12,
+        "failed": 0,
+        "triples_checked": 220,
+        "rejections": {
+          "Target wavelength spread exceeds the allowed band fraction": 220
+        },
+        "candidate_groups": [],
+        "status": "insufficient_compatible_coverage",
+        "note": "Bounded sample only; this does not establish absence of suitable coverage elsewhere in the archive."
+      },
+      "stack_available": false,
+      "note": "One authentic exposure. Native resampling can emphasize square detector footprints; compare both views. No recovered resolution is claimed."
+    },
+    {
+      "id": "synthetic",
+      "title": "Synthetic sampling control",
+      "kind": "synthetic",
+      "display_side": 768,
+      "native_scale_arcsec": null,
+      "prepared_side": 64,
+      "fov_arcmin": null,
+      "source": null,
+      "assets": {
+        "current": {
+          "standard": "/experiments/resolution/synthetic-current-standard.png",
+          "shoulder": "/experiments/resolution/synthetic-current-shoulder.png"
+        },
+        "native": {
+          "standard": "/experiments/resolution/synthetic-native-standard.png",
+          "shoulder": "/experiments/resolution/synthetic-native-shoulder.png"
+        },
+        "denoised": {
+          "standard": "/experiments/resolution/synthetic-denoised-standard.png",
+          "shoulder": "/experiments/resolution/synthetic-denoised-shoulder.png"
+        },
+        "stack": {
+          "standard": "/experiments/resolution/synthetic-stack-standard.png",
+          "shoulder": "/experiments/resolution/synthetic-stack-shoulder.png"
+        },
+        "truth": {
+          "standard": "/experiments/resolution/synthetic-truth-standard.png",
+          "shoulder": "/experiments/resolution/synthetic-truth-shoulder.png"
+        }
+      },
+      "coverage_asset": "/experiments/resolution/synthetic-coverage.png",
+      "metrics": {
+        "current_rmse": 0.013391831336938467,
+        "native_rmse": 0.012315893842118217,
+        "denoised_rmse": 0.01022297070816151,
+        "stack_rmse": 0.006642424313998943,
+        "coverage_fraction": 1.0,
+        "median_contributors": 8.0,
+        "variance_note": "Diagonal propagated variance assumes independent input noise; adjacent output pixels are correlated."
+      },
+      "noise_reduction": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.85,
+        "kernel": "3x3 binomial",
+        "robust_haar_sigma": 0.011871273371674106,
+        "archive_sky_sigma": 0.012,
+        "used_sigma": 0.011871273371674106,
+        "maximum_correction_sigma": 2,
+        "validity_unchanged": true,
+        "note": "Display only. Faint sources and diffuse structure can be attenuated; use Original for evidence."
+      },
+      "stack_available": true,
+      "exposure_count": 8,
+      "seed": 57,
+      "pixfrac": 0.6,
+      "note": "SIMULATED DATA: eight noisy measurements of one analytic scene. No real observation dates or discoveries."
+    }
+  ],
+  "method": "Native bounded Catmull-Rom resampling; optional native-grid local Wiener noise reduction and asinh highlight shoulder; synthetic pixel-drop reconstruction.",
+  "gap_display": {
+    "encoding": "RGBA with binary alpha; no-data RGB is zero but alpha is zero",
+    "default": "Dark navy #070b12",
+    "inspect": "Slate #273140",
+    "note": "Gap styling changes no measured pixel or validity; original hold uses the prior slate display."
+  },
+  "limits": [
+    "Research comparison only; production data and measurements are unchanged.",
+    "Real stacks require full-field spectral compatibility and registration verification, beyond the target gate.",
+    "A synthetic sampling improvement does not establish recovered resolution in SPHEREx.",
+    "Original source data stay immutable. Missing measurements remain masked."
+  ]
+}

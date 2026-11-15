@@ -11,6 +11,7 @@ from PIL import Image
 from reproject import reproject_interp
 
 from ..interfaces import ProcessingOptions
+from ..limits import MAX_GRID_SIDE
 from .errors import ProcessingError
 
 # Output pixels per native detector pixel. Two keeps registration error near
@@ -18,9 +19,9 @@ from .errors import ProcessingError
 # pixel across many display pixels (512 px at 6 arcmin was ~9x).
 GRID_OVERSAMPLE = 2.0
 MIN_GRID_PX = 32
-# Wide fields are sampled slightly coarser than native rather than exceeding
-# the per-job output pixel budget.
-MAX_AUTO_GRID_PX = 512
+# Large fields retain native samples; the processor also enforces a total
+# sequence pixel budget before allocating output arrays.
+MAX_AUTO_GRID_PX = MAX_GRID_SIDE
 
 # Display stretch, shared by every frame in a comparison. Limits come from the
 # empty sky so noise stays dark instead of filling the gray range.

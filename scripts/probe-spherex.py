@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "apps" / "api"))
 
 from app.interfaces import ProcessingOptions
+from app.limits import MAX_CUTOUT_ARCMIN, MAX_DOWNLOAD_BYTES, MAX_FITS_BYTES
 from app.retrieval.presets import PRESETS
 from app.retrieval.service import IrsaRetriever, RetrievalError
 from app.schemas import SequenceRequest
@@ -64,7 +65,7 @@ The processor retained source metadata, quality masks and a shared celestial gri
 
 """
 
-REFERENCE_NOTES = """
+REFERENCE_NOTES = f"""
 ## Coordinate references
 
 | Target | Coordinate reference | Search context |
@@ -81,11 +82,11 @@ REFERENCE_NOTES = """
 
 The [official introductory notebook](https://caltech-ipac.github.io/irsa-tutorials/spherex-intro/) queries the IRSA SIA service with `collection=['spherex_dr1','spherex_qr3']`. The [current access guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-access/) confirms those compatible releases. The [SIA service guide](https://irsa.ipac.caltech.edu/ibe/sia.html) defines `POS` in ICRS degrees, `TIME` in MJD, `BAND` in metres and `RESPONSEFORMAT=CSV`.
 
-Khonsu searches a one-arcsecond cone at the supplied field centre, selects the most populated detector when none was requested, and samples actual exposures across the available time span. It appends the documented `center` and `size` parameters to approved IRSA FITS URLs. Size is 1.5 times the square field width in degrees, capped at 60 arcminutes and never below the field width, so the detector-aligned cutout covers the corners of the north-up field (see [display rendering](display-rendering.md)). A detector footprint can cover the centre without covering the whole field; processing masks uncovered pixels.
+Khonsu searches a one-arcsecond cone at the supplied field centre, selects the most populated detector when none was requested, and samples actual exposures across the available time span. It appends the documented `center` and `size` parameters to approved IRSA FITS URLs. Size is 1.5 times the square field width in degrees, capped at {MAX_CUTOUT_ARCMIN:g} arcminutes and never below the field width, so the detector-aligned cutout covers the corners of the north-up field (see [display rendering](display-rendering.md)). A detector footprint can cover the centre without covering the whole field; processing masks uncovered pixels.
 
 The returned fields `obs_id`, `t_min`, `t_max`, `energy_bandpassname` and `access_url` supply provenance. FITS processing dates are not exposure dates. SIA image-level wavelength overlap is not proof of a comparable wavelength at the target. The processor checks the target's WCS-WAVE wavelength and bandwidth, flags, finite values and coverage as described by the [official data-products guide](https://caltech-ipac.github.io/spherex-archive-documentation/spherex-data-products/).
 
-Metadata is capped at 5,000 rows and 8 MiB. FITS responses are capped at 48 MiB each and 256 MiB per sequence. Requests have finite timeouts, a total retrieval deadline and cancellation checks between reads. Transient failures are retried with capped 1, 2, 4 and 8 second backoff: at most five attempts for the metadata query and three per FITS cutout. IRSA's `Retry-After` header (observed as 5 seconds) is honoured up to 15 seconds, and no wait crosses the deadline. A cutout that stays busy or unusable is skipped; the job continues with the remaining real observations and the manifest carries an `ARCHIVE_DOWNLOADS_SKIPPED` warning with the count. If fewer than two cutouts download, the job reports `archive_busy` (HTTP 429 or 503) or `archive_unavailable` rather than an epoch shortage. The earlier 09:42 UTC probe recorded above ran with the three-attempt, no-skip policy. The current complete five-target run uses the bounded parallel-download and skip policy described here. Downloads and redirects allow only HTTPS `irsa.ipac.caltech.edu/ibe/data/spherex/{dr1,qr3}/level2/...fits` paths. An overflow asks the user to narrow the date range; it is not silently reported as complete coverage.
+Metadata is capped at 5,000 rows and 8 MiB. FITS responses are capped at {MAX_FITS_BYTES // 1024**2} MiB each and {MAX_DOWNLOAD_BYTES // 1024**2} MiB per sequence. Requests have finite timeouts, a total retrieval deadline and cancellation checks between reads. Transient failures are retried with capped 1, 2, 4 and 8 second backoff: at most five attempts for the metadata query and three per FITS cutout. IRSA's `Retry-After` header (observed as 5 seconds) is honoured up to 15 seconds, and no wait crosses the deadline. A cutout that stays busy or unusable is skipped; the job continues with the remaining real observations and the manifest carries an `ARCHIVE_DOWNLOADS_SKIPPED` warning with the count. If fewer than two cutouts download, the job reports `archive_busy` (HTTP 429 or 503) or `archive_unavailable` rather than an epoch shortage. The earlier 09:42 UTC probe recorded above ran with the three-attempt, no-skip policy. The current complete five-target run uses the bounded parallel-download and skip policy described here. Downloads and redirects allow only HTTPS `irsa.ipac.caltech.edu/ibe/data/spherex/{{dr1,qr3}}/level2/...fits` paths. An overflow asks the user to narrow the date range; it is not silently reported as complete coverage.
 
 ### Download speed (BYT-35)
 
@@ -147,7 +148,7 @@ def write_report(report: dict, path: Path) -> None:
             lines.append("")
     lines.extend(["## Processing and interpretation limits", "",
         "One detector is selected per bounded sample. The full comparison group must have target-wavelength center spread no larger than one quarter of its smallest bandwidth. SIA BAND overlaps a whole image and cannot replace this target-position check. WCS-WAVE wavelengths are approximate visualization values, not calibrated spectrophotometry.", "",
-        "The retrieval cutout is 1.5 times the displayed field width, capped at 60 arcminutes and never narrower than the requested field. Validity-weighted reprojection preserves bad-pixel locations and coverage masks. A common sky-referenced asinh stretch is used across a sequence. No PSF/background matching, resampling uncertainty propagation, inpainting, stacked epochs or interpolated observation times are claimed.", "",
+        f"The retrieval cutout is 1.5 times the displayed field width, capped at {MAX_CUTOUT_ARCMIN:g} arcminutes and never narrower than the requested field. Validity-weighted reprojection preserves bad-pixel locations and coverage masks. A common sky-referenced asinh stretch is used across a sequence. No PSF/background matching, resampling uncertainty propagation, inpainting, stacked epochs or interpolated observation times are claimed.", "",
         "SIP convention diagnostics, when emitted, are recorded in the JSON report. The existing reader explicitly clears SIP on its alternate spectral WCS before wavelength lookup, while retaining the supplied celestial WCS. No header correction or precision astrometric validation is claimed here; stationary-source and external-catalog validation remain separate from field playback.", "",
         "The global probe budget is shared fairly across remaining targets, with an additional per-target cap. Metadata, per-file downloads, combined bytes, retry waits and processing cancellation remain bounded. A missing second comparable epoch is distinct from an archive timeout or malformed response.", "",
         "## Reproduction", "",

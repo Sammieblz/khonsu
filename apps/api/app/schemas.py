@@ -9,6 +9,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
+from .limits import MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, MAX_OBSERVATIONS, MAX_RASTER_BYTES
+
 
 class ApiModel(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
@@ -28,8 +30,8 @@ class SkyTarget(ApiModel):
 
 
 class SequenceRequest(SkyTarget):
-    fov_arcmin: float = Field(default=6.0, ge=0.5, le=60.0)
-    max_frames: int = Field(default=24, ge=2, le=96)
+    fov_arcmin: float = Field(default=6.0, ge=MIN_FOV_ARCMIN, le=MAX_FOV_ARCMIN)
+    max_frames: int = Field(default=24, ge=2, le=MAX_OBSERVATIONS)
     detector: Detector | None = None
     wavelength_min_um: Wavelength | None = None
     wavelength_max_um: Wavelength | None = None
@@ -125,7 +127,7 @@ class DisplaySettings(ApiModel):
 class PreparedRaster(ApiModel):
     url: str = Field(min_length=1, max_length=2048)
     encoding: Literal["float32-le-mask8-v1"] = "float32-le-mask8-v1"
-    size_bytes: int = Field(gt=0, le=5 * 1024 * 1024)
+    size_bytes: int = Field(gt=0, le=MAX_RASTER_BYTES)
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
@@ -171,10 +173,10 @@ class SequenceManifest(ApiModel):
     title: str = Field(min_length=1, max_length=160)
     disclosure: str = Field(min_length=1, max_length=500)
     target: SkyTarget
-    requested_fov_arcmin: float = Field(ge=0.5, le=60.0)
+    requested_fov_arcmin: float = Field(ge=MIN_FOV_ARCMIN, le=MAX_FOV_ARCMIN)
     grid: ImageGrid
     display: DisplaySettings
-    frames: list[Frame] = Field(min_length=2, max_length=96)
+    frames: list[Frame] = Field(min_length=2, max_length=MAX_OBSERVATIONS)
     warnings: list[QualityWarning] = Field(default_factory=list)
     processing: dict[str, str | float | int | bool] = Field(default_factory=dict)
 

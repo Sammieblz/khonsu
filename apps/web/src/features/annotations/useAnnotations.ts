@@ -10,7 +10,9 @@ export function useAnnotations() {
   const [storage, setStorage] = useState<CandidateStorageState>({ kind: "loading" });
   // Writes are allowed only after a readable load, or after the visitor chooses
   // to replace unreadable saved data. Candidates always work in memory.
-  const writable = useRef(false);
+  // Commit write permission with the loaded store. A ref would become writable
+  // while the persistence effect still sees the initial empty render.
+  const [writable, setWritable] = useState(false);
   const unreadableRaw = useRef<string | null>(null);
 
   useEffect(() => {
@@ -24,8 +26,8 @@ export function useAnnotations() {
     }
     const loaded = loadStore(raw, legacy);
     if (loaded.ok) {
-      writable.current = true;
       setStore(loaded.store);
+      setWritable(true);
     } else {
       unreadableRaw.current = raw;
       setStorage({ kind: "unreadable", reason: loaded.reason });
@@ -33,7 +35,7 @@ export function useAnnotations() {
   }, []);
 
   useEffect(() => {
-    if (!writable.current) return;
+    if (!writable) return;
     const text = serializeStore(store);
     if (text.length > MAX_STORE_CHARS) { setStorage({ kind: "too-large" }); return; }
     try {
@@ -42,7 +44,7 @@ export function useAnnotations() {
     } catch {
       setStorage({ kind: "write-failed" });
     }
-  }, [store]);
+  }, [store, writable]);
 
   function add(selection: ImageSelection, note: string, context: SequenceContext | null) {
     const now = new Date().toISOString();
@@ -56,7 +58,7 @@ export function useAnnotations() {
   }
   /** Replace unreadable saved data with this session's candidates, after the visitor asks. */
   function startFresh() {
-    writable.current = true;
+    setWritable(true);
     unreadableRaw.current = null;
     setStore(previous => ({ ...previous }));
   }

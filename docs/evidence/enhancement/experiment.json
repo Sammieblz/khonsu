@@ -1,0 +1,285 @@
+{
+  "seed": 49,
+  "experiment": "exploratory-display-restoration-v1",
+  "real": [
+    {
+      "target": "real-wise-0855",
+      "frame": "2025W45_2A_0292_2",
+      "utc": "2025-11-07T20:31:27.206400Z",
+      "release": "DR1",
+      "raster_sha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9",
+      "metrics": {
+        "Original": {
+          "original_sky_std_ratio": 1.0,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.0,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.0
+        },
+        "Detail 0.35": {
+          "original_sky_std_ratio": 1.0018139847022771,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.03449834581646211,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.007089185430288955
+        },
+        "Wiener 0.03": {
+          "original_sky_std_ratio": 5.16233399309921,
+          "valid_negative_fraction": 0.015946006081732553,
+          "max_bright_peak_centroid_shift_grid_px": 0.7790646557796169,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.22709191256621405
+        },
+        "RL 5 iterations": {
+          "original_sky_std_ratio": 1.7512353420467122,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.33388295903792803,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.1417287496021058
+        },
+        "RL 20 iterations": {
+          "original_sky_std_ratio": 3.075370292114058,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.7673611527157176,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.3805289183155767
+        },
+        "Fourier bandpass": {
+          "original_sky_std_ratio": 4.0739324500387495,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.966748911702873,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.088216456425738
+        },
+        "Wiener 0.003": {
+          "original_sky_std_ratio": 11.204001078584962,
+          "valid_negative_fraction": 0.02877697841726619,
+          "max_bright_peak_centroid_shift_grid_px": 1.3182094911667788,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.47262831239605085
+        },
+        "Wiener 0.3": {
+          "original_sky_std_ratio": 3.7710618386669035,
+          "valid_negative_fraction": 0.01068011570125343,
+          "max_bright_peak_centroid_shift_grid_px": 0.41665935028744644,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.1316395990161872
+        },
+        "Wiener 3.0": {
+          "original_sky_std_ratio": 3.143370877315109,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 1.0043393575020776,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.18693211116536818
+        },
+        "RL 2 iterations": {
+          "original_sky_std_ratio": 1.2629383109449457,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.3056503652842658,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.09490759024661914
+        },
+        "RL 10 iterations": {
+          "original_sky_std_ratio": 2.2961109950247667,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.5588448808989943,
+          "checked_bright_peaks": 15,
+          "valid_rms_change": 0.254374460471803
+        }
+      },
+      "interpretation": "No truth image exists here; these are artifact/change diagnostics, not recovered-resolution measurements."
+    },
+    {
+      "target": "real-epsilon-indi-b",
+      "frame": "2025W19_1B_0344_3",
+      "utc": "2025-05-07T05:14:15.590400Z",
+      "release": "DR1",
+      "raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+      "metrics": {
+        "Original": {
+          "original_sky_std_ratio": 1.0,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.0,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.0
+        },
+        "Detail 0.35": {
+          "original_sky_std_ratio": 0.9981496530289213,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.04611600136844752,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.008078961519936081
+        },
+        "Wiener 0.03": {
+          "original_sky_std_ratio": 2.6281791692855934,
+          "valid_negative_fraction": 0.010941744642318141,
+          "max_bright_peak_centroid_shift_grid_px": 0.43698053504388173,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.24963954147082879
+        },
+        "RL 5 iterations": {
+          "original_sky_std_ratio": 1.1461670482648605,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.2639737808836433,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.1899640986416801
+        },
+        "RL 20 iterations": {
+          "original_sky_std_ratio": 1.3799914986138058,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.47010774318493986,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.493844381789436
+        },
+        "Fourier bandpass": {
+          "original_sky_std_ratio": 2.32752314817514,
+          "valid_negative_fraction": 0.02444913975249019,
+          "max_bright_peak_centroid_shift_grid_px": 0.9981499389632718,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.12602421604988803
+        },
+        "Wiener 0.003": {
+          "original_sky_std_ratio": 3.080462536223373,
+          "valid_negative_fraction": 0.01486568065197706,
+          "max_bright_peak_centroid_shift_grid_px": 0.7302141604739899,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.4711057445349676
+        },
+        "Wiener 0.3": {
+          "original_sky_std_ratio": 2.4826151834270984,
+          "valid_negative_fraction": 0.012224569876245095,
+          "max_bright_peak_centroid_shift_grid_px": 0.5206013142330456,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.15567952409706273
+        },
+        "Wiener 3.0": {
+          "original_sky_std_ratio": 2.148555181233401,
+          "valid_negative_fraction": 0.0012073649260488982,
+          "max_bright_peak_centroid_shift_grid_px": 0.9853664814877311,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.22998677558532113
+        },
+        "RL 2 iterations": {
+          "original_sky_std_ratio": 1.0379971891096342,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.19189885044183477,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.08791385636754143
+        },
+        "RL 10 iterations": {
+          "original_sky_std_ratio": 1.250117156492741,
+          "valid_negative_fraction": 0.0,
+          "max_bright_peak_centroid_shift_grid_px": 0.33806597670085925,
+          "checked_bright_peaks": 14,
+          "valid_rms_change": 0.339405507790367
+        }
+      },
+      "interpretation": "No truth image exists here; these are artifact/change diagnostics, not recovered-resolution measurements."
+    }
+  ],
+  "synthetic": {
+    "Original": {
+      "truth_rmse": 0.02469682118994396,
+      "blank_rms": 0.012240936468236051,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "Detail 0.35": {
+      "truth_rmse": 0.02440922761425014,
+      "blank_rms": 0.01224395492429158,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "Wiener 0.03": {
+      "truth_rmse": 0.020011631485883464,
+      "blank_rms": 0.009994995378793255,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "RL 5 iterations": {
+      "truth_rmse": 0.019485497864960427,
+      "blank_rms": 0.006939120728799285,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "RL 20 iterations": {
+      "truth_rmse": 0.01864122925079505,
+      "blank_rms": 0.0141908368730788,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "Fourier bandpass": {
+      "truth_rmse": 0.023414336414239307,
+      "blank_rms": 0.0068955590254865425,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "Wiener 0.003": {
+      "truth_rmse": 0.02600372560669168,
+      "blank_rms": 0.0227311830304689,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "Wiener 0.3": {
+      "truth_rmse": 0.022353585217384585,
+      "blank_rms": 0.006256083448473103,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "Wiener 3.0": {
+      "truth_rmse": 0.025703571655615584,
+      "blank_rms": 0.006181480157260724,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "RL 2 iterations": {
+      "truth_rmse": 0.022621904399123104,
+      "blank_rms": 0.005207302524003308,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    },
+    "RL 10 iterations": {
+      "truth_rmse": 0.018010194041098396,
+      "blank_rms": 0.00974475061948496,
+      "negative_fraction": 0.0,
+      "interpretation": "Synthetic known convolution and additive Gaussian noise; not a real-source resolution claim."
+    }
+  },
+  "tested_at": "2026-11-15T02:49:09.352775+00:00",
+  "script_sha256": "e28321bb6b012337874cd70fbe079c34343501092d009575842ad0fdf21a6699",
+  "versions": {
+    "numpy": "2.2.5",
+    "scipy": "1.18.1",
+    "astropy": "7.0.1",
+    "reproject": "0.14.1",
+    "Pillow": "11.2.1"
+  },
+  "parameters": {
+    "detail_amount": 0.35,
+    "detail_threshold_fraction": 0.025,
+    "detail_cap_fraction": 0.08,
+    "wiener_laplacian_balances": [
+      0.003,
+      0.03,
+      0.3,
+      3.0
+    ],
+    "rl_iterations": [
+      2,
+      5,
+      10,
+      20
+    ],
+    "fft_reflection_pad_px": 24,
+    "bandpass_sigma_cycles_per_pixel": [
+      0.025,
+      0.3
+    ]
+  },
+  "synthetic_periodic_notch": {
+    "known_period_px": 8,
+    "before_rmse_to_uncontaminated_observed": 0.03181980515339462,
+    "after_rmse_to_uncontaminated_observed": 0.0006862405192155624,
+    "limitation": "Controlled sinusoid only; no such periodic contaminant has been identified in the real fields."
+  }
+}

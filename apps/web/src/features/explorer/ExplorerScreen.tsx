@@ -92,8 +92,16 @@ export function ExplorerScreen() {
     setActiveFrameId(manifest.frames[0]?.frame_id ?? null);
     setSelection(null);
     setSelectedCandidateId(null);
-    requestAnimationFrame(()=>{const consoleElement=document.getElementById('explorer');consoleElement?.focus({preventScroll:true});consoleElement?.scrollIntoView({behavior:'instant',block:'start'});});
   }
+
+  // The entry button disappears when a sequence opens. Focus only after React
+  // has committed the new console, rather than racing the render in a RAF.
+  useEffect(() => {
+    if (!sequence) return;
+    const consoleElement = document.getElementById('explorer');
+    consoleElement?.focus({ preventScroll: true });
+    consoleElement?.scrollIntoView({ behavior: 'instant', block: 'start' });
+  }, [sequence]);
 
   async function submit(request: SequenceRequest) {
     activeExampleLoad.current?.abort();
@@ -203,14 +211,6 @@ export function ExplorerScreen() {
     const frame = search.manifest.frames.find(item => item.frame_id === activeFrameId);
     setAddress(sharedSearchQuery(requestValues(search.request), frame?.observation_id ?? null));
   }, [search, activeFrameId]);
-
-  // Opening a sequence can remove the control a keyboard user just pressed
-  // (the entry panel closes). Move focus to the explorer instead of the page body.
-  useEffect(() => {
-    if (!sequence) return;
-    const focused = document.activeElement;
-    if (!focused || focused === document.body) document.getElementById("explorer")?.focus({ preventScroll: true });
-  }, [sequence]);
 
   const picker=<CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id=>{activeExampleLoad.current?.abort();activeExampleLoad.current=null;setSelectedExampleId(id);setExampleError('');}} onLoad={()=>void loadExample()}/>;
   const showConsole=!!sequence||search.phase!=='idle';
