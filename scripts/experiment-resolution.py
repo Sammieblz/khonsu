@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / 'apps/api'))
 from app.interfaces import ObservationInput, ProcessingOptions
 from app.processing.alignment import output_wcs, auto_grid_size, reproject_observation
 from app.processing.fits_reader import read_observation
-from app.processing.resolution import DropPlane, compatibility, drizzle, sample_masked, tone
+from app.processing.resolution import DropPlane, compatibility, drizzle, reduce_grain, sample_masked, tone
 
 OUTPUT = ROOT / 'apps/web/public/experiments/resolution'
 EVIDENCE = ROOT / 'docs/evidence/resolution'
@@ -69,9 +69,10 @@ def save_view(name, values, valid, limits):
         mapped = tone(values, *limits, shoulder=shoulder, softness=.3)
         gray = np.rint(mapped*255).astype(np.uint8)
         rgb = np.repeat(gray[..., None], 3, axis=2)
-        rgb[~valid] = [39, 49, 64]
+        rgb[~valid] = 0
+        rgba = np.dstack((rgb, np.where(valid, 255, 0).astype(np.uint8)))
         filename = f'{name}-{"shoulder" if shoulder else "standard"}.png'
-        Image.fromarray(np.flipud(rgb)).save(OUTPUT / filename)
+        Image.fromarray(np.flipud(rgba)).save(OUTPUT / filename)
         assets['shoulder' if shoulder else 'standard'] = '/experiments/resolution/' + filename
     return assets
 
@@ -156,27 +157,41 @@ def real_field(name, audit, overview=None):
     baseline, baseline_valid = on_grid(current, current_mask, grid_wcs, display_wcs, DISPLAY_SIZE)
     native, native_valid = on_grid(loaded.science, loaded.valid, loaded.spatial_wcs, display_wcs, DISPLAY_SIZE, cubic=True)
     small, small_valid = on_grid(loaded.science, loaded.valid, loaded.spatial_wcs, grid_wcs, size, cubic=True)
+    filtered, noise_settings = reduce_grain(loaded.science, loaded.valid, loaded.variance)
+    denoised, denoised_valid = on_grid(filtered, loaded.valid, loaded.spatial_wcs, display_wcs, DISPLAY_SIZE, cubic=True)
+    filtered_small, filtered_small_valid = on_grid(filtered, loaded.valid, loaded.spatial_wcs, grid_wcs, size, cubic=True)
     # Keep both treatments on the original prepared footprint. Native sampling
     # cannot quietly fill a pixel rejected by the recorded comparison product.
     native_valid &= baseline_valid
     small_valid &= current_mask
+    denoised_valid &= baseline_valid
+    if not np.array_equal(denoised_valid, native_valid) or not np.array_equal(filtered_small_valid & current_mask, small_valid):
+        raise ValueError('Denoising changed the validity footprint')
     limits = (manifest['display']['vmin'], manifest['display']['vmax'])
     identity = name+'-overview' if overview else name
     assets = {'current': save_view(identity+'-current', baseline, baseline_valid, limits),
-              'native': save_view(identity+'-native', native, native_valid, limits)}
+              'native': save_view(identity+'-native', native, native_valid, limits),
+              'denoised': save_view(identity+'-denoised', denoised, denoised_valid, limits)}
     measured = diagnostics(current, small, current_mask & small_valid, manifest['requested_fov_arcmin']*60/size)
+    noise_settings['diagnostics'] = diagnostics(small, filtered_small, small_valid, manifest['requested_fov_arcmin']*60/size)
     measured['display_valid_fraction_current'] = float(np.mean(baseline_valid))
     measured['display_valid_fraction_native'] = float(np.mean(native_valid))
     measured['display_white_fraction_standard'] = float(np.mean(tone(native[native_valid], *limits, softness=.3) >= 254.5/255))
     measured['display_white_fraction_shoulder'] = float(np.mean(tone(native[native_valid], *limits, shoulder=True, softness=.3) >= 254.5/255))
     with fits.open(path) as hdus:
         psf_zones = len(hdus['EPSF'].data)
+        flags = np.asarray(hdus['FLAGS'].data, dtype=np.uint32)
+        flag_counts = {name: int(np.sum((flags & (1 << bit)) != 0))
+                       for bit, name in loaded.flag_definitions.items()
+                       if name not in {'SOURCE', 'FULLSAMPLE'} and np.any(flags & (1 << bit))}
     result = {'id': identity, 'title': manifest['title'].replace(' (primary)', '').replace(' (backup)', '') + (' / 20 arcmin overview' if overview else ' / 6 arcmin close-up'), 'kind': 'real', 'fov_arcmin': manifest['requested_fov_arcmin'],
               'native_scale_arcsec': manifest['processing']['native_pixel_scale_arcsec'], 'prepared_side': size,
               'display_side': DISPLAY_SIZE, 'target': manifest['target'], 'grid_wcs': dict(display_wcs.to_header()),
               'limits_mjy_sr': list(limits), 'asinh_softness': .3, 'source': {**{k: frame[k] for k in ['observation_id', 'observed_start_utc', 'observed_end_utc', 'release', 'detector', 'wavelength_um', 'bandwidth_um', 'source_fits_url']}, 'raw_sha256': sha(path), 'raw_bytes': path.stat().st_size,
               'raw_shape': list(loaded.science.shape), 'epsf_zone_count': psf_zones}, 'assets': assets,
-              'metrics': measured, 'coverage': audit, 'stack_available': False,
+              'metrics': measured, 'noise_reduction': noise_settings,
+              'quality_flags': {'scope': 'Entire padded source FITS cutout; flags can overlap', 'counts': flag_counts},
+              'coverage': audit, 'stack_available': False,
               'note': ('A wider crop of the same authentic exposure. More measured sky pixels, at the same native angular sampling. ' if overview else 'One authentic exposure. ') + 'Native resampling can emphasize square detector footprints; compare both views. No recovered resolution is claimed.'}
     return result
 
@@ -208,15 +223,18 @@ def synthetic_field():
     truth = scene(xx/2, yy/2)
     baseline, baseline_valid = sample_masked(planes[0].values, planes[0].valid, xx/2, yy/2)
     native, native_valid = sample_masked(planes[0].values, planes[0].valid, xx/2, yy/2, cubic=True)
+    filtered, noise_settings = reduce_grain(planes[0].values, planes[0].valid, planes[0].variance)
+    denoised, denoised_valid = sample_masked(filtered, planes[0].valid, xx/2, yy/2, cubic=True)
+    assert np.array_equal(denoised_valid, native_valid)
     valid = baseline_valid & native_valid & stack_valid
     valid[[0, -1], :] = False; valid[:, [0, -1]] = False
     metrics = {name+'_rmse': float(np.sqrt(np.mean((data[valid]-truth[valid])**2)))
-               for name, data in [('current', baseline), ('native', native), ('stack', stack)]}
+               for name, data in [('current', baseline), ('native', native), ('denoised', denoised), ('stack', stack)]}
     metrics.update(coverage_fraction=float(np.mean(stack_valid)), median_contributors=float(np.median(count[stack_valid])),
                    variance_note='Diagonal propagated variance assumes independent input noise; adjacent output pixels are correlated.')
     assets = {}
     for name, values, good in [('current', baseline, baseline_valid), ('native', native, native_valid),
-                               ('stack', stack, stack_valid), ('truth', truth, np.ones_like(stack_valid))]:
+                               ('denoised', denoised, denoised_valid), ('stack', stack, stack_valid), ('truth', truth, np.ones_like(stack_valid))]:
         image, mask = enlarge(values, good, DISPLAY_SIZE)
         assets[name] = save_view('synthetic-'+name, image, mask, (0, .75))
     # Exact contributor coverage is separately inspectable, without smoothing.
@@ -230,6 +248,7 @@ def synthetic_field():
     return {'id': 'synthetic', 'title': 'Synthetic sampling control', 'kind': 'synthetic', 'display_side': DISPLAY_SIZE,
             'native_scale_arcsec': None, 'prepared_side': 64, 'fov_arcmin': None, 'source': None,
             'assets': assets, 'coverage_asset': '/experiments/resolution/synthetic-coverage.png', 'metrics': metrics,
+            'noise_reduction': noise_settings,
             'stack_available': True, 'exposure_count': 8, 'seed': 57, 'pixfrac': .6,
             'note': 'SIMULATED DATA: eight noisy measurements of one analytic scene. No real observation dates or discoveries.'}
 
@@ -244,12 +263,15 @@ def main():
     fields += [real_field(name, next(a for a in audit if a['id'] == name))
               for name in ['real-wise-0855', 'real-epsilon-indi-b']]
     fields.append(synthetic_field())
-    report = {'schema_version': 1, 'generated_at_utc': datetime.now(timezone.utc).isoformat(),
+    report = {'schema_version': 2, 'generated_at_utc': datetime.now(timezone.utc).isoformat(),
               'versions': {name: version(name) for name in ['numpy', 'scipy', 'astropy', 'reproject', 'Pillow']},
               'source_hashes': {p: sha(ROOT / p) for p in ['scripts/experiment-resolution.py', 'scripts/probe-resolution.py',
               'apps/api/app/processing/resolution.py']}, 'acquisition_sha256': sha(EVIDENCE / 'acquisition.json'),
               'audit': audit, 'fields': fields,
-              'method': 'Native, locally bounded Catmull-Rom display resampling; optional smooth asinh highlight shoulder; synthetic pixel-drop reconstruction.',
+              'method': 'Native bounded Catmull-Rom resampling; optional native-grid local Wiener noise reduction and asinh highlight shoulder; synthetic pixel-drop reconstruction.',
+              'gap_display': {'encoding': 'RGBA with binary alpha; no-data RGB is zero but alpha is zero',
+                              'default': 'Dark navy #070b12', 'inspect': 'Slate #273140',
+                              'note': 'Gap styling changes no measured pixel or validity; original hold uses the prior slate display.'},
               'limits': ['Research comparison only; production data and measurements are unchanged.',
                          'Real stacks require full-field spectral compatibility and registration verification, beyond the target gate.',
                          'A synthetic sampling improvement does not establish recovered resolution in SPHEREx.',

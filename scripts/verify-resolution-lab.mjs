@@ -32,18 +32,77 @@ for (const engine of [chromium, firefox]) {
     const errors = []; page.on('pageerror', error => errors.push(String(error)));
     await page.goto(`${base}/resolution-lab/`, { waitUntil: 'domcontentloaded' }); await ready(page);
     const manifest = await (await page.request.get(`${base}/experiments/resolution/manifest.json`)).json();
+    assert.equal(manifest.schema_version, 2);
     assert.equal(manifest.fields[0].fov_arcmin, 20);
     assert.equal(await region(page).getAttribute('data-kind'), 'real');
     assert(await button(page, 'RECONSTRUCTION').isDisabled());
+    assert.equal(await region(page).getAttribute('data-grain'), 'true');
+    assert.equal(await region(page).getAttribute('data-gaps'), 'quiet');
+    assert((await visibleSource(page)).endsWith('-denoised-shoulder.png'));
+    const quietImage = await region(page).screenshot();
+    await button(page, 'SHOW GAPS').click();
+    const inspectImage = await region(page).screenshot();
+    const gapPixels = await page.evaluate(async ({ quiet, inspect }) => {
+      async function pixels(url) {
+        const image = new Image(); image.src = url; await image.decode();
+        const canvas = document.createElement('canvas'); canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+        return { data: context.getImageData(0, 0, canvas.width, canvas.height).data, width: canvas.width, height: canvas.height };
+      }
+      const a = await pixels(`data:image/png;base64,${quiet}`), b = await pixels(`data:image/png;base64,${inspect}`);
+      const source = await pixels(document.querySelector('img[aria-hidden="false"]').src);
+      let validChecked = 0, validChanged = 0, gapsChanged = 0;
+      for (let y = 3; y < source.height-3; y += 3) for (let x = 3; x < source.width-3; x += 3) {
+        const alpha = [];
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) alpha.push(source.data[((y+dy)*source.width+x+dx)*4+3]);
+        const offset = (Math.floor((y+.5)*a.height/source.height)*a.width+Math.floor((x+.5)*a.width/source.width))*4;
+        const changed = [0, 1, 2].some(c => a.data[offset+c] !== b.data[offset+c]);
+        if (alpha.every(v => v === 255)) { validChecked++; validChanged += Number(changed); }
+        if (alpha.every(v => v === 0) && changed) gapsChanged++;
+      }
+      return { validChecked, validChanged, gapsChanged };
+    }, { quiet: quietImage.toString('base64'), inspect: inspectImage.toString('base64') });
+    assert(gapPixels.validChecked > 1000 && gapPixels.gapsChanged > 10);
+    assert.equal(gapPixels.validChanged, 0, 'Gap styling must change only unknown pixels');
+    await button(page, 'SHOW GAPS').click();
+    await button(page, 'REDUCE GRAIN').click(); await ready(page);
+    assert((await visibleSource(page)).endsWith('-native-shoulder.png'));
+    await button(page, 'REDUCE GRAIN').click(); await ready(page);
+    const preservedMasks = await page.evaluate(async fields => {
+      const checked = [];
+      for (const field of fields) {
+        const arrays = [];
+        for (const name of ['native', 'denoised']) {
+          const image = new Image(); image.src = field.assets[name].standard; await image.decode();
+          const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+          const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+          arrays.push(context.getImageData(0, 0, canvas.width, canvas.height).data);
+        }
+        let differingMasks = 0, alteredValid = 0, gaps = 0;
+        for (let i = 0; i < arrays[0].length; i += 4) {
+          differingMasks += Number(arrays[0][i+3] !== arrays[1][i+3]);
+          gaps += Number(arrays[0][i+3] === 0);
+          alteredValid += Number(arrays[0][i+3] === 255 && arrays[0][i] !== arrays[1][i]);
+        }
+        checked.push({ field: field.id, differingMasks, alteredValid, gaps });
+      }
+      return checked;
+    }, manifest.fields);
+    for (const checked of preservedMasks) assert(checked.differingMasks === 0 && checked.alteredValid > 0 && checked.gaps > 0);
+    await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 0); });
     await page.screenshot({ path: new URL(`${engine.name()}-desktop.png`, output).pathname.replace(/^\/(.:)/, '$1'), fullPage: true });
     const originalMode = await region(page).getAttribute('data-mode');
     const hold = button(page, 'HOLD ORIGINAL');
     await hold.focus(); await page.keyboard.down('Space');
     assert.equal(await region(page).getAttribute('data-mode'), 'current');
     assert.equal(await region(page).getAttribute('data-shoulder'), 'false');
+    assert.equal(await region(page).getAttribute('data-grain'), 'false');
+    assert.equal(await region(page).getAttribute('data-gaps'), 'inspect');
     assert((await visibleSource(page)).endsWith('-current-standard.png'));
     await page.keyboard.up('Space');
     assert.equal(await region(page).getAttribute('data-mode'), originalMode);
+    assert.equal(await region(page).getAttribute('data-grain'), 'true');
+    assert.equal(await region(page).getAttribute('data-gaps'), 'quiet');
     const holdBox = await hold.boundingBox();
     await page.mouse.move(holdBox.x+holdBox.width/2, holdBox.y+holdBox.height/2); await page.mouse.down();
     await hold.dispatchEvent('pointercancel', { pointerId: 1 });
@@ -61,6 +120,7 @@ for (const engine of [chromium, firefox]) {
     const closeup = manifest.fields.findIndex(field => field.id === 'real-wise-0855');
     await page.getByLabel('CHOOSE THE FIELD', { exact: true }).selectOption(String(closeup)); await ready(page);
     await button(page, 'CURRENT').click(); await button(page, 'PRESERVE BRIGHT CORES').click(); await ready(page);
+    assert(await button(page, 'REDUCE GRAIN').isDisabled());
     const difference = await page.evaluate(async ({ moduleUrl, base64, fixture }) => {
       const { decodeRaster, renderPixels } = await import(moduleUrl);
       const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
@@ -68,6 +128,8 @@ for (const engine of [chromium, firefox]) {
       const expected = renderPixels(raster, { low: fixture.display.vmin, high: fixture.display.vmax, a: .3, gamma: 1, curve: 'asinh', mask: 'quiet', sampling: 'smooth', detail: 0 }, { width: 768, height: 768 });
       const canvas = document.createElement('canvas'); canvas.width = canvas.height = 768;
       const image = document.querySelector('img[aria-hidden="false"]');
+      canvas.getContext('2d').fillStyle = '#273140';
+      canvas.getContext('2d').fillRect(0, 0, 768, 768);
       canvas.getContext('2d').drawImage(image, 0, 0);
       const actual = canvas.getContext('2d').getImageData(0, 0, 768, 768).data;
       let max = 0; for (let i = 0; i < actual.length; i++) max = Math.max(max, Math.abs(actual[i]-expected[i]));
@@ -75,6 +137,7 @@ for (const engine of [chromium, firefox]) {
     }, { moduleUrl, base64: raster.toString('base64'), fixture });
     assert(difference <= 1, `Current view differs from actual production CPU display: ${difference}`);
     await button(page, 'NATIVE RESAMPLE').click(); await button(page, 'PRESERVE BRIGHT CORES').click(); await ready(page);
+    await button(page, 'REDUCE GRAIN').click(); await ready(page);
     assert((await visibleSource(page)).endsWith('-native-shoulder.png'));
     const synthetic = manifest.fields.findIndex(field => field.kind === 'synthetic');
     await page.getByLabel('CHOOSE THE FIELD', { exact: true }).selectOption(String(synthetic)); await ready(page);
@@ -92,7 +155,7 @@ for (const engine of [chromium, firefox]) {
       const box = await control.boundingBox(); assert(box.height >= 44);
     }
     await button(page, 'RECONSTRUCTION').click(); await ready(page);
-    await page.evaluate(() => document.activeElement?.blur());
+    await page.evaluate(() => { document.activeElement?.blur(); window.scrollTo(0, 0); });
     await page.screenshot({ path: new URL(`${engine.name()}-mobile.png`, output).pathname.replace(/^\/(.:)/, '$1'), fullPage: true });
     assert.deepEqual(errors, []);
     await page.close();
@@ -104,12 +167,13 @@ for (const engine of [chromium, firefox]) {
     await unavailable.unroute('**/experiments/resolution/manifest.json');
     await button(unavailable, 'RETRY COMPARISON').click(); await ready(unavailable); await unavailable.close();
     const imageFailure = await browser.newPage();
-    await imageFailure.route('**/*native-shoulder.png', route => route.abort());
+    await imageFailure.route('**/*denoised-shoulder.png', route => route.abort());
     await imageFailure.goto(`${base}/resolution-lab/`);
     await imageFailure.getByText('This comparison image could not be loaded. Refresh to retry.', { exact: true }).waitFor();
     assert.equal(await imageFailure.locator('img[aria-hidden="false"]').isVisible(), false);
     await button(imageFailure, 'CURRENT').click(); await ready(imageFailure); await imageFailure.close();
     report.browsers.push({ browser: engine.name(), version: browser.version(), currentDisplayMaxByteDifference: difference,
+      grainToggleAndExactMasks: preservedMasks, gapStylingPreservesFullyMeasuredRegions: gapPixels,
       realAndSyntheticLabels: true, originalHoldCancelBlur: true, zoomPanReset: true, coverageAndTruth: true,
       narrowLayoutAnd44pxButtons: true, reportRetryAndImageFailure: true });
     await writeFile(new URL('report.json', output), `${JSON.stringify(report, null, 2)}\n`);

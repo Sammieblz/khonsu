@@ -8,6 +8,50 @@ from datetime import datetime
 import math
 
 import numpy as np
+from scipy.ndimage import convolve
+
+
+def reduce_grain(values, valid, variance, *, strength=.85):
+    """Bounded, mask-normalized local Wiener display filter on native samples.
+
+    Noise is estimated from adjacent Haar diagonal differences, capped by the
+    median archive sigma on low-intensity pixels. No quality flag is relaxed.
+    This visual copy is not photometry: faint structure can be attenuated.
+    """
+    values = np.asarray(values, dtype=float)
+    variance = np.asarray(variance, dtype=float)
+    valid = np.asarray(valid, dtype=bool)
+    if values.ndim != 2 or min(values.shape) < 2 or values.size > 2048**2:
+        raise ValueError('Invalid or unbounded denoising image')
+    if valid.shape != values.shape or variance.shape != values.shape:
+        raise ValueError('Denoising shapes must match')
+    if not np.isfinite(strength) or not 0 <= strength <= 1:
+        raise ValueError('Invalid denoising strength')
+    good = valid & np.isfinite(values) & np.isfinite(variance) & (variance > 0)
+    if not np.array_equal(good, valid):
+        raise ValueError('Valid samples need finite values and positive variance')
+    clean = np.where(good, values, 0.)
+    hh_good = good[:-1, :-1] & good[1:, :-1] & good[:-1, 1:] & good[1:, 1:]
+    hh = (clean[:-1, :-1]-clean[1:, :-1]-clean[:-1, 1:]+clean[1:, 1:])/2
+    detail = hh[hh_good]
+    robust_sigma = float(1.4826*np.median(abs(detail-np.median(detail)))) if detail.size >= 16 else 0.
+    sky = good & (clean <= np.median(clean[good])) if np.any(good) else good
+    archive_sigma = float(np.median(np.sqrt(variance[sky]))) if np.any(sky) else 0.
+    sigma = min(robust_sigma, archive_sigma)
+    kernel = np.outer([1., 2., 1.], [1., 2., 1.])/16
+    mass = convolve(good.astype(float), kernel, mode='constant')
+    mean = np.divide(convolve(clean, kernel, mode='constant'), mass, out=clean.copy(), where=mass > 0)
+    second = np.divide(convolve(clean*clean, kernel, mode='constant'), mass, out=clean*clean, where=mass > 0)
+    local_variance = np.maximum(0, second-mean*mean)
+    gain = np.maximum(0, 1-sigma*sigma/np.maximum(local_variance, 1e-30))
+    correction = strength*(1-gain)*(mean-clean)
+    correction = np.clip(correction, -2*sigma, 2*sigma)
+    output = np.where(good, clean+correction, np.nan)
+    return output, {'method': 'native-mask-normalized-local-wiener', 'strength': strength,
+                    'kernel': '3x3 binomial', 'robust_haar_sigma': robust_sigma,
+                    'archive_sky_sigma': archive_sigma, 'used_sigma': sigma,
+                    'maximum_correction_sigma': 2, 'validity_unchanged': True,
+                    'note': 'Display only. Faint sources and diffuse structure can be attenuated; use Original for evidence.'}
 
 
 def sample_masked(values, valid, x, y, *, cubic=False):
