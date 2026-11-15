@@ -27,7 +27,7 @@ from urllib.parse import urlencode, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from ..interfaces import ObservationInput
-from ..limits import MAX_CUTOUT_ARCMIN, MAX_DOWNLOAD_BYTES, MAX_FITS_BYTES, MAX_FOV_ARCMIN
+from ..limits import MIN_FOV_ARCMIN, MAX_CUTOUT_ARCMIN, MAX_DOWNLOAD_BYTES, MAX_FITS_BYTES, MAX_FOV_ARCMIN, MAX_OBSERVATIONS
 
 if TYPE_CHECKING:
     from ..schemas import SequenceRequest
@@ -120,10 +120,10 @@ def query_url(request: SequenceRequest) -> str:
     for value in (request.ra_deg, request.dec_deg, request.fov_arcmin):
         if not math.isfinite(value):
             raise RetrievalError("invalid_target", "Coordinates and field size must be finite.")
-    if not 0 <= request.ra_deg < 360 or not -90 <= request.dec_deg <= 90 or not .5 <= request.fov_arcmin <= MAX_FOV_ARCMIN:
+    if not 0 <= request.ra_deg < 360 or not -90 <= request.dec_deg <= 90 or not MIN_FOV_ARCMIN <= request.fov_arcmin <= MAX_FOV_ARCMIN:
         raise RetrievalError("invalid_target", "Coordinates or field size are outside supported bounds.")
-    if not 2 <= request.max_frames <= 96:
-        raise RetrievalError("invalid_target", "Request between 2 and 96 frames.")
+    if not 2 <= request.max_frames <= MAX_OBSERVATIONS:
+        raise RetrievalError("invalid_target", f"Request between 2 and {MAX_OBSERVATIONS} frames.")
     params = [
         ("POS", f"CIRCLE {request.ra_deg:.10f} {request.dec_deg:.10f} {1/3600:.10f}"),
         ("DPTYPE", "image"), ("CALIB", "2"),

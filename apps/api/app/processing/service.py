@@ -15,12 +15,11 @@ import statistics
 from typing import Callable
 
 from ..interfaces import ObservationInput, ProcessingOptions
-from ..limits import MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OUTPUT_PIXELS_TOTAL
+from ..limits import MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OBSERVATIONS, MAX_OUTPUT_PIXELS_TOTAL
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
 PIPELINE_VERSION = "khonsu-display-0.4.0"
-MAX_OBSERVATIONS = 96
 
 
 def _check_cancelled(cancelled):
@@ -33,12 +32,12 @@ def _validate_options(options, observations, lower, upper):
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Sequence identifier is invalid.")
     if options.coordinate_frame != "ICRS" or not (math.isfinite(options.ra_deg) and 0 <= options.ra_deg < 360 and math.isfinite(options.dec_deg) and -90 <= options.dec_deg <= 90):
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Target coordinates must be finite ICRS degrees.")
-    if not math.isfinite(options.fov_arcmin) or not 0.5 <= options.fov_arcmin <= MAX_FOV_ARCMIN:
-        raise ProcessingError("INVALID_PROCESSING_OPTIONS", f"Field of view must be between 0.5 and {MAX_FOV_ARCMIN:g} arcminutes.")
+    if not math.isfinite(options.fov_arcmin) or not MIN_FOV_ARCMIN <= options.fov_arcmin <= MAX_FOV_ARCMIN:
+        raise ProcessingError("INVALID_PROCESSING_OPTIONS", f"Field of view must be between {MIN_FOV_ARCMIN:g} and {MAX_FOV_ARCMIN:g} arcminutes.")
     if options.output_size_px is not None and (not isinstance(options.output_size_px, int) or isinstance(options.output_size_px, bool) or not 32 <= options.output_size_px <= MAX_GRID_SIDE):
         raise ProcessingError("RESOURCE_LIMIT", f"Output width must be between 32 and {MAX_GRID_SIDE} pixels.")
     if len(observations) > MAX_OBSERVATIONS:
-        raise ProcessingError("RESOURCE_LIMIT", "At most 96 observations can be processed in one job.")
+        raise ProcessingError("RESOURCE_LIMIT", f"At most {MAX_OBSERVATIONS} observations can be processed in one job.")
     if any(value is not None and (not math.isfinite(value) or not 0.75 <= value <= 5.0) for value in (lower, upper)):
         raise ProcessingError("INVALID_PROCESSING_OPTIONS", "Wavelength filters must be between 0.75 and 5 micrometers.")
     if lower is not None and upper is not None and lower > upper:

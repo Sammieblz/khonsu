@@ -1,5 +1,8 @@
 # Target coverage
 
+This is a historical acquisition record. The recorded limits and pipeline below
+describe that run. Current resource bounds are documented in [native wide fields](hd-fields.md).
+
 Live probe started: 2026-11-14T20:36:07.993960+00:00. Finished: 2026-11-14T20:38:39.304027+00:00. Collections: SPHEREx DR1 and QR3.
 
 Every named challenge field receives a bounded attempt. An upstream failure is not a statement that the archive lacks coverage. A successful field sequence is not a recovered target detection, motion measurement, variability measurement or Planet X discovery.

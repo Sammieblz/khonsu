@@ -45,7 +45,8 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const raster=active?rasters.get(active.frame_id):undefined;
   const displayAvailable=!!raster&&!rendererMode.startsWith('Original PNG');
   const preparedFailed=!!active&&rasterFailed.includes(active.frame_id);
-  const ready=!!active && images.has(active.frame_id)&&(!active.raster||!!raster||preparedFailed);
+  const frameReady=(frame:ObservationFrame|undefined)=>!!frame&&images.has(frame.frame_id)&&(!frame.raster||rasters.has(frame.frame_id)||rasterFailed.includes(frame.frame_id));
+  const ready=frameReady(active),comparisonReady=a!==b&&frameReady(frames[a])&&frameReady(frames[b]);
   const nativeAcross=sequence?nativeSampling(sequence.requested_fov_arcmin,sequence.processing?.native_pixel_scale_arcsec):null;
   const region=visibleField(view,viewportSize.width,viewportSize.height);
   const {playing,setPlaying}=usePlayback(frameIds,active?.frame_id ?? null,onFrameChange,speed,ready&&!rendering);
@@ -54,13 +55,14 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   function releaseHold(){ if(held.current){onFrameChange(held.current);held.current=null;} }
   function stop(){setPlaying(false);setBlink(false);releaseHold();}
   function selectIndex(next:number){stop();if(frames[next])onFrameChange(frames[next].frame_id);}
-  function beginHold(){if(!ready||a===b)return;setPlaying(false);setBlink(false);if(!held.current)held.current=active.frame_id;onFrameChange(frames[b]!.frame_id);}
+  function beginHold(){if(!active||!ready||a===b)return;setPlaying(false);setBlink(false);if(!held.current)held.current=active.frame_id;onFrameChange(frames[b]!.frame_id);}
   useEffect(()=>{const release=()=>{setBlink(false);setPlaying(false);setOriginalHeld(false);releaseHold();pointers.current.clear();drag.current=null;};window.addEventListener('blur',release);return()=>window.removeEventListener('blur',release);});
   useEffect(()=>{
-    if(!blink||a===b||!images.has(frames[a]?.frame_id ?? '')||!images.has(frames[b]?.frame_id ?? ''))return;
-    const timer=window.setInterval(()=>onFrameChange(active?.frame_id===frames[a]!.frame_id?frames[b]!.frame_id:frames[a]!.frame_id),speed);
-    return()=>window.clearInterval(timer);
-  },[blink,a,b,images,frames,active,onFrameChange,speed]);
+    if(!blink||!comparisonReady||!ready||rendering)return;
+    // Start the viewing interval only after this frame has actually appeared.
+    const timer=window.setTimeout(()=>onFrameChange(active?.frame_id===frames[a]!.frame_id?frames[b]!.frame_id:frames[a]!.frame_id),speed);
+    return()=>window.clearTimeout(timer);
+  },[blink,comparisonReady,ready,rendering,a,b,frames,active,onFrameChange,speed]);
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
     const resize=()=>{
@@ -184,7 +186,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       <button disabled={a===b} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);beginHold();}} onPointerUp={releaseHold} onPointerCancel={releaseHold} onLostPointerCapture={releaseHold} onBlur={releaseHold} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();beginHold();}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')releaseHold();}}>HOLD FOR B</button>
       {/* One press switches between A and B, for anyone who cannot hold a button or prefers no blinking. */}
       <button disabled={a===b} aria-label={active.frame_id===frames[b]?.frame_id?`Show A, ${observationLabel(frames[a]?.observed_start_utc)}`:`Show B, ${observationLabel(frames[b]?.observed_start_utc)}`} onClick={()=>{stop();onFrameChange(active.frame_id===frames[b]!.frame_id?frames[a]!.frame_id:frames[b]!.frame_id);}}>{active.frame_id===frames[b]?.frame_id?'SHOW A':'SHOW B'}</button>
-      {blink&&a!==b&&[a,b].some(i=>!images.has(frames[i]?.frame_id ?? ''))&&<p className={styles.comparisonStatus} role="status">{[a,b].some(i=>failedIds.includes(frames[i]?.frame_id ?? ''))?<>Observation {[a,b].filter(i=>failedIds.includes(frames[i]?.frame_id ?? '')).map(i=>i===a?'A':'B').join(' and ')} could not be loaded, so blinking is paused. <button onClick={retry}>RETRY IMAGE</button></>:'Blinking starts when both observations have loaded.'}</p>}
+      {blink&&a!==b&&!comparisonReady&&<p className={styles.comparisonStatus} role="status">{[a,b].some(i=>failedIds.includes(frames[i]?.frame_id ?? ''))?<>Observation {[a,b].filter(i=>failedIds.includes(frames[i]?.frame_id ?? '')).map(i=>i===a?'A':'B').join(' and ')} could not be loaded, so blinking is paused. <button onClick={retry}>RETRY IMAGE</button></>:'Blinking starts when both observations have loaded.'}</p>}
       {(()=>{const comparison=sequence?describeComparison(sequence,a,b):null;if(!comparison)return null;return <div className={styles.comparisonNotes}>
         <p>{comparison.sides[0]}</p><p>{comparison.sides[1]}</p>
         {comparison.notes.length>0&&<ul aria-label="Limits of this comparison">{comparison.notes.map(note=><li key={note}>{note}</li>)}</ul>}

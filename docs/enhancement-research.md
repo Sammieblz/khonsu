@@ -139,7 +139,7 @@ known synthetic blur improvement, correction bounds and input preservation.
    original validity sample still decides whether an output pixel is missing.
    **Pixels** uses nearest samples. Both retain the original coordinates and FOV.
 2. Render directly at viewport size times device pixel ratio and zoom, bounded
-   to 1536 pixels on the longest side. This replaces integer enlargement of a
+   to 2160 pixels on the longest side after the wide-field pass. This replaces integer enlargement of a
    small intermediate canvas. It changes screen sampling, not measured resolution.
 3. **Detail experiment** uses a 5-by-5 separable binomial kernel on a derived
    native-grid copy. Let `r = image - blur(image)` and `s = white - black`.
@@ -245,7 +245,8 @@ The integrated frontend has 63 passing unit tests; TypeScript, static export and
 repository checks pass. The unchanged Python experiment/API suite passed 99
 tests during this pass. Reports identify their base Git revision and, for the
 enhancement and candidate suites, hashes of the working files actually tested.
-User testing approval is still required before merging this feature into main.
+That historical report predates the 2160-pixel HD pass. Samuel subsequently
+authorized final cleanup and main integration; see [the integration decision](decisions.md).
 
 ## Next scientific step
 

@@ -23,10 +23,12 @@ state and resets it when sequence identity changes.
   selected image to load. It never starts automatically, including reduced motion.
 - Comparison: select A/B, blink crisply or hold to show B. Releasing, cancelling
   or losing focus restores the frame held before comparison. View transforms
-  remain shared between epochs. Timers stop on blur and sequence replacement.
+  remain shared between epochs. Blink waits for both assets and for the displayed
+  frame to finish rendering before starting its viewing interval, including on a
+  slow CPU. Timers stop on blur and sequence replacement.
 - Image sampling: Smooth interpolates display intensities; Pixels shows nearest
   prepared samples. Both retain masks and natural-raster coordinates. The canvas
-  follows viewport size, device pixel ratio and zoom with a 1536-pixel bound.
+  follows viewport size, device pixel ratio and zoom with a 2160-pixel bound.
 - Detail experiment: optional capped visual emphasis, off initially. Hold
   Original compares the same frame with detail off and unchanged stretch/sampling.
   Pointer release/cancel, key release and blur restore the prior display. Mark
@@ -52,7 +54,9 @@ does not interpolate sources, crossfade observations or alter a celestial WCS.
 ## Image resources and geometry
 
 Load the current frame, previous/next and selected A/B, deduplicated to at most
-five images. Abort obsolete pending loads and prune images outside this set.
+five images, or three for large prepared rasters with current/A-B priority.
+Both PNG and intensity loaders use the same cache-window policy. Abort obsolete
+pending loads and prune images outside this set.
 Sequence remounts discard all prior state and resources. Missing frames show a
 visible retry state; old science pixels cannot appear under a new date.
 

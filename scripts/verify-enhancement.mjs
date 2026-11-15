@@ -207,6 +207,36 @@ for (const engine of [chromium, firefox]) {
     assert.equal(await noGpu.locator('[data-renderer]').textContent(), 'CPU canvas');
     assert.equal(await noGpu.locator('[data-detail]').getAttribute('data-detail'), 'on');
     result.noGpuNoWorkerDetail = true; await noGpu.close();
+    // Model a busy CPU worker. A/B must let each real frame finish rendering
+    // instead of advancing faster than the display and showing only loading.
+    const slow = await browser.newPage();
+    await slow.addInitScript(() => {
+      const NativeWorker = window.Worker;
+      window.Worker = class extends NativeWorker {
+        set onmessage(handler) {
+          super.onmessage = handler ? event => setTimeout(() => handler.call(this, event), 1200) : null;
+        }
+      };
+    });
+    await load(slow);
+    await slow.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await slow.getByLabel('Rendering mode', { exact: true }).selectOption('cpu');
+    await slow.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent === 'CPU worker');
+    await ready(slow);
+    await slow.getByLabel('Playback rate', { exact: true }).selectOption('350');
+    await slow.evaluate(() => {
+      const canvas = document.querySelector('canvas');
+      window.__slowBlinkShown = [];
+      new MutationObserver(() => {
+        if (canvas.style.visibility === 'visible') window.__slowBlinkShown.push(canvas.getAttribute('aria-label'));
+      }).observe(canvas, { attributes: true });
+    });
+    await button(slow, 'BLINK A/B').click();
+    await slow.waitForFunction(label => window.__slowBlinkShown.includes(label),
+      `Observation ${primary.frames.at(-1).observation_id}`, { timeout: 6500 });
+    await button(slow, 'STOP BLINK').click(); await ready(slow);
+    result.slowCpuBlink = { workerDelayMs: 1200, selectedIntervalMs: 350, displayedComparisonB: true };
+    await slow.close();
     report.browsers.push(result);
     await writeFile(`${output}/enhancement-report.json`, `${JSON.stringify(report, null, 2)}\n`);
     console.log(`${engine.name()}: enhancement acceptance passed`);

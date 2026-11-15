@@ -1,10 +1,10 @@
 # Native wide fields and HD display
 
 Scope: [GitHub #60](https://github.com/Sammieblz/khonsu/issues/60) /
-[BYT-45](https://linear.app/byteboyz/issue/BYT-45), consolidated into draft
-[PR #54](https://github.com/Sammieblz/khonsu/pull/54). Main remains unmerged for
-the user's testing hold. This is a source-sampling and display change, not the
-new dedicated console design phase.
+[BYT-45](https://linear.app/byteboyz/issue/BYT-45), consolidated in
+[PR #54](https://github.com/Sammieblz/khonsu/pull/54). Samuel authorized the final
+cleanup and main integration on November 15, lifting the earlier testing hold.
+The dedicated console design remains a separate planned phase.
 
 ## What changed
 

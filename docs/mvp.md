@@ -49,7 +49,8 @@ The November 15 design follow-up is planning only: [#61](https://github.com/Samm
 for the dedicated console, [#62](https://github.com/Sammieblz/khonsu/issues/62)
 for sky-swipe entry and loading feedback, and [#63](https://github.com/Sammieblz/khonsu/issues/63)
 for landing storytelling. These do not replace the live-data, release or submission
-acceptance gates. The current display integration remains unmerged for user testing.
+acceptance gates. Samuel authorized integrating the display work through PR #54
+after the final cleanup and regression checks.
 
 | Window, America/New_York | Exit condition |
 | --- | --- |

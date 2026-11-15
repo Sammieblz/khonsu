@@ -6,9 +6,13 @@ interface Props { frames: ObservationFrame[]; index: number; playing: boolean; s
 export function PlaybackControls({ frames, index, playing, speed, onSpeed, onToggle, onIndexChange }: Props) {
   const active = frames[index], positions = timePositions(frames.map(frame => frame.observed_start_utc));
   const label = active ? observationLabel(active.observed_start_utc) : "Choose a field to begin";
+  function scrub(clientX: number, element: SVGSVGElement) {
+    const rect = element.getBoundingClientRect();
+    onIndexChange(nearestObservation(positions, ((clientX - rect.left) / rect.width * 600 - 16) / 568));
+  }
   return <div className={styles.transport} aria-label="Observation time controls">
     <div className={styles.timeReadout}><span>{active ? `${index + 1} / ${frames.length} OBSERVATIONS` : "OBSERVATION TIME"}</span><strong>{label}</strong></div>
-    <svg className={styles.timeArc} viewBox="0 0 600 70" aria-label="Available observation dates" onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);const r=event.currentTarget.getBoundingClientRect();onIndexChange(nearestObservation(positions,((event.clientX-r.left)/r.width*600-16)/568));}} onPointerMove={event=>{if(event.currentTarget.hasPointerCapture(event.pointerId)){const r=event.currentTarget.getBoundingClientRect();onIndexChange(nearestObservation(positions,((event.clientX-r.left)/r.width*600-16)/568));}}} style={{touchAction:"none"}}>
+    <svg className={styles.timeArc} viewBox="0 0 600 70" aria-label="Available observation dates" onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);scrub(event.clientX,event.currentTarget);}} onPointerMove={event=>{if(event.currentTarget.hasPointerCapture(event.pointerId))scrub(event.clientX,event.currentTarget);}} style={{touchAction:"none"}}>
       <path d="M16 56 Q300 -26 584 56" fill="none" />
       {positions.map((position, i) => <circle key={frames[i]!.frame_id} cx={16+568*position} cy={56-164*position*(1-position)} r={i === index ? 7 : 4} className={i===index ? styles.selectedTick : undefined} onClick={() => onIndexChange(i)}><title>{observationLabel(frames[i]!.observed_start_utc)}</title></circle>)}
     </svg>

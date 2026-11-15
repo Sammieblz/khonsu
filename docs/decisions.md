@@ -55,8 +55,9 @@ Khonsu controls, time arc and real-observation sky swipe.
 ## November 15, 2026: Consolidated branch and native wide fields
 
 The user authorized consolidation of `feat/49-display-experiments`, its stacked
-`feat/57-resolution-lab` work, and Tyrone's newer main changes. The explicit
-testing hold still prohibits merging to main. #59 / BYT-44 tracks integration;
+`feat/57-resolution-lab` work, and Tyrone's newer main changes. At this stage the
+testing hold prohibited merging to main; the later decision below supersedes it.
+#59 / BYT-44 tracks integration;
 #60 / BYT-45 tracks wider native acquisition and HD display. Both belong to
 Samuel for this pass, with Tyrone reviewing shared limits and contracts.
 
@@ -84,3 +85,25 @@ The requested pick-ui-library, animate and animation-performance skills were
 installed and read from Emil Kowalski's skills repository. Their guidance is
 recorded in the design tickets. Select the minimum suitable animation stack when
 implementation starts; no GSAP, Motion or Remotion dependency is added now.
+
+## November 15, 2026: Final cleanup and main integration authorized
+
+Samuel explicitly requested fixing the remaining work, checking redundancies,
+merging to main and leaving no open PRs. This supersedes the earlier testing
+hold. PR #54 is the only open PR and contains the complete #58 lab history.
+Use it for the final cleanup and merge; preserve the existing commit history.
+The three future frontend design tickets remain planning work.
+
+The final audit reproduced an A/B failure with a 1200 ms CPU worker response and
+a 350 ms blink interval: frames changed before any rendering completed. Blink
+now uses the same frame-readiness decision as the viewer and waits for each
+render before starting its viewing interval. Arc pointer gestures also share a
+single coordinate calculation. Python FOV and observation-count bounds are
+centralized across validation, retrieval and processing without changing values.
+
+Current guides use the 2160-pixel display bound and large-raster cache policy.
+The probe report generator reads current limits from Python constants. Historical
+acquisition reports keep their original numbers and identify them as historical.
+Research artifacts and CPU/GPU fallback implementations retain their distinct
+purposes. Merge only after the final regression suite and CI pass; hosting,
+submission and the final human release walkthrough are still separate gates.

@@ -3,9 +3,10 @@
 Issue [#57](https://github.com/Sammieblz/khonsu/issues/57), owned by Samuel,
 continues [#49](https://github.com/Sammieblz/khonsu/issues/49) and
 [BYT-43](https://linear.app/byteboyz/issue/BYT-43/samuel-compare-native-rendering-and-compatible-exposure-reconstruction).
-The isolated static route is `/resolution-lab/`. This experiment stays on
-`feat/57-resolution-lab`, based on `feat/49-display-experiments`, for user testing.
-Do not merge either branch until Samuel approves.
+The isolated static route is `/resolution-lab/`. The complete
+`feat/57-resolution-lab` history is consolidated into `feat/49-display-experiments`
+and PR #54. Samuel authorized main integration on November 15 after the final
+cleanup and automated acceptance, superseding the earlier testing hold.
 
 ## Try the comparison
 
@@ -249,8 +250,9 @@ The existing [candidate-display regression](evidence/resolution/candidate-regres
 also passed in both browsers. The API contract check and repository text/link
 check passed.
 See the [desktop](evidence/resolution/desktop.png) and
-[mobile](evidence/resolution/mobile.png) captures. User visual acceptance and
-integration remain pending.
+[mobile](evidence/resolution/mobile.png) captures. These reports predate the final
+cleanup and main integration authorized by Samuel on November 15. The complete
+lab history is consolidated in PR #54; PR #58 was integrated into that branch.
 
 ## Scientific references
 

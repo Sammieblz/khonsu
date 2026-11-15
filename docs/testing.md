@@ -69,6 +69,9 @@ the visitor explicitly requests replacement.
 
 ## Wide fields and consolidated display regression
 
+The [final PR #54 acceptance](merge-54-acceptance.md) records the authorized
+integration and the slow-CPU A/B regression in both browsers.
+
 Run `python scripts/verify-hd-field.py --download` for the explicitly bounded
 two-exposure acquisition, then `node scripts/verify-hd-display.mjs` for the real
 2048-square products in Chromium and Firefox. The latter replays API transport;
@@ -78,7 +81,7 @@ geometry/keyboard actions, A/B epochs, CPU worker recovery and candidate lineage
 search or a public deployment. Its synthetic unit tests test bounds and values,
 not claimed source resolution.
 
-Also run `node scripts/verify-resolution-lab.mjs` to preserve the unmerged lab's
+Also run `node scripts/verify-resolution-lab.mjs` to preserve the resolution lab's
 real-image comparisons and controls. Browser display suites share
 `scripts/browser-display-modules.mjs`, which compiles the actual renderer and
 generated limits rather than maintaining independent copies. Candidate tests
