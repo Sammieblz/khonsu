@@ -46,4 +46,5 @@
 .displayControls label { display: flex; flex-direction: column; gap: 6px; color: var(--silver); }
 .displayControls input { width: 100%; accent-color: var(--amber); min-height: 30px; }
 .displayControls .rendererChoice { flex-direction: row; align-items: center; flex-wrap: wrap; }
+@media(min-width:1100px){ .instrument:not(.expanded){max-width:clamp(480px,calc(100svh - 500px),780px);} }
 @media(max-width:520px){ .instrument{padding:12px;} .instrumentHeading{font-size:10px;} .tools button{flex:1;padding:8px;} .transportButtons button{flex:1;} .transportButtons label{width:100%;margin-top:6px;} }

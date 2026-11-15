@@ -12,7 +12,7 @@ export function CoordinateForm({ onSubmit, busy, target }: { onSubmit: (request:
   const [dec, setDec] = useState("");
   const [fov, setFov] = useState("6");
   const [error, setError] = useState("");
-  useEffect(()=>{if(target?.ra_deg!=null&&target.dec_deg!=null){const parsed=parseCoordinates(String(target.ra_deg),String(target.dec_deg),fov);if(parsed.ok){setRa(String(target.ra_deg));setDec(String(target.dec_deg));setError('');}}},[target]);
+  useEffect(()=>{if(target?.ra_deg!=null&&target.dec_deg!=null){const parsed=parseCoordinates(String(target.ra_deg),String(target.dec_deg),"6");if(parsed.ok){setRa(String(target.ra_deg));setDec(String(target.dec_deg));setError('');}}},[target]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

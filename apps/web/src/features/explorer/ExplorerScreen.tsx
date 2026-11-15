@@ -132,7 +132,7 @@ export function ExplorerScreen() {
   const picker=<CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id=>{activeExampleLoad.current?.abort();activeExampleLoad.current=null;setSelectedExampleId(id);setExampleError('');}} onLoad={()=>void loadExample()}/>;
   const showConsole=!!sequence||search.phase!=='idle';
   return (
-    <div id="top" className={styles.site} data-loaded={!!sequence}>
+    <div id="top" className={styles.site} data-loaded={showConsole}>
       <a className="skip-link" href="#field-command">Skip to field controls</a>
       <header className={styles.header}>
         <Brand />
@@ -143,7 +143,7 @@ export function ExplorerScreen() {
         <section className={styles.introduction} aria-labelledby="hero-title">
           <div className={styles.celestial} aria-hidden="true" />
           <div className={styles.heroCopy}><span className={styles.eyebrow}>AN OBSERVATORY THROUGH TIME</span><h1 id="hero-title">THE SKY<br/>REMEMBERS.</h1><p>Move through real SPHEREx observations.<br/>Find what time reveals.</p><span className={styles.artLabel}>ORIGINAL CELESTIAL ILLUSTRATION</span></div>
-          {!sequence&&<aside className={styles.entryPanel} aria-label="Open saved observations"><img src="/khonsu-mark.svg" width="100" height="100" alt=""/><p className={styles.tagline}>One sky.<br/>Many moments.</p>{picker}</aside>}
+          {!showConsole&&<aside className={styles.entryPanel} aria-label="Open saved observations"><img src="/khonsu-mark.svg" width="100" height="100" alt=""/><p className={styles.tagline}>One sky.<br/>Many moments.</p>{picker}</aside>}
         </section>
         <section id="field-command" className={styles.command} aria-label="Choose a sky field">
           <CoordinateForm target={selectedTarget} onSubmit={request=>void submit(request)} busy={search.phase==='running'}/>
