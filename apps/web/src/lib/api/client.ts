@@ -61,8 +61,11 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
     response = await fetch(`${apiBaseUrl()}${path}`, init);
   } catch (error) {
     if (isAbort(error)) throw error;
+    const slow = record(error)?.name === "TimeoutError";
     throw new ApiClientError(
-      "The observation service is unavailable. Start the backend container or check the configured API address.",
+      slow
+        ? "The observation service did not answer in time. Check that the backend is running, then retry."
+        : "The observation service is unavailable. Start the backend container or check the configured API address.",
       0, CLIENT_ERROR.backendUnavailable,
     );
   }
@@ -82,6 +85,9 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
 }
 
 const jobPath = (sequenceId: string) => `/v1/sequences/${encodeURIComponent(sequenceId)}`;
+
+/** Upper bound for the job-creation request, which only validates and enqueues. */
+export const CREATE_TIMEOUT_MS = 30_000;
 
 export function createSequence(request: SequenceRequest, signal?: AbortSignal): Promise<SequenceJob> {
   return requestJson<SequenceJob>("/v1/sequences", {
@@ -114,6 +120,8 @@ export interface RunOptions {
   maxPollIntervalMs?: number;
   /** Stop waiting (and cancel the job) after this long. */
   maxWaitMs?: number;
+  /** Consecutive unreachable-backend polls tolerated before giving up. */
+  maxPollFailures?: number;
   sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
   now?: () => number;
 }
@@ -133,6 +141,8 @@ export function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> 
   });
 }
 
+const TERMINAL_STATUSES = new Set<JobStatus>(["ready", "failed", "cancelled", "expired"]);
+
 function terminalError(job: SequenceJob): ApiClientError {
   if (job.status === "failed") {
     return new ApiClientError(
@@ -146,56 +156,205 @@ function terminalError(job: SequenceJob): ApiClientError {
   return new ApiClientError("This temporary job expired or the backend restarted. Repeat the search.", 410, CLIENT_ERROR.expired);
 }
 
+function cancelQuietly(sequenceId: string): Promise<void> {
+  return cancelSequence(sequenceId).then(() => undefined, () => undefined);
+}
+
+function timeoutSignal(ms: number): AbortSignal | undefined {
+  return typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(ms) : undefined;
+}
+
+// Coordinates round-trip through JSON unchanged; the tolerance only absorbs
+// float formatting, far below one SPHEREx pixel (about 6 arcseconds).
+const TARGET_TOLERANCE_DEG = 1e-7;
+
+/** Reject a manifest that does not belong to this job and this search. */
+function checkManifest(manifest: SequenceManifest, sequenceId: string, request: SequenceRequest): SequenceManifest {
+  const target = record(record(manifest)?.target);
+  const sameField = typeof target?.ra_deg === "number" && typeof target.dec_deg === "number"
+    && Math.abs(target.ra_deg - request.ra_deg) <= TARGET_TOLERANCE_DEG
+    && Math.abs(target.dec_deg - request.dec_deg) <= TARGET_TOLERANCE_DEG;
+  if (manifest.sequence_id !== sequenceId || manifest.data_mode !== "live" || !sameField) {
+    throw new ApiClientError(
+      "The service returned a sequence that does not match this search, so it was not shown. Retry the search.",
+      0, CLIENT_ERROR.invalidResponse,
+    );
+  }
+  return manifest;
+}
+
 /**
  * Start a sequence job and poll with capped backoff until it is ready, then
  * return its manifest. Rejects with ApiClientError for every failure state and
- * with an AbortError when the caller aborts; no polling continues after either.
+ * with an AbortError when the caller aborts.
+ *
+ * Aborting never leaves work behind: creation is allowed to finish so the
+ * server-assigned job can be cancelled, a non-terminal job is cancelled before
+ * the promise settles, and no request is sent after that.
  */
 export async function runSequenceJob(request: SequenceRequest, options: RunOptions = {}): Promise<SequenceManifest> {
   const { signal, onUpdate } = options;
   const sleep = options.sleep ?? abortableSleep;
   const now = options.now ?? Date.now;
   const maxInterval = options.maxPollIntervalMs ?? 5000;
+  const maxFailures = options.maxPollFailures ?? 3;
   const deadline = now() + (options.maxWaitMs ?? 10 * 60 * 1000);
   let interval = options.initialPollMs ?? 1000;
+  let failures = 0;
 
-  let job = await createSequence(request, signal);
-  onUpdate?.(job);
-  while (job.status !== "ready") {
-    if (job.status === "failed" || job.status === "cancelled" || job.status === "expired") throw terminalError(job);
-    if (now() >= deadline) {
-      await cancelSequence(job.sequence_id).catch(() => undefined);
-      throw new ApiClientError("Stopped waiting for this search. The archive may be slow; try again or request fewer frames.", 0, CLIENT_ERROR.pollTimeout);
-    }
-    await sleep(interval, signal);
-    interval = Math.min(maxInterval, Math.round(interval * 1.5));
-    try {
-      job = await getSequenceStatus(job.sequence_id, signal);
-    } catch (error) {
-      if (error instanceof ApiClientError && error.status === 410) throw terminalError({ ...job, status: "expired" });
-      throw error;
-    }
+  if (signal?.aborted) throw abortError();
+  // Not tied to the caller's signal: an aborted POST could still create a job
+  // that nobody can cancel, holding the single science worker for minutes.
+  let job = await createSequence(request, timeoutSignal(CREATE_TIMEOUT_MS));
+  const sequenceId = job.sequence_id;
+  try {
+    if (signal?.aborted) throw abortError();
     onUpdate?.(job);
+    while (job.status !== "ready") {
+      if (TERMINAL_STATUSES.has(job.status)) throw terminalError(job);
+      if (now() >= deadline) {
+        await cancelQuietly(sequenceId);
+        throw new ApiClientError("Stopped waiting for this search. The archive may be slow; try again or request fewer frames.", 0, CLIENT_ERROR.pollTimeout);
+      }
+      await sleep(interval, signal);
+      interval = Math.min(maxInterval, Math.round(interval * 1.5));
+      try {
+        job = await getSequenceStatus(sequenceId, signal);
+        failures = 0;
+      } catch (error) {
+        if (error instanceof ApiClientError && error.status === 410) throw terminalError({ ...job, status: "expired" });
+        if (error instanceof ApiClientError && error.code === CLIENT_ERROR.backendUnavailable) {
+          // Ride out a brief outage such as a container restart. If the
+          // process did restart, the next answer is a 410 for the lost job.
+          if (++failures < maxFailures) continue;
+          throw new ApiClientError(
+            "Lost contact with the observation service while the search was running. Check that the backend is still running, then retry.",
+            0, CLIENT_ERROR.backendUnavailable,
+          );
+        }
+        throw error;
+      }
+      onUpdate?.(job);
+    }
+    return checkManifest(await getSequenceManifest(sequenceId, signal), sequenceId, request);
+  } catch (error) {
+    if (signal?.aborted) {
+      if (!TERMINAL_STATUSES.has(job.status)) await cancelQuietly(sequenceId);
+      throw isAbort(error) ? error : abortError();
+    }
+    throw error;
   }
-  return getSequenceManifest(job.sequence_id, signal);
+}
+
+/** Distinct, readable failure states shown to the user. */
+export type FailureKind =
+  | "invalid-search" | "no-coverage" | "too-large" | "archive" | "busy" | "timeout"
+  | "unusable-data" | "processing" | "expired" | "unreachable" | "misconfigured" | "cancelled";
+
+export interface FailureGuide {
+  kind: FailureKind;
+  /** Short panel heading. */
+  title: string;
+  /** What the user can do next, in plain language. */
+  hint: string;
+  /** Repeating the identical search can reasonably succeed. */
+  retry: boolean;
+  /** Changing the coordinates, field or frame count is the useful next step. */
+  editSearch: boolean;
+  /** Offer a bundled cached real example, when one is available. */
+  cachedExample: boolean;
+}
+
+const GUIDES: Record<FailureKind, Omit<FailureGuide, "kind">> = {
+  "invalid-search": {
+    title: "CHECK THE SEARCH", retry: false, editSearch: true, cachedExample: false,
+    hint: "The service rejected these search values. Correct them and search again.",
+  },
+  "no-coverage": {
+    title: "NOT ENOUGH COMPARABLE OBSERVATIONS", retry: false, editSearch: true, cachedExample: true,
+    hint: "The SPHEREx data here could not form a time sequence, so retrying the same search will not help. Try another target or a wider field, or explore a cached real example.",
+  },
+  "too-large": {
+    title: "SEARCH TOO LARGE", retry: false, editSearch: true, cachedExample: false,
+    hint: "This search exceeds a safety limit. Use a smaller field of view or another target.",
+  },
+  archive: {
+    title: "IRSA ARCHIVE UNAVAILABLE", retry: true, editSearch: false, cachedExample: true,
+    hint: "The NASA/IPAC archive did not deliver usable data. Wait a minute and retry, or explore a cached real example meanwhile.",
+  },
+  busy: {
+    title: "OBSERVATION SERVICE BUSY", retry: true, editSearch: false, cachedExample: true,
+    hint: "The observation service is at capacity. Retry after the current search finishes or temporary results expire.",
+  },
+  timeout: {
+    title: "SEARCH TOOK TOO LONG", retry: true, editSearch: true, cachedExample: true,
+    hint: "The search ran past its time limit. Retry when the archive is less busy, or use a smaller field.",
+  },
+  "unusable-data": {
+    title: "ARCHIVE DATA COULD NOT BE USED", retry: false, editSearch: true, cachedExample: true,
+    hint: "The observations for this field failed a validity check, so no frames were shown. Try another target or explore a cached real example.",
+  },
+  processing: {
+    title: "PROCESSING FAILED", retry: true, editSearch: true, cachedExample: true,
+    hint: "The observations could not be prepared. Retry once; if it fails again, try another target.",
+  },
+  expired: {
+    title: "SEARCH EXPIRED", retry: true, editSearch: false, cachedExample: false,
+    hint: "Search results are kept only temporarily and do not survive a service restart. Your coordinates are still in the form; retry to start a fresh search.",
+  },
+  unreachable: {
+    title: "OBSERVATION SERVICE UNREACHABLE", retry: true, editSearch: false, cachedExample: false,
+    hint: "Retry once the backend is running. Cached real examples come from the same service, so they are unavailable until it is reachable.",
+  },
+  misconfigured: {
+    title: "LIVE SEARCH NOT AVAILABLE", retry: false, editSearch: false, cachedExample: true,
+    hint: "The observation service is running without the scientific components live searches need. Rebuild it with them, or explore a cached real example.",
+  },
+  cancelled: {
+    title: "SEARCH CANCELLED", retry: true, editSearch: true, cachedExample: false,
+    hint: "The search was cancelled. Your coordinates are still in the form.",
+  },
+};
+
+// Every code the API, retrieval, processing or this client can report.
+// Unknown codes fall back to "processing", which still offers a retry.
+const KIND_BY_CODE: Record<string, FailureKind> = {
+  INVALID_REQUEST: "invalid-search", invalid_target: "invalid-search", INVALID_PROCESSING_OPTIONS: "invalid-search",
+  NO_USABLE_COVERAGE: "no-coverage", INSUFFICIENT_EPOCHS: "no-coverage",
+  INSUFFICIENT_COMPARABLE_EPOCHS: "no-coverage", INSUFFICIENT_SPECTRAL_OVERLAP: "no-coverage",
+  too_many_observations: "too-large", archive_size_limit: "too-large", RESOURCE_LIMIT: "too-large",
+  archive_busy: "archive", archive_unavailable: "archive", empty_archive_response: "archive",
+  invalid_archive_response: "archive", invalid_fits: "archive", unsafe_source_url: "archive", aborted: "archive",
+  QUEUE_FULL: "busy", CACHE_FULL: "busy", CACHE_UNAVAILABLE: "busy",
+  JOB_TIMEOUT: "timeout", archive_timeout: "timeout", [CLIENT_ERROR.pollTimeout]: "timeout",
+  INVALID_FITS: "unusable-data", INVALID_WCS: "unusable-data", INVALID_PROVENANCE: "unusable-data",
+  MISSING_QUALITY_DATA: "unusable-data", MISSING_SPECTRAL_METADATA: "unusable-data",
+  UNSUPPORTED_RELEASE: "unusable-data", UNSUPPORTED_FLUX_UNIT: "unusable-data",
+  PROCESSING_FAILED: "processing", [CLIENT_ERROR.invalidResponse]: "processing", NOT_READY: "processing",
+  [CLIENT_ERROR.expired]: "expired", ASSET_EXPIRED: "expired",
+  [CLIENT_ERROR.backendUnavailable]: "unreachable",
+  SCIENCE_UNAVAILABLE: "misconfigured", SCIENCE_DEPENDENCIES_MISSING: "misconfigured",
+  [CLIENT_ERROR.cancelled]: "cancelled", cancelled: "cancelled",
+};
+
+/** Codes with an explicit failure state; a contract test compares these with the API. */
+export function knownFailureCodes(): string[] {
+  return Object.keys(KIND_BY_CODE);
+}
+
+/** The failure state and recovery actions for an error code. */
+export function describeFailure(code: string): FailureGuide {
+  const kind = KIND_BY_CODE[code] ?? "processing";
+  return { kind, ...GUIDES[kind] };
 }
 
 export type Recovery = "retry" | "change-query" | "none";
 
-const RETRYABLE = new Set([
-  "archive_busy", "archive_unavailable", "archive_timeout", "empty_archive_response", "invalid_archive_response",
-  "JOB_TIMEOUT", "QUEUE_FULL", "CACHE_FULL", "CACHE_UNAVAILABLE", "PROCESSING_FAILED",
-  CLIENT_ERROR.backendUnavailable, CLIENT_ERROR.pollTimeout, CLIENT_ERROR.expired, CLIENT_ERROR.cancelled,
-]);
-const CHANGE_QUERY = new Set([
-  "INVALID_REQUEST", "invalid_target", "too_many_observations", "archive_size_limit",
-  "INSUFFICIENT_EPOCHS", "INSUFFICIENT_COMPARABLE_EPOCHS", "INSUFFICIENT_SPECTRAL_OVERLAP",
-  "NO_USABLE_COVERAGE", "RESOURCE_LIMIT",
-]);
-
-/** What a user can usefully do next after a failure with this code. */
+/** Compact form of describeFailure, kept for existing callers. */
 export function recoveryFor(code: string): Recovery {
-  if (RETRYABLE.has(code)) return "retry";
-  if (CHANGE_QUERY.has(code)) return "change-query";
+  const guide = describeFailure(code);
+  if (guide.retry) return "retry";
+  if (guide.editSearch) return "change-query";
   return "none";
 }
+

@@ -5,20 +5,13 @@ import { Brand } from "@/components/ui/Brand";
 import { AnnotationPanel } from "@/features/annotations/AnnotationPanel";
 import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
-import { ApiClientError, cancelSequence, listExamples, listPresets, type PresetTarget, recoveryFor, runSequenceJob } from "@/lib/api/client";
+import { ApiClientError, describeFailure, listExamples, listPresets, type PresetTarget, runSequenceJob } from "@/lib/api/client";
+import { SequenceSession } from "@/lib/api/session";
 import { CoordinateForm } from "./CoordinateForm";
 import { CachedExamplePicker, SearchStatus, type SearchState } from "./SearchStatus";
 import { TargetPresets } from "./TargetPresets";
 import type { ImageSelection, SequenceManifest, SequenceRequest } from "./interfaces";
 import styles from "./explorer.module.css";
-
-const TERMINAL = new Set(["ready", "failed", "cancelled", "expired"]);
-
-interface ActiveRun {
-  controller: AbortController;
-  jobId: string | null;
-  status: string | null;
-}
 
 export function ExplorerScreen() {
   const [sequence, setSequence] = useState<SequenceManifest | null>(null);
@@ -33,18 +26,14 @@ export function ExplorerScreen() {
   const [selectedTarget,setSelectedTarget]=useState<PresetTarget|null>(null);
   const [catalogError,setCatalogError]=useState('');
   const [missionOpen,setMissionOpen]=useState(false);
-  const activeRun = useRef<ActiveRun | null>(null);
+  // One live search at a time; replacing or leaving it cancels its server job.
+  const session = useRef<SequenceSession | null>(null);
   const activeExampleLoad = useRef<AbortController | null>(null);
   const { annotations, addAnnotation, removeAnnotation } = useAnnotations();
 
-  // Stop polling and release the single backend worker for an abandoned job.
-  function stopActiveRun(): Promise<void> {
-    const run = activeRun.current;
-    activeRun.current = null;
-    if (!run) return Promise.resolve();
-    run.controller.abort();
-    if (!run.jobId || (run.status && TERMINAL.has(run.status))) return Promise.resolve();
-    return cancelSequence(run.jobId).then(() => undefined, () => undefined);
+  function searchSession(): SequenceSession {
+    session.current ??= new SequenceSession(runSequenceJob);
+    return session.current;
   }
 
   useEffect(() => {
@@ -62,7 +51,7 @@ export function ExplorerScreen() {
     return () => {
       controller.abort();
       activeExampleLoad.current?.abort();
-      void stopActiveRun();
+      void session.current?.stop();
     };
   }, []);
 
@@ -76,47 +65,41 @@ export function ExplorerScreen() {
   async function submit(request: SequenceRequest) {
     activeExampleLoad.current?.abort();
     activeExampleLoad.current = null;
-    await stopActiveRun();
-    const run: ActiveRun = { controller: new AbortController(), jobId: null, status: null };
-    activeRun.current = run;
     // Never leave a previous sequence on screen under a new query.
     setSequence(null);
     setActiveFrameId(null);
     setSelection(null);
     setSearch({ phase: "running", request, job: null });
     try {
-      const manifest = await runSequenceJob(request, {
-        signal: run.controller.signal,
-        onUpdate: job => {
-          if (activeRun.current !== run) return;
-          run.jobId = job.sequence_id;
-          run.status = job.status;
-          setSearch({ phase: "running", request, job });
-        },
+      const manifest = await searchSession().start(request, {
+        onUpdate: job => setSearch({ phase: "running", request, job }),
       });
-      if (activeRun.current !== run) return;
-      activeRun.current = null;
+      if (!manifest) return; // Replaced by a newer search or stopped.
       showSequence(manifest);
       setSearch({ phase: "ready", request, manifest });
     } catch (error) {
-      if (activeRun.current !== run || run.controller.signal.aborted) return;
-      activeRun.current = null;
       const failure = error instanceof ApiClientError
         ? error
         : new ApiClientError("The search failed unexpectedly. Retry, or reload the page.", 0, "CLIENT_FAILURE");
-      setSearch({ phase: "failed", request, code: failure.code, message: failure.message, recovery: recoveryFor(failure.code) });
+      setSearch({
+        phase: "failed", request, code: failure.code, message: failure.message,
+        details: failure.details, guide: describeFailure(failure.code),
+      });
     }
   }
 
-  async function cancelSearch() {
+  function cancelSearch() {
     if (search.phase !== "running") return;
-    const { request } = search;
-    await stopActiveRun();
-    setSearch({ phase: "cancelled", request });
+    setSearch({ phase: "cancelled", request: search.request });
+    void searchSession().stop();
   }
 
   function retrySearch() {
     if (search.phase === "failed" || search.phase === "cancelled") void submit(search.request);
+  }
+
+  function editSearch() {
+    document.getElementById("ra")?.focus();
   }
 
   async function loadExample() {
@@ -125,7 +108,7 @@ export function ExplorerScreen() {
     activeExampleLoad.current?.abort();
     const controller = new AbortController();
     activeExampleLoad.current = controller;
-    await stopActiveRun();
+    await searchSession().stop();
     if (activeExampleLoad.current !== controller || controller.signal.aborted) return;
     setSearch(state => state.phase === "running" ? { phase: "cancelled", request: state.request } : state);
     // Recheck the selected bundle: a missing or corrupt asset must not load a
@@ -169,7 +152,7 @@ export function ExplorerScreen() {
         {showConsole&&<section id="explorer" tabIndex={-1} className={styles.workspace} aria-label="Sky observation explorer">
           <div className={styles.mainInstrument}><SkyViewer sequence={sequence} activeFrameId={activeFrameId} annotations={annotations} onFrameChange={setActiveFrameId} onSelect={setSelection}/></div>
           <aside className={styles.sidePanel} aria-label="Observation context and candidate notes">
-            <SearchStatus state={search} canLoadExample={false} onCancel={()=>void cancelSearch()} onRetry={retrySearch} onLoadExample={()=>void loadExample()}/>
+            <SearchStatus state={search} canLoadExample={examples.length > 0} onCancel={cancelSearch} onRetry={retrySearch} onEditSearch={editSearch} onLoadExample={()=>void loadExample()}/>
             {picker}
             <AnnotationPanel selection={selection} annotations={annotations.filter(item=>item.selection.sequenceId===sequence?.sequence_id)} onAdd={addAnnotation} onRemove={removeAnnotation}/>
           </aside>
