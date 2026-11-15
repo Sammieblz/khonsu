@@ -1,0 +1,99 @@
+{
+  "testedAt": "2026-11-15T22:54:17.988Z",
+  "frontend": "http://localhost:3003",
+  "viewports": {
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "overflow": 0,
+      "missing": [],
+      "small": [],
+      "entryViolations": [],
+      "loadedViolations": []
+    },
+    "tablet": {
+      "width": 820,
+      "height": 1180,
+      "overflow": 0,
+      "missing": [],
+      "small": [],
+      "entryViolations": [],
+      "loadedViolations": []
+    },
+    "desktop": {
+      "width": 1440,
+      "height": 900,
+      "overflow": 0,
+      "missing": [],
+      "small": [],
+      "entryViolations": [],
+      "loadedViolations": []
+    }
+  },
+  "motion": {
+    "no-preference": {
+      "onEntry": 0,
+      "running": 0,
+      "autoplay": false
+    },
+    "reduce": {
+      "onEntry": 0,
+      "running": 0,
+      "autoplay": false
+    }
+  },
+  "keyboard": [
+    {
+      "step": "load cached example",
+      "label": "LOAD CACHED REAL EXAMPLE",
+      "tag": "button",
+      "visible": true
+    },
+    {
+      "step": "focus after loading",
+      "label": "Sky observation explorer",
+      "tag": "section",
+      "visible": true
+    },
+    {
+      "step": "observation canvas",
+      "label": "Observation canvas",
+      "tag": "div",
+      "visible": true
+    },
+    {
+      "step": "Mark tool",
+      "label": "MARK",
+      "tag": "button",
+      "visible": true
+    },
+    {
+      "step": "canvas in Mark mode",
+      "label": "Observation canvas",
+      "tag": "div",
+      "visible": true
+    },
+    {
+      "step": "note field",
+      "label": "candidate-note",
+      "tag": "textarea",
+      "visible": true
+    },
+    {
+      "step": "save note",
+      "label": "SAVE CANDIDATE NOTE",
+      "tag": "button",
+      "visible": true
+    },
+    {
+      "step": "export candidate",
+      "label": "Export candidate 01 as an evidence file",
+      "tag": "button",
+      "visible": true
+    },
+    {
+      "step": "evidence downloaded",
+      "file": "khonsu-evidence-real-wise-0855-8c7a4f29.json"
+    }
+  ]
+}

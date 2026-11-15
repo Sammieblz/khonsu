@@ -78,7 +78,7 @@ def main():
             (bundle/filename).write_bytes(path.read_bytes())
         (bundle/'manifest.json').write_text(json.dumps(manifest, indent=2)+'\n')
         lineage['quality_updated_at_utc'] = datetime.now(timezone.utc).isoformat()
-        lineage['source_observations'] = [{k:v for k,v in f.items() if k not in {'image_url','raster','gap_fill'}} for f in manifest['frames']]
+        lineage['source_observations'] = [{k:v for k,v in f.items() if k not in {'image_url','raster','gap_fill','refinement'}} for f in manifest['frames']]
         for filename in ['manifest.json', *(f for _,f in staged)]:
             path = bundle/filename
             lineage['files'][filename] = {'size_bytes':path.stat().st_size,'sha256':digest(path)}

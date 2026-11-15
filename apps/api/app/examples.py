@@ -56,7 +56,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
         if acquired != datetime.fromisoformat(acquisition['processing_timestamp_utc'].replace('Z', '+00:00')):
             raise CachedExampleError("The acquisition timestamp and recorded probe disagree.")
         source_observations = [{"warning_fraction": 0.0, "estimated_fraction": 0.0, **entry} for entry in lineage.get('source_observations', [])]
-        if source_observations != [frame.model_dump(mode='json', exclude={'image_url', 'raster', 'gap_fill'}) for frame in manifest.frames]:
+        if source_observations != [frame.model_dump(mode='json', exclude={'image_url', 'raster', 'gap_fill', 'refinement'}) for frame in manifest.frames]:
             raise CachedExampleError("The lineage and observation metadata disagree.")
         if source.target != manifest.target or source.grid != manifest.grid or source.display != manifest.display:
             raise CachedExampleError("The cached grid, target or stretch differs from its source.")
@@ -64,7 +64,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
             raise CachedExampleError("The cached field or quality warnings differ from their source.")
         # Warning-only display provenance can be added to a reviewed v1 bundle.
         # Its original strict PNG, frame facts and source manifest stay intact.
-        compared = {'image_url', 'raster', 'warning_fraction', 'gap_fill', 'estimated_fraction'}
+        compared = {'image_url', 'raster', 'warning_fraction', 'gap_fill', 'estimated_fraction', 'refinement'}
         if [frame.model_dump(exclude=compared) for frame in source.frames] != [frame.model_dump(exclude=compared) for frame in manifest.frames]:
             raise CachedExampleError("The cached observations differ from their source.")
         if any(manifest.processing.get(key) != value for key, value in source.processing.items()):
@@ -132,6 +132,23 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                             or revision.get('method') != manifest.processing.get('gap_fill_method')
                             or revision.get('estimated_fraction') != frame.estimated_fraction):
                         raise CachedExampleError("Gap-fill derivative lacks matching input provenance.")
+                if frame.refinement:
+                    name = frame.frame_id + '-refined.bin'
+                    meta = frame.refinement.raster
+                    if meta.url != f'/v1/examples/{manifest.sequence_id}/frames/{name}':
+                        raise CachedExampleError('Refinement must identify its bundled local file.')
+                    expected.add(name)
+                    refined_raw = read_bounded(directory / name, MAX_RASTER_BYTES)
+                    if len(refined_raw) != meta.size_bytes or hashlib.sha256(refined_raw).hexdigest() != meta.sha256:
+                        raise CachedExampleError('Refinement failed checksum or size verification.')
+                    refined_values = np.frombuffer(refined_raw[:count * 4], dtype='<f4')
+                    refined_mask = np.frombuffer(refined_raw[count * 4:], dtype=np.uint8)
+                    if (not np.isfinite(refined_values).all() or not np.array_equal(refined_mask, valid == 1)
+                            or np.any(refined_values[refined_mask == 0] != 0)):
+                        raise CachedExampleError('Refinement changed the original strict footprint.')
+                    revision = lineage.get('refinement_revision', {}).get(frame.frame_id, {})
+                    if revision.get('settings') != frame.refinement.model_dump(mode='json', exclude={'raster'}):
+                        raise CachedExampleError('Refinement lacks matching input and method provenance.')
         entries = lineage.get('files')
         if not isinstance(entries, dict) or set(entries) != expected:
             raise CachedExampleError("The cached file inventory is incomplete.")

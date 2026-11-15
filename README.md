@@ -89,6 +89,10 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [ownership](docs/ownership.md)
 
 ## Data and credits
 
+The optional [astro image refinement](docs/astro-refinement.md) adds gentler
+grain and highlights to the console, with original comparison and recorded
+scientific limits. Follow its Docker testing steps to compare the same real frame.
+
 SPHEREx data comes from the [NASA/IPAC Infrared Science Archive](https://irsa.ipac.caltech.edu/Missions/spherex.html). The [data-source register](docs/data-sources.md) covers all eight challenge resources, access methods, citations, terms, and the optional Gaia DR3, WISE, CADC, and NEOSSat integrations. The [science rules](docs/science-integrity.md) explain registration, wavelength consistency, masks, dates, and the limits of candidate interpretation.
 
 NASA does not endorse any non-U.S. Government entity and is not responsible for information contained on non-U.S. Government websites. For non-U.S. Government websites, participants must comply with any data use parameters of that specific website.

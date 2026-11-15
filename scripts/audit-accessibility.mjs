@@ -138,6 +138,9 @@ try {
   await step('observation canvas', await tabTo(page, info => info.label === 'Observation canvas'));
   await page.keyboard.press('ArrowRight');
   await page.getByText(/^2 \/ \d+ OBSERVATIONS$/).waitFor();
+  // The epoch label changes before its verified raster arrives. Wait for the
+  // actual second observation before attempting to mark it with the keyboard.
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('canvas')).visibility === 'visible');
   await step('Mark tool', await tabTo(page, info => info.label === 'MARK', { limit: 30, reverse: true }));
   await page.keyboard.press('Enter');
   await step('canvas in Mark mode', await tabTo(page, info => info.label === 'Observation canvas'));

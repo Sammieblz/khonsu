@@ -68,7 +68,21 @@
         "sha256": "c407014e813f3afb759cef2d31609811f380e69751831b5f1e8bd4037503663e",
         "url": "/v1/examples/real-wise-0855/frames/frame-0001-fill.bin"
       },
-      "estimated_fraction": 0.019606434932490664
+      "estimated_fraction": 0.019606434932490664,
+      "refinement": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.018004795645808404,
+        "robust_haar_sigma_mjy_sr": 0.021228270766139028,
+        "archive_sky_sigma_mjy_sr": 0.018004795645808404,
+        "raster": {
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 69620,
+          "sha256": "d42cc4cfa5dff8f1131df046b6074bbdbc71ddad0a05b26c61345646637d85f1",
+          "url": "/v1/examples/real-wise-0855/frames/frame-0001-refined.bin"
+        },
+        "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58"
+      }
     },
     {
       "frame_id": "frame-0002",
@@ -97,7 +111,21 @@
         "sha256": "2856b9c3216cac3406cb2ae530db1e9d3103361c7841cf01a3cc882601c830e2",
         "url": "/v1/examples/real-wise-0855/frames/frame-0002-fill.bin"
       },
-      "estimated_fraction": 0.023197357081298477
+      "estimated_fraction": 0.023197357081298477,
+      "refinement": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01612354172242384,
+        "robust_haar_sigma_mjy_sr": 0.01994341186210513,
+        "archive_sky_sigma_mjy_sr": 0.01612354172242384,
+        "raster": {
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 69620,
+          "sha256": "dcfd02670892e532f658f2179c66aa2e2eb5817d16d0327d30da19935567d9b3",
+          "url": "/v1/examples/real-wise-0855/frames/frame-0002-refined.bin"
+        },
+        "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45"
+      }
     },
     {
       "frame_id": "frame-0003",
@@ -126,7 +154,21 @@
         "sha256": "ae5dbaf13a22b31a1f4531886fcf2b940800bb000052c87f7289c360b2181b77",
         "url": "/v1/examples/real-wise-0855/frames/frame-0003-fill.bin"
       },
-      "estimated_fraction": 0.021401896006894572
+      "estimated_fraction": 0.021401896006894572,
+      "refinement": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01659866089988934,
+        "robust_haar_sigma_mjy_sr": 0.02111986858025193,
+        "archive_sky_sigma_mjy_sr": 0.01659866089988934,
+        "raster": {
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 69620,
+          "sha256": "ed701bceb0cbc0662e2a912b2ec9951f7c7080b53a28f955fa46426a57e46138",
+          "url": "/v1/examples/real-wise-0855/frames/frame-0003-refined.bin"
+        },
+        "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d"
+      }
     }
   ],
   "warnings": [
@@ -189,6 +231,10 @@
     "gap_fill_bright_boundary_sigma": 5.0,
     "gap_fill_max_components": 2048,
     "gap_fill_max_pixels": 65536,
-    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
+    "refinement_method": "native-mask-normalized-local-wiener",
+    "refinement_strength": 0.5,
+    "refinement_scope": "optional display copy; native linear values before WCS resampling; no temporal averaging or measurement change",
+    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery"
   }
 }

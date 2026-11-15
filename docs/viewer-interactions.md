@@ -119,3 +119,10 @@ The original validity plane and selected A/B IDs accompany each mark. Detail
 remains paused in Mark mode. Candidate persistence begins only after the loaded
 store is committed to React state, avoiding an initial empty write on reload.
 See the [combined acceptance evidence](enhancement-research.md#candidate-integration).
+
+**REFINE IMAGE** is an optional, initially off preset beside Clean View. It
+combines native grain reduction with soft highlights. Advanced exposes the two
+individually. **SHOW ORIGINAL** and **HOLD ORIGINAL** pause the refinements and
+estimated fills; Mark also excludes warning-only samples. The
+[research and acceptance](astro-refinement.md) explain attenuation, independent
+asset fallback and the unchanged measurement footprint.

@@ -154,5 +154,13 @@ The cached example is not offered when the backend is unreachable, because the s
 
 ## Change procedure
 
+The [astro refinement contract](astro-refinement.md#manifest-and-provenance)
+adds optional `frame.refinement` metadata and a separately hashed binary to
+existing asset allowlists. It binds to the original raster checksum and exact
+strict mask. Original raster encodings reject display derivatives. Live and
+cached packaging record the same settings; a legacy or failed derivative falls
+back without replacing the observation. No new route or request parameter is
+required.
+
 Agree field names and units in the linked issue. Change Python schemas, regenerate OpenAPI and TypeScript, update fixtures and examples, then adjust both client and server in the same PR. Tyrone reviews the public contract. Samuel reviews science fields. Robel reviews composition changes. Run the contract and API checks in `docs/testing.md` before merge.
 

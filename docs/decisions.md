@@ -130,3 +130,14 @@ CPython produces a separate bounded estimate asset. Mark mode shows the original
 Bright boundaries, large star cores and external coverage stay unfilled. There is
 no generative model, temporal borrowing, new dependency or optional frontend
 design-phase implementation. Tyrone reviews the additive manifest contract.
+
+## November 15: optional astro refinement, #68 / BYT-51
+
+Samuel requested research and implementation inspired by Samsung Astrophoto.
+The [research record](astro-refinement.md) promotes existing native local Wiener
+grain reduction at strength 0.5 and a shared highlight shoulder. A separate
+verified visual asset preserves every source measurement and mask. Synthetic
+controls show faint-peak attenuation, so the preset starts off and Mark restores
+original samples. Existing real coadd compatibility gates stay in force; no
+cross-date averaging, sky-segmentation model, deconvolution or new dependency
+is added. Tyrone reviews the additive API contract.

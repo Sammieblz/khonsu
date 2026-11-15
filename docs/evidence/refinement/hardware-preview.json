@@ -1,0 +1,40 @@
+{
+  "testedAt": "2026-11-15T22:55:33.507Z",
+  "frontend": "http://localhost:3003",
+  "backend": "http://localhost:8003",
+  "browser": "157.0.8103.50",
+  "renderer": "WebGL2",
+  "adapter": "ANGLE (AMD, Radeon RX 580 Series (0x000067DF) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "changedDisplayPixels": 402262,
+  "maximumCpuGpuByteDifference": 1,
+  "manual4KDisplay": {
+    "width": 2880,
+    "height": 2880
+  },
+  "originalAndHoldExact": true,
+  "realDateStepping": true,
+  "markingUsesOriginal": true,
+  "refinementAssets": [
+    {
+      "url": "http://localhost:8003/v1/examples/real-wise-0855/frames/frame-0002-refined.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8003/v1/examples/real-wise-0855/frames/frame-0003-refined.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8003/v1/examples/real-wise-0855/frames/frame-0001-refined.bin",
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "base_commit": "95243c208b956d4a5c16ba8376738d823e44a1cd",
+  "tested_working_tree": "feat/68-astro-refinement, final implementation before commit",
+  "source_sha256": {
+    "apps/web/src/features/viewer/SkyViewer.tsx": "6d25333bd6a2afb7865d5cd990ef8ae07f4ed5dab74f7c3e92be9037ac99d469",
+    "apps/web/src/features/viewer/display.ts": "c0537abb3594cf969f82bfa653c4fcbea7cd93c58cd36aa2fe9902b7be37b5a6",
+    "apps/web/src/features/viewer/displayRenderer.ts": "51fa9740d00cf1dd1de410597d8d7e6f8c7882cfc90e0661787417079133985c",
+    "apps/api/app/processing/refinement.py": "c4f8f5664cf1ee36fa6134ba01dbcea29eacaa69653e16815d209f7c1c1dfaa8"
+  }
+}

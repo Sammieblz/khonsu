@@ -68,7 +68,21 @@
         "sha256": "234c6b3025dbed20682c77132bad0dd0b3cefd97491da52ba73243d6f3776c8e",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001-fill.bin"
       },
-      "estimated_fraction": 0.007816494995982175
+      "estimated_fraction": 0.007816494995982175,
+      "refinement": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01603916853889646,
+        "robust_haar_sigma_mjy_sr": 0.023219641068577764,
+        "archive_sky_sigma_mjy_sr": 0.01603916853889646,
+        "raster": {
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 68445,
+          "sha256": "52c947a2f720243925d9bebdbbfec9b1060512d85e669b057d15f0fd9a1a3850",
+          "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001-refined.bin"
+        },
+        "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91"
+      }
     },
     {
       "frame_id": "frame-0002",
@@ -97,7 +111,21 @@
         "sha256": "a129985c57b15c95f37d4639479d9dce645e1f7d8a2a85de46f76f0f4ff310f9",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002-fill.bin"
       },
-      "estimated_fraction": 0.011469062751114032
+      "estimated_fraction": 0.011469062751114032,
+      "refinement": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.015836161493804464,
+        "robust_haar_sigma_mjy_sr": 0.021108507531881333,
+        "archive_sky_sigma_mjy_sr": 0.015836161493804464,
+        "raster": {
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 68445,
+          "sha256": "3a9228dcfa39a569f693b479cdddf931acecea1d428e6844cf5cd220bd2a77c5",
+          "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002-refined.bin"
+        },
+        "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de"
+      }
     }
   ],
   "warnings": [
@@ -160,6 +188,10 @@
     "gap_fill_bright_boundary_sigma": 5.0,
     "gap_fill_max_components": 2048,
     "gap_fill_max_pixels": 65536,
-    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
+    "refinement_method": "native-mask-normalized-local-wiener",
+    "refinement_strength": 0.5,
+    "refinement_scope": "optional display copy; native linear values before WCS resampling; no temporal averaging or measurement change",
+    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery"
   }
 }

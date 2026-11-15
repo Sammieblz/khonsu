@@ -63,8 +63,10 @@ hashes are in [acquisition.json](evidence/resolution/acquisition.json).
 
 ## Rendering methods
 
-All transformations run in CPython. Original FITS and prepared rasters stay
-immutable, with unchanged production manifests and API contracts.
+All lab transformations run in CPython. Original FITS and prepared rasters stay
+immutable. The initial lab kept production contracts unchanged; the subsequent
+[astro refinement pass](astro-refinement.md) promotes a gentler grain filter and
+highlight curve through an optional, separately hashed display asset.
 
 | Treatment | Method | Limit |
 | --- | --- | --- |

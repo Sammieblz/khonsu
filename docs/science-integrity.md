@@ -37,6 +37,12 @@ Use approximate wavelength lookup for display only where documented. For quantit
 
 ## Distinguish motion and variability
 
+Optional [image refinement](astro-refinement.md) smooths a separate native-derived
+visual copy and softens display highlights. It starts off because faint peaks
+can be attenuated. Original values, uncertainty and strict validity remain the
+measurement source; Mark pauses refinement. No photometric or detection claim
+may be based on the filtered image alone.
+
 The user-authorized [Clean View](clean-view.md) can display explicitly labelled
 small-gap estimates by default. Keep that derivative separate from observations:
 preserve original masks and values, disclose the estimate, provide original and

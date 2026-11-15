@@ -173,8 +173,10 @@ def test_legacy_binary_masks_remain_readable_and_warning_counts_fail_closed(copi
     frame['raster']['sha256'] = hashlib.sha256(raw).hexdigest()
     frame['warning_fraction'] = 0
     frame['gap_fill'] = None
+    frame['refinement'] = None
     frame['estimated_fraction'] = 0
     lineage['files'].pop(frame['frame_id'] + '-fill.bin', None)
+    lineage['files'].pop(frame['frame_id'] + '-refined.bin', None)
     lineage['source_observations'][0]['estimated_fraction'] = 0
     lineage['source_observations'][0]['warning_fraction'] = 0
     (bundle/'manifest.json').write_text(json.dumps(payload))
@@ -188,6 +190,23 @@ def test_legacy_binary_masks_remain_readable_and_warning_counts_fail_closed(copi
     (bundle/'manifest.json').write_text(json.dumps(payload));(bundle/'lineage.json').write_text(json.dumps(lineage))
     rewrite_inventory(bundle,'manifest.json')
     with pytest.raises(CachedExampleError, match='warning fraction'):
+        validate_bundle(bundle)
+
+
+def test_refinement_cannot_grant_validity_even_with_rewritten_checksums(copied_bundles):
+    import numpy as np
+    from app.examples import validate_bundle, CachedExampleError
+    bundle = copied_bundles/'real'/'real-wise-0855'
+    payload = json.loads((bundle/'manifest.json').read_text())
+    frame = payload['frames'][0]; filename = frame['frame_id']+'-refined.bin'
+    raw = bytearray((bundle/filename).read_bytes()); count = len(raw)//5
+    mask = np.frombuffer(raw, np.uint8, offset=count*4)
+    mask[np.flatnonzero(mask == 0)[0]] = 1
+    (bundle/filename).write_bytes(raw)
+    frame['refinement']['raster']['sha256'] = hashlib.sha256(raw).hexdigest()
+    (bundle/'manifest.json').write_text(json.dumps(payload))
+    rewrite_inventory(bundle, filename); rewrite_inventory(bundle, 'manifest.json')
+    with pytest.raises(CachedExampleError, match='strict footprint'):
         validate_bundle(bundle)
 
 

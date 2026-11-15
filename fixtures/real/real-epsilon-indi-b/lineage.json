@@ -53,8 +53,8 @@
       "sha256": "893dc01d81e385c9bebb8f306f6f263c45de6ec3799a562296bf61f4e95e32e4"
     },
     "manifest.json": {
-      "sha256": "685e2a615b436130ae600c7a97b491f36d6d77a4034279f274aa55414c1c5ee2",
-      "size_bytes": 7464
+      "sha256": "408e99be0e3c5a5f6932cbc33d901d3fb8b3992a24e5f3ff0b907d1360a45188",
+      "size_bytes": 9131
     },
     "source-manifest.json": {
       "size_bytes": 5428,
@@ -75,6 +75,14 @@
     "frame-0002-fill.bin": {
       "sha256": "a129985c57b15c95f37d4639479d9dce645e1f7d8a2a85de46f76f0f4ff310f9",
       "size_bytes": 68445
+    },
+    "frame-0001-refined.bin": {
+      "size_bytes": 68445,
+      "sha256": "52c947a2f720243925d9bebdbbfec9b1060512d85e669b057d15f0fd9a1a3850"
+    },
+    "frame-0002-refined.bin": {
+      "size_bytes": 68445,
+      "sha256": "3a9228dcfa39a569f693b479cdddf931acecea1d428e6844cf5cd220bd2a77c5"
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
@@ -122,6 +130,30 @@
       "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
       "method": "small-gap-harmonic-v1",
       "estimated_fraction": 0.011469062751114032
+    }
+  },
+  "refinement_revision": {
+    "frame-0001": {
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01603916853889646,
+        "robust_haar_sigma_mjy_sr": 0.023219641068577764,
+        "archive_sky_sigma_mjy_sr": 0.01603916853889646,
+        "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91"
+      },
+      "raw_sha256": "41b1e38bcfede38700bb8fd719301a4f51df92cbc7252459562657b9e114d8a1"
+    },
+    "frame-0002": {
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.015836161493804464,
+        "robust_haar_sigma_mjy_sr": 0.021108507531881333,
+        "archive_sky_sigma_mjy_sr": 0.015836161493804464,
+        "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de"
+      },
+      "raw_sha256": "2c662f342e690c3b2d982e1eadd4d04c58a49cea1a87c69bdc1742b65cff6fe0"
     }
   }
 }
