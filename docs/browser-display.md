@@ -54,3 +54,26 @@ Background matching needs independent stationary-source and uncertainty tests.
 PSF matching generally softens sharper observations to a common response. Both
 remain unimplemented and explicitly disclosed. WebGPU is a future option if
 WebGL2/CPU benchmarks establish a useful benefit on these small fields.
+
+## Browser implementation and recovery
+
+WebGL2 uploads Float32 intensities and integer validity textures with nearest
+sampling. The shader maps shared black/white, asinh/linear, gamma and no-data
+style to colors. Scientific registration and validity decisions remain Python.
+The CPU path uses the same formula in a Web Worker; OffscreenCanvas transfers
+an ImageBitmap when available, otherwise the worker returns RGBA bytes. Canvas
+on the main thread remains the final fallback when Workers are unavailable.
+
+The renderer processes one job at a time and retains only the newest queued
+display request. Frame resources stay within the current/neighbor/A-B window
+of five. Loading and stale-result guards keep metadata and the shown frame
+together. Context loss triggers CPU rendering; selecting CPU explicitly also
+works. Missing or corrupt intensity assets preserve the original PNG and show
+why interactive intensity controls are unavailable. They do not fabricate data.
+
+The first production-export browser check passed in Chromium and Firefox with
+the authentic cached WISE field: maximum CPU/GPU byte difference was zero,
+forced WebGL context loss recovered, and disabling both WebGL2 and Workers
+still rendered through Canvas. These results establish tested compatibility,
+not guaranteed acceleration on every device. See the
+[recorded result](evidence/console/display-report.json).

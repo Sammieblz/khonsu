@@ -1,0 +1,18 @@
+[
+  {
+    "browser": "chromium",
+    "mode": "GPU WebGL2",
+    "cpuGpuMaxByteDifference": 0,
+    "contextLoss": true,
+    "errors": [],
+    "noGpuNoWorker": "CPU canvas"
+  },
+  {
+    "browser": "firefox",
+    "mode": "GPU WebGL2",
+    "cpuGpuMaxByteDifference": 0,
+    "contextLoss": true,
+    "errors": [],
+    "noGpuNoWorker": "CPU canvas"
+  }
+]
