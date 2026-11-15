@@ -32,7 +32,7 @@
 .commandFields>div{padding:6px 20px;border-right:1px solid #66707c;min-width:0;}
 .coordinateForm label{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font:10px var(--font-data);letter-spacing:.08em;}
 .coordinateForm label span{color:var(--silver);font-size:9px;}
-.coordinateForm input{display:block;background:transparent;color:#a6d0e8;border:0;border-bottom:1px solid #344357;width:100%;height:43px;font:20px var(--font-data);border-radius:0;}
+.coordinateForm input{display:block;background:transparent;color:#a6d0e8;border:0;border-bottom:1px solid #344357;width:100%;height:44px;font:20px var(--font-data);border-radius:0;}
 .coordinateForm input::placeholder{color:#8292a6;}
 .primaryButton{display:flex;align-items:center;justify-content:center;gap:18px;min-height:72px;background:var(--amber);color:#070b12;border:0;border-radius:0;font:600 25px var(--font-display);letter-spacing:.12em;padding:14px 18px;}
 .primaryButton:hover{background:#f5ce89;}
@@ -58,7 +58,7 @@
 .secondaryButton{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:10px 14px;font:11px var(--font-data);border:1px solid #66707c;background:transparent;color:var(--ivory);border-radius:0;}
 .secondaryButton:hover{border-color:var(--amber);}
 .qualityNotes{font-size:11px;color:var(--silver);margin-top:12px;}
-.qualityNotes summary{cursor:pointer;min-height:32px;color:var(--ivory);}
+.qualityNotes summary{cursor:pointer;min-height:44px;padding-top:12px;box-sizing:border-box;color:var(--ivory);}
 .qualityNotes ul{padding-left:16px;}
 .guide{display:grid;grid-template-columns:1fr 2fr;gap:40px;padding:60px 0;scroll-margin-top:20px;}
 .guide h2{font:500 42px/1.1 var(--font-display);margin:18px 0;}
@@ -76,8 +76,8 @@
 .footer{display:flex;gap:24px;align-items:center;padding:28px 0;border-top:1px solid #66707c;font:10px var(--font-data);line-height:1.8;}
 .footer>span{color:var(--amber);letter-spacing:.12em;}
 .footer p{color:var(--silver);margin:0;}
-.footer a{margin-left:auto;text-decoration:none;}
+.footer a{margin-left:auto;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;}
 @media(min-width:1500px){.workspace{grid-template-columns:minmax(0,1fr) 360px;}.mainInstrument{padding:20px 0;}}
 @media(max-width:1100px){.site{padding:0 28px;}.buildLabel{display:none;}.introduction{grid-template-columns:minmax(0,1fr) 260px;min-height:520px;}.heroCopy h1{font-size:11.5vw;}.heroCopy>p{font-size:15px;}.entryPanel .searchStatus{padding:18px;}.workspace{grid-template-columns:minmax(0,1fr) 280px;}.commandFields>div{padding:6px 10px;}.primaryButton{font-size:21px;}.coordinateForm input{font-size:17px;}}
 @media(max-width:800px){.site{padding:0 20px;}.header{min-height:90px;}.header nav{gap:16px;}.header nav a,.header nav button{font-size:10px;}.introduction{display:block;}.heroCopy{padding:45px 0 25px;}.heroCopy h1{font-size:clamp(90px,16vw,128px);}.celestial{background-position:65% top;}.entryPanel{display:block;border-left:0;border-top:1px solid #66707c;padding:0;background:#070b12c9;}.entryPanel>img,.tagline{display:none;}.entryPanel .searchStatus{padding:20px 0;border-bottom:0;}.entryPanel .statusActions button{width:auto;}.entryPanel select{max-width:450px;}.commandFields{grid-template-columns:1fr 1fr;}.commandFields>div:nth-child(2){border-right:0;}.commandFields>div:nth-child(3){border-top:1px solid #66707c;padding-top:14px;}.commandFields>.primaryButton{margin-top:7px;}.workspace{grid-template-columns:1fr;}.sidePanel{border-left:0;border-top:1px solid #556071;display:grid;grid-template-columns:1fr 1fr;}.sidePanel>section:first-child{grid-column:1/-1;}.guide{grid-template-columns:1fr;gap:24px;}.guide ol{gap:20px;}.footer{flex-wrap:wrap;}.footer a{margin-left:0;}}
-@media(max-width:520px){.site{padding:0 16px;}.header{flex-wrap:wrap;gap:8px;padding:18px 0;}.header nav{width:100%;justify-content:space-between;margin:0;gap:10px;}.header nav a,.header nav button{padding:10px 0;}.heroCopy h1{font-size:clamp(76px,20vw,102px);}.heroCopy>p{font-size:14px;}.heroCopy .eyebrow{font-size:9px;}.site[data-loaded="true"] .heroCopy h1{font-size:42px;}.site[data-loaded="true"] .heroCopy>p{margin:0;font-size:12px;}.commandFields>div{padding:6px;}.coordinateForm input{font-size:16px;}.primaryButton{font-size:20px;letter-spacing:.08em;padding:10px;}.referenceTargets>div{gap:8px 20px;}.referenceTargets button{font-size:12px;}.sidePanel{display:block;}.guide{padding:40px 0;}.guide ol{grid-template-columns:1fr;gap:24px;}.guide li{border-top:1px solid var(--line);padding-top:16px;}.guide h3{margin:10px 0;}.missionHeading{display:block;}.mission summary span{float:none;display:block;margin-top:10px;}.footer{display:block;font-size:9px;}.footer p{margin:12px 0;}}
+@media(max-width:520px){.site{padding:0 16px;}.header{flex-wrap:wrap;gap:8px;padding:18px 0;}.header nav{width:100%;justify-content:space-between;margin:0;gap:10px;}.header nav a,.header nav button{padding:0;min-height:44px;display:inline-flex;align-items:center;}.heroCopy h1{font-size:clamp(76px,20vw,102px);}.heroCopy>p{font-size:14px;}.heroCopy .eyebrow{font-size:9px;}.site[data-loaded="true"] .heroCopy h1{font-size:42px;}.site[data-loaded="true"] .heroCopy>p{margin:0;font-size:12px;}.commandFields>div{padding:6px;}.coordinateForm input{font-size:16px;}.primaryButton{font-size:20px;letter-spacing:.08em;padding:10px;}.referenceTargets>div{gap:8px 20px;}.referenceTargets button{font-size:12px;}.sidePanel{display:block;}.guide{padding:40px 0;}.guide ol{grid-template-columns:1fr;gap:24px;}.guide li{border-top:1px solid var(--line);padding-top:16px;}.guide h3{margin:10px 0;}.missionHeading{display:block;}.mission summary span{float:none;display:block;margin-top:10px;}.footer{display:block;font-size:9px;}.footer p{margin:12px 0;}}
