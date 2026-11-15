@@ -2,7 +2,7 @@
 
 Status: deployment design and contributor guidance. A configuration file or health response does not mean the application is deployed or its SPHEREx processing is complete. Do not provision paid services, publish secrets or claim a live deployment as part of documentation work.
 
-The API advertises `live_processing_available` according to installed scientific dependencies. The Docker image installs them by default. Live searches create HTTP 202 jobs; poll status, fetch the manifest, and then retrieve PNG frames. The opt-in `/v1/demo/manifest` remains synthetic. Cached-real examples are served only when verified files are actually bundled; the list can be empty. The frontend integration and production deployment remain team work.
+The API advertises `live_processing_available` according to installed scientific dependencies. The Docker image installs them by default. Live searches create HTTP 202 jobs; poll status, fetch the manifest, and then retrieve PNG frames. The opt-in `/v1/demo/manifest` remains synthetic. Cached-real examples are served only when verified files are actually bundled; the list can be empty. The frontend runs the full live search path against a local or configured backend. No Cloudflare resource has been provisioned; see [hosted path status](#hosted-path-status) for what has been verified and the remaining account prerequisite.
 
 ## Supported arrangement
 
@@ -34,7 +34,21 @@ For a temporary live demonstration, a [Cloudflare Quick Tunnel](https://develope
 
 ## Frontend static export
 
-Use Next.js static-export configuration and verify that the production build produces `out/`. In Cloudflare Pages, use the web application's actual repository root, its declared build script and `out` as the output directory. See the [official Pages guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/).
+Use Next.js static-export configuration and verify that the production build produces `out/`. See the [official Pages guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/) and [Pages build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/). Configure the Pages project with these settings:
+
+| Pages setting | Value |
+| --- | --- |
+| Root directory | `apps/web` |
+| Framework preset | Next.js (Static HTML Export) |
+| Build command | `npm ci && npm run build` |
+| Build output directory | `out` |
+| `NEXT_PUBLIC_API_BASE_URL` | The gateway's HTTPS origin, for example `https://khonsu-api.<subdomain>.workers.dev`, with no path |
+| `NEXT_TELEMETRY_DISABLED` | `1` |
+| Node.js | 24, from `apps/web/.node-version`, matching CI and the web image. Without it the current build image defaults to Node 22. |
+
+Pages sets `CF_PAGES=1` during its builds. `apps/web/next.config.ts` then refuses to build unless `NEXT_PUBLIC_API_BASE_URL` is an HTTPS origin. Without that check, a public build would fall back to `http://localhost:8000` and send every visitor's browser to their own computer. The browser client has a matching guard. If a page served from a non-local host is still configured for a loopback API, or an HTTPS page for an `http` API, it sends no request. It shows "Site not connected to a service" instead.
+
+Add the production Pages origin, for example `https://<project>.pages.dev`, and any custom domain to the gateway's `KHONSU_CORS_ORIGINS`. Preview deployments have their own hostnames and stay blocked unless they are listed too.
 
 Static export has no running Next.js server. Do not depend on Next.js API routes, server actions, request-time server rendering or server-side middleware for the API. Keep data calls in the client API layer. Ensure nested static routes and search-parameter-driven explorer states work when opened directly. Use an image strategy compatible with [Next.js static export](https://nextjs.org/docs/app/guides/static-exports).
 
@@ -67,6 +81,37 @@ A Docker volume can make local cache survive a process restart, but does not mak
 ## Optional real-example fallback
 
 Ship a small public set of preprocessed real SPHEREx examples only if its provenance and file sizes are reviewed. Keep it usable without a live backend and label it clearly as a cached example. Never silently switch a user's requested coordinates to a different preset or replace failed archive data with synthetic observations. Include a recording and repository link in the submission so later judges can understand the live workflow even when the temporary backend is unavailable.
+
+## Hosted path status
+
+Checked on November 14, 2026 (BYT-32) without any Cloudflare account or paid service:
+
+| Check | Result |
+| --- | --- |
+| Gateway type check and tests (`npm run check` in `infra/cloudflare`) | Passed, 6 tests |
+| Deploy dry run (`npm run bundle`) | Built the API image from `apps/api/Dockerfile` with repository-root context and bundled the Worker (9 KiB); nothing published |
+| The same image run with only the environment the Worker passes (`KHONSU_CORS_ORIGINS`) | Healthy as the non-root `khonsu` user with live processing available and both cached examples bundled |
+| Static production build served to headless Edge, API origin set at build time | Cached example, a live NEP search (2 real frames) and a container restart mid-search ("Search expired" with Retry) all worked; requests went only to the configured origin |
+| Pages build guard (`CF_PAGES=1`) | Fails with no API origin or an `http` origin; succeeds with an `https` origin, which then appears in the bundle with no localhost fallback |
+| Unconfigured build opened at a non-local hostname | Zero requests to `localhost:8000`; both panels explain that the site is not connected |
+
+Not verified: the Worker and container together. `wrangler dev` does not support local containers on native Windows. Run it on Linux, macOS or WSL with Docker available to rehearse the gateway end to end.
+
+Remaining prerequisite for a hosted backend: a Cloudflare account on the Workers Paid plan, which the team must choose to purchase. Then follow [the gateway README](../infra/cloudflare/README.md):
+
+1. Set the Pages origin in `KHONSU_CORS_ORIGINS` and run `npm run deploy`.
+2. Build Pages with the gateway origin.
+3. From the deployed frontend, check `/health`, an allowed and a disallowed origin, the cached example, a live search, a cold start and a restart with an old job.
+
+Record the URL and results only after that run.
+
+## Demonstration fallback
+
+If cloud provisioning is blocked or the hosted backend fails, present from a laptop:
+
+1. Run `docker compose up --build`, then open `http://localhost:3000`. Live searches reach IRSA directly from that machine.
+2. If the archive is unavailable, use "Load cached real example". It needs only the local API and stays labelled as previously acquired data.
+3. For a remote audience, a Quick Tunnel can expose the local API as described in [Local first](#local-first). Rebuild Pages with the tunnel's HTTPS origin, and start the local API with the Pages origin in `KHONSU_CORS_ORIGINS`. Treat this as a demonstration mode, not hosting.
 
 ## Release check
 

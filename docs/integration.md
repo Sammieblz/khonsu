@@ -47,6 +47,20 @@ The explorer owns active sequence, current frame index, A/B frame IDs, selected 
 
 The browser reads `NEXT_PUBLIC_API_BASE_URL` at build time. Static Cloudflare Pages cannot read a changed API base at runtime without a rebuild or an explicitly designed configuration asset. Local defaults use http://localhost:8000. Production must use an HTTPS API origin with configured CORS.
 
+## Shared search links
+
+The address bar describes the live search on screen, so copying it, or using **Copy search link** on a ready sequence, reproduces that search. The link is a plain query string on the static page; no Next.js server route is involved. `readSharedSearch` and `sharedSearchQuery` in `apps/web/src/features/explorer/coordinates.ts` own the format.
+
+| Parameter | Meaning | When invalid |
+| --- | --- | --- |
+| `ra_deg` | Right Ascension, ICRS decimal degrees, at least 0 and less than 360 | Nothing is restored, and the form explains why |
+| `dec_deg` | Declination, ICRS decimal degrees, from -90 to +90 | Nothing is restored, and the form explains why |
+| `fov_arcmin` | Field of view in arcminutes, from 0.5 to 60 | The default 6′ is used, with a note |
+| `frame` | `ICRS`, the only supported frame | Any other frame restores nothing |
+| `obs` | IRSA observation ID to select | Ignored unless it is a plain identifier; selected only if the returned sequence contains it |
+
+Opening a link fills the form; the visitor still chooses **Explore the sky**, so a link never starts an archive download by itself. The frame count stays the form's fixed bound because links cannot carry it. Coordinates are validated with the same rules as typed input and are never wrapped, clamped or rounded, so a link cannot silently move the requested position. Unknown parameters are ignored, and values that look like URLs are never used. Loading a cached example clears the parameters, because a link cannot reproduce it. Candidate notes stay in the browser and are never part of a link. The frontend does not yet expose wavelength or time filters, so links do not carry them.
+
 ## Error and data modes
 
 The UI distinguishes live data, previously acquired real data, and synthetic development fixtures. Labels persist through exported evidence. Show actionable states for missing coverage, too few comparable epochs, incompatible wavelengths, masked targets, timeouts, download bounds, processing failure, job expiry, failed frame loads and unavailable backend. Do not switch silently to synthetic data.
@@ -66,6 +80,7 @@ The UI distinguishes live data, previously acquired real data, and synthetic dev
 | SEARCH EXPIRED | `JOB_EXPIRED` (also a backend restart), `ASSET_EXPIRED` | Retry |
 | OBSERVATION SERVICE UNREACHABLE | `BACKEND_UNAVAILABLE` | Retry |
 | LIVE SEARCH NOT AVAILABLE | `SCIENCE_UNAVAILABLE`, `SCIENCE_DEPENDENCIES_MISSING` | Cached example |
+| SITE NOT CONNECTED TO A SERVICE | `API_NOT_CONFIGURED`, raised in the browser before any request when a public page would call a loopback or insecure API origin | None; the site operator must rebuild with `NEXT_PUBLIC_API_BASE_URL` (see [deployment](deployment.md#frontend-static-export)) |
 | SEARCH CANCELLED | `CANCELLED` | Search again, edit search |
 
 ![Six search panels captured from the production static build: not enough comparable observations, IRSA archive unavailable, the cached real example loaded from that failure, search expired after a backend restart, observation service unreachable, and search cancelled](images/search-recovery-states.png)

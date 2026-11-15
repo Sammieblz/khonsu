@@ -20,6 +20,7 @@ export const CLIENT_ERROR = {
   pollTimeout: "POLL_TIMEOUT",
   cancelled: "CANCELLED",
   expired: "JOB_EXPIRED",
+  notConfigured: "API_NOT_CONFIGURED",
 } as const;
 
 export class ApiClientError extends Error {
@@ -40,6 +41,35 @@ export function apiBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").replace(/\/$/, "");
 }
 
+function isLoopback(hostname: string): boolean {
+  return ["localhost", "127.0.0.1", "[::1]"].includes(hostname) || hostname.endsWith(".localhost");
+}
+
+/**
+ * Why this page cannot use the API origin compiled into it, or null when it
+ * can. Without this, a public build made without NEXT_PUBLIC_API_BASE_URL
+ * would send every visitor's browser to port 8000 on their own computer.
+ */
+export function apiConfigurationProblem(
+  pageUrl: string | undefined = typeof window === "undefined" ? undefined : window.location.href,
+): string | null {
+  if (!pageUrl) return null;
+  const page = new URL(pageUrl);
+  let api: URL;
+  try {
+    api = new URL(apiBaseUrl());
+  } catch {
+    return "This copy of Khonsu has an invalid observation service address. The site operator must rebuild it with NEXT_PUBLIC_API_BASE_URL set to the HTTPS API origin.";
+  }
+  if (!isLoopback(page.hostname) && isLoopback(api.hostname)) {
+    return "This copy of Khonsu was built without a public observation service address, so it would contact your own computer instead. The site operator must rebuild it with NEXT_PUBLIC_API_BASE_URL set to the HTTPS API origin.";
+  }
+  if (page.protocol === "https:" && api.protocol !== "https:" && !isLoopback(api.hostname)) {
+    return "This secure page is configured with an insecure observation service address, which browsers block. The site operator must rebuild it with an HTTPS API origin.";
+  }
+  return null;
+}
+
 /** Resolve an API-relative artifact path (from a manifest) against the API origin. */
 export function resolveAssetUrl(imageUrl: string): string {
   return new URL(imageUrl, `${apiBaseUrl()}/`).toString();
@@ -56,6 +86,8 @@ function isAbort(error: unknown): boolean {
 }
 
 async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const problem = apiConfigurationProblem();
+  if (problem) throw new ApiClientError(problem, 0, CLIENT_ERROR.notConfigured);
   let response: Response;
   try {
     response = await fetch(`${apiBaseUrl()}${path}`, init);
@@ -249,7 +281,7 @@ export async function runSequenceJob(request: SequenceRequest, options: RunOptio
 /** Distinct, readable failure states shown to the user. */
 export type FailureKind =
   | "invalid-search" | "no-coverage" | "too-large" | "archive" | "busy" | "timeout"
-  | "unusable-data" | "processing" | "expired" | "unreachable" | "misconfigured" | "cancelled";
+  | "unusable-data" | "processing" | "expired" | "unreachable" | "misconfigured" | "not-configured" | "cancelled";
 
 export interface FailureGuide {
   kind: FailureKind;
@@ -306,6 +338,10 @@ const GUIDES: Record<FailureKind, Omit<FailureGuide, "kind">> = {
     title: "OBSERVATION SERVICE UNREACHABLE", retry: true, editSearch: false, cachedExample: false,
     hint: "Retry once the backend is running. Cached real examples come from the same service, so they are unavailable until it is reachable.",
   },
+  "not-configured": {
+    title: "SITE NOT CONNECTED TO A SERVICE", retry: false, editSearch: false, cachedExample: false,
+    hint: "Searches and saved observations both come from the observation service, so nothing can load until this site is rebuilt with its address.",
+  },
   misconfigured: {
     title: "LIVE SEARCH NOT AVAILABLE", retry: false, editSearch: false, cachedExample: true,
     hint: "The observation service is running without the scientific components live searches need. Rebuild it with them, or explore a cached real example.",
@@ -334,6 +370,7 @@ const KIND_BY_CODE: Record<string, FailureKind> = {
   [CLIENT_ERROR.expired]: "expired", ASSET_EXPIRED: "expired",
   [CLIENT_ERROR.backendUnavailable]: "unreachable",
   SCIENCE_UNAVAILABLE: "misconfigured", SCIENCE_DEPENDENCIES_MISSING: "misconfigured",
+  [CLIENT_ERROR.notConfigured]: "not-configured",
   [CLIENT_ERROR.cancelled]: "cancelled", cancelled: "cancelled",
 };
 

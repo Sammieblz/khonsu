@@ -7,7 +7,8 @@ import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
 import { ApiClientError, describeFailure, listExamples, listPresets, type PresetTarget, runSequenceJob } from "@/lib/api/client";
 import { SequenceSession } from "@/lib/api/session";
-import { CoordinateForm } from "./CoordinateForm";
+import { CoordinateForm, type SharedLinkState } from "./CoordinateForm";
+import { DEFAULT_FOV_ARCMIN, readSharedSearch, sharedSearchQuery, type CoordinateValues, type SharedSearch } from "./coordinates";
 import { CachedExamplePicker, SearchStatus, type SearchState } from "./SearchStatus";
 import { TargetPresets } from "./TargetPresets";
 import type { ImageSelection, SequenceManifest, SequenceRequest } from "./interfaces";
@@ -26,10 +27,27 @@ export function ExplorerScreen() {
   const [selectedTarget,setSelectedTarget]=useState<PresetTarget|null>(null);
   const [catalogError,setCatalogError]=useState('');
   const [missionOpen,setMissionOpen]=useState(false);
+  const [sharedLink, setSharedLink] = useState<SharedLinkState | null>(null);
+  // The observation a shared link selects, applied only to that link's search.
+  const linkedSearch = useRef<SharedSearch | null>(null);
   // One live search at a time; replacing or leaving it cancels its server job.
   const session = useRef<SequenceSession | null>(null);
   const activeExampleLoad = useRef<AbortController | null>(null);
   const { annotations, addAnnotation, removeAnnotation } = useAnnotations();
+
+  function requestValues(request: SequenceRequest): CoordinateValues {
+    return { ra_deg: request.ra_deg, dec_deg: request.dec_deg, fov_arcmin: request.fov_arcmin ?? DEFAULT_FOV_ARCMIN };
+  }
+
+  // The address bar always describes the search on screen, so copying it
+  // reproduces that search. Candidate notes are never part of it.
+  function setAddress(query: string) {
+    try {
+      window.history.replaceState(null, "", `${window.location.pathname}${query}${window.location.hash}`);
+    } catch {
+      // A blocked history update only loses the shareable address.
+    }
+  }
 
   function searchSession(): SequenceSession {
     session.current ??= new SequenceSession(runSequenceJob);
@@ -38,6 +56,17 @@ export function ExplorerScreen() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const link = readSharedSearch(window.location.search);
+    if (link.kind === "ok") {
+      const { ra_deg, dec_deg, fov_arcmin } = link.search.values;
+      linkedSearch.current = link.search;
+      setSharedLink({
+        values: link.search.values,
+        message: [`Search restored from a shared link: RA ${ra_deg}°, Dec ${dec_deg}°, ${fov_arcmin}′ field. Choose Explore the sky to run it.`, ...link.search.notes].join(" "),
+      });
+    } else if (link.kind === "invalid") {
+      setSharedLink({ values: null, message: link.message });
+    }
     listPresets(controller.signal).then(setTargets,()=>{if(!controller.signal.aborted)setCatalogError('Target catalog could not be loaded.');});
     listExamples(controller.signal).then(items => {
       setExamples(items);
@@ -70,12 +99,20 @@ export function ExplorerScreen() {
     setActiveFrameId(null);
     setSelection(null);
     setSearch({ phase: "running", request, job: null });
+    setAddress(sharedSearchQuery(requestValues(request)));
     try {
       const manifest = await searchSession().start(request, {
         onUpdate: job => setSearch({ phase: "running", request, job }),
       });
       if (!manifest) return; // Replaced by a newer search or stopped.
       showSequence(manifest);
+      const linked = linkedSearch.current;
+      if (linked && sharedSearchQuery(linked.values) === sharedSearchQuery(requestValues(request))) {
+        linkedSearch.current = null;
+        // Select the linked observation only if this sequence really has it.
+        const frame = manifest.frames.find(item => item.observation_id === linked.observationId);
+        if (frame) setActiveFrameId(frame.frame_id);
+      }
       setSearch({ phase: "ready", request, manifest });
     } catch (error) {
       const failure = error instanceof ApiClientError
@@ -120,6 +157,7 @@ export function ExplorerScreen() {
       if (!verified) throw new Error("The selected cached example is no longer available. Restore the reviewed bundle and reload this page.");
       showSequence(verified);
       setSearch({ phase: "example", manifest: verified });
+      setAddress(""); // A cached example is not a search a link can reproduce.
       setExampleError("");
     } catch (error) {
       if (activeExampleLoad.current !== controller || controller.signal.aborted) return;
@@ -128,6 +166,13 @@ export function ExplorerScreen() {
       if (activeExampleLoad.current === controller) activeExampleLoad.current = null;
     }
   }
+
+  // Keep the selected observation in the link once a live sequence is shown.
+  useEffect(() => {
+    if (search.phase !== "ready") return;
+    const frame = search.manifest.frames.find(item => item.frame_id === activeFrameId);
+    setAddress(sharedSearchQuery(requestValues(search.request), frame?.observation_id ?? null));
+  }, [search, activeFrameId]);
 
   const picker=<CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id=>{activeExampleLoad.current?.abort();activeExampleLoad.current=null;setSelectedExampleId(id);setExampleError('');}} onLoad={()=>void loadExample()}/>;
   const showConsole=!!sequence||search.phase!=='idle';
@@ -146,7 +191,7 @@ export function ExplorerScreen() {
           {!showConsole&&<aside className={styles.entryPanel} aria-label="Open saved observations"><img src="/khonsu-mark.svg" width="100" height="100" alt=""/><p className={styles.tagline}>One sky.<br/>Many moments.</p>{picker}</aside>}
         </section>
         <section id="field-command" className={styles.command} aria-label="Choose a sky field">
-          <CoordinateForm target={selectedTarget} onSubmit={request=>void submit(request)} busy={search.phase==='running'}/>
+          <CoordinateForm target={selectedTarget} shared={sharedLink} onSubmit={request=>void submit(request)} busy={search.phase==='running'}/>
           <TargetPresets targets={targets} selected={selectedTarget?.preset_id} error={catalogError} onChoose={target=>{setSelectedTarget({...target});document.getElementById('ra')?.focus();}}/>
         </section>
         {showConsole&&<section id="explorer" tabIndex={-1} className={styles.workspace} aria-label="Sky observation explorer">
