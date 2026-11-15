@@ -1,91 +1,55 @@
-# Viewer interactions and shared seams
+# Observation console interactions
 
-Status: implementation guidance for the hackathon. The initial frontend has an honest empty screen, coordinate validation, backend error handling, an isolated viewer, and isolated annotation controls. Real data retrieval, the live job flow, pan/zoom, epoch comparison, and direct sky-drag scrubbing remain follow-up work.
+Samuel's user-authorized integration pass extends Michael's viewer and Robel's
+composition boundaries through GitHub #37 / Linear BYT-38. The existing
+`SkyViewerProps` and natural-raster annotation event remain unchanged. The parent
+owns the manifest and selected frame; the console owns temporary interaction
+state and resets it when sequence identity changes.
 
-## Module ownership
+## Controls
 
-| Area | Owner |
-| --- | --- |
-| `apps/web/src/features/explorer/` | Robel |
-| `apps/web/src/features/viewer/` | Michael |
-| `apps/web/src/features/annotations/` | Aryan |
-| `apps/web/src/lib/api/` | Tyrone |
+- Rewind: horizontal image drag selects the nearest real epoch. The arc and
+  slider map actual elapsed UTC time; date buttons and arrow keys also select
+  repeated timestamps individually. Earliest/latest refer to available visits.
+- Pan: drag, wheel or pinch to zoom; arrow keys pan, + and - zoom, 0 fits.
+  Zoom is bounded to 1-8x and panning keeps the field reachable. Fit preserves
+  the full aspect ratio; zoomed views explicitly identify cropping.
+- Mark: click an image pixel, or focus the observation canvas and move the
+  keyboard cursor with arrows, then Enter. The transformed canvas rectangle
+  maps back to integer natural-raster coordinates. Pixel origin remains top-left.
+- Playback: explicit Play/Pause, Previous/Next and rate. Playback waits for the
+  selected image to load. It never starts automatically, including reduced motion.
+- Comparison: select A/B, blink crisply or hold to show B. Releasing, cancelling
+  or losing focus restores the frame held before comparison. View transforms
+  remain shared between epochs. Timers stop on blur and sequence replacement.
 
-`ExplorerScreen.tsx` composes the modules. It owns the loaded sequence, active frame identifier, and selected point. Annotation collection logic lives in Aryan's hook; it is supplied to both the panel and viewer. Michael owns the frame cache, playback behavior, and eventual viewport transform.
+The SVG time arc and accessible range input provide the same real-date mapping.
+Unknown dates use an index fallback and remain labelled unavailable. The display
+does not interpolate sources, crossfade observations or alter a celestial WCS.
 
-Coordinate changes to `features/explorer/interfaces.ts` before changing component signatures. The public API definitions come from the generated file `lib/api/generated.d.ts`. Generated schemas must not be patched manually by frontend contributors.
+## Image resources and geometry
 
-## Frontend component contract
+Load the current frame, previous/next and selected A/B, deduplicated to at most
+five images. Abort obsolete pending loads and prune images outside this set.
+Sequence remounts discard all prior state and resources. Missing frames show a
+visible retry state; old science pixels cannot appear under a new date.
 
-`SkyViewer` receives the sequence, active frame identifier, annotation collection, frame-change callback, and selection callback. It does not start archive queries or own the application page.
+The image, toolbar and timeline share one console width. Controls and provenance
+sit outside the science raster. Original output dimensions and angular field
+remain visible. No-data pixels use a distinct slate fill and legend. Optional
+intensity controls consume the prepared arrays described in
+[browser display](browser-display.md).
 
-`AnnotationPanel` receives a selection, annotation collection, add callback, and remove callback. It does not read the image canvas or calculate coordinates from pointer events.
+## Verification
 
-The selection contains:
+Pure tests cover irregular/repeated epochs, bounded loading, transformed pixel
+selection and pan limits. Browser checks use the authentic cached WISE 0855
+sequence, keyboard marking, step controls, A/B hold restoration, blink and
+390px layout. Desktop and narrow screenshots are in
+[console evidence](evidence/console/controls-desktop.png) and
+[mobile evidence](evidence/console/controls-mobile.png).
 
-- Sequence identifier.
-- Frame identifier.
-- Integer `x` and `y` in the natural output raster.
-- `coordinateSpace: "natural-raster"`.
-- `pixelOrigin: "top-left"`.
-
-Pixel centers use the backend's zero-based integer convention. A pointer inside the first displayed pixel maps to `(0, 0)`. Sky coordinate conversion must use the output grid's retained World Coordinate System rather than an approximation based on a screenshot.
-
-## Tool modes
-
-| Mode | Primary pointer gesture | Existing alternative |
-| --- | --- | --- |
-| Time | Planned horizontal scrub through observation ticks | Slider and previous/next buttons |
-| Pan | Planned viewport pan; zoom around a stable focal point | To be implemented with labeled reset/zoom controls |
-| Mark | Select a pixel location and create a candidate note | Keyboard marking remains required work |
-
-A drag must have one clear meaning. Use an explicit active tool. Do not simultaneously pan and change time in response to the same gesture. On mobile, provide visible controls and support ordinary page scrolling outside the viewer.
-
-## Observation navigation
-
-The initial slider indexes actual manifest frames and never synthesizes intermediate imagery. Its arc is decorative instrument geometry. The initial implementation does not yet communicate irregular time gaps spatially.
-
-The complete timeline should position observation ticks using actual timestamps, clearly mark gaps, and retain a discrete selected frame. The pointer can move continuously; the image changes only when it selects a real frame. Show the actual selected observation date in UTC. For synthetic fixtures, dates remain unknown unless explicitly described as simulated.
-
-Compare compatible wavelength coverage. The detector number alone does not guarantee matched wavelengths. Do not mix releases that the science pipeline marks as incompatible.
-
-Playback and a blink comparison must not silently crossfade or interpolate scientific sources. A decorative star trail or rotation belongs in optional mission context, not in the measured image sequence.
-
-## Frame loading
-
-The initial loader preloads the supplied manifest and reports frame errors. Michael should bound preloading before connecting the maximum-size live sequence. The production viewer needs a small cache around the active frame, cancellation on target changes, and a visible loading state when a selected frame is missing.
-
-Draw grid pixels as crisp blocks and transparent (masked or uncovered) pixels with the documented no-data hatch and key; see [display rendering](display-rendering.md). Never let masked pixels show the page background.
-
-Do not retain images from one sequence under another sequence identifier. Do not display a new date over an old image while loading. Keep the previous complete view visibly labeled or show a loading state.
-
-## Marking and evidence
-
-The initial helper maps the actual displayed canvas rectangle to the natural output raster, excluding surrounding layout. Add the inverse viewport transform when implementing pan and zoom. Scaling the viewer must not change the stored scientific pixel.
-
-Notes are stored in this browser under a versioned key. Malformed entries are ignored. Browser storage is not shared project storage and must not be described as server persistence.
-
-The initial candidate panel supports notes and removal. Export, evidence thumbnails, source metadata, and keyboard selection remain Aryan's implementation work. Candidate evidence should preserve the frame identifier, image location, source provenance, quality warnings, and the observer's uncertainty.
-
-## Backend integration
-
-`NEXT_PUBLIC_API_BASE_URL` defaults to `http://localhost:8000` for local development. It is compiled into a static frontend build. It must point to a publicly reachable backend when deployed.
-
-The initial form calls `POST /v1/sequences`. The current backend explicitly returns `501 LIVE_PROCESSING_NOT_IMPLEMENTED`; the frontend displays that status. It must not silently replace a failed live request with synthetic observations.
-
-The next slice should connect a typed sequence job response, poll the documented status endpoint, fetch the completed manifest, and validate it before replacing the current sequence. Update Python models, exported OpenAPI, generated TypeScript types, and the API client together.
-
-The backend's `/v1/demo/manifest` fixture is synthetic and opt-in. Keep its disclosure visible whenever used. The default scaffold does not load it.
-
-## Acceptance checks for the owners
-
-1. A stationary reference remains in the same output pixel across aligned real frames.
-2. Dates match the image actually displayed, including loading and failure states.
-3. Unknown dates, wavelengths, and source metadata remain explicitly unknown.
-4. Candidate coordinates remain correct after resizing and after the eventual pan/zoom transform.
-5. Playback stops at a real boundary and can restart deliberately.
-6. The form and backend agree on coordinate and field-size bounds.
-7. Empty results and unavailable backend states explain what the user can do next.
-8. Every gesture has a keyboard or labeled-button alternative before completion.
-9. A narrow screen retains the image, actual date, and usable controls.
-10. Reduced motion avoids decorative scene movement without losing functionality.
+Annotation notes still use Aryan's local storage component. A natural-raster
+selection is not a sky-coordinate evidence export; the wider #14/#15 acceptance
+remains tracked separately. Review source quality, spectral compatibility and
+unmatched PSFs/backgrounds before interpreting apparent change.
