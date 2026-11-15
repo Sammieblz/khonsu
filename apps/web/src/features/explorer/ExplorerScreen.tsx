@@ -5,7 +5,7 @@ import { Brand } from "@/components/ui/Brand";
 import { AnnotationPanel } from "@/features/annotations/AnnotationPanel";
 import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
-import { ApiClientError, cancelSequence, listExamples, recoveryFor, runSequenceJob } from "@/lib/api/client";
+import { ApiClientError, cancelSequence, listExamples, listPresets, type PresetTarget, recoveryFor, runSequenceJob } from "@/lib/api/client";
 import { CoordinateForm } from "./CoordinateForm";
 import { CachedExamplePicker, SearchStatus, type SearchState } from "./SearchStatus";
 import { TargetPresets } from "./TargetPresets";
@@ -29,6 +29,10 @@ export function ExplorerScreen() {
   const [selectedExampleId, setSelectedExampleId] = useState("");
   const [exampleError, setExampleError] = useState("");
   const [examplesLoading, setExamplesLoading] = useState(true);
+  const [targets,setTargets]=useState<PresetTarget[]>([]);
+  const [selectedTarget,setSelectedTarget]=useState<PresetTarget|null>(null);
+  const [catalogError,setCatalogError]=useState('');
+  const [missionOpen,setMissionOpen]=useState(false);
   const activeRun = useRef<ActiveRun | null>(null);
   const activeExampleLoad = useRef<AbortController | null>(null);
   const { annotations, addAnnotation, removeAnnotation } = useAnnotations();
@@ -45,6 +49,7 @@ export function ExplorerScreen() {
 
   useEffect(() => {
     const controller = new AbortController();
+    listPresets(controller.signal).then(setTargets,()=>{if(!controller.signal.aborted)setCatalogError('Target catalog could not be loaded.');});
     listExamples(controller.signal).then(items => {
       setExamples(items);
       setSelectedExampleId(items[0]?.sequence_id ?? "");
@@ -65,6 +70,7 @@ export function ExplorerScreen() {
     setSequence(manifest);
     setActiveFrameId(manifest.frames[0]?.frame_id ?? null);
     setSelection(null);
+    requestAnimationFrame(()=>{const consoleElement=document.getElementById('explorer');consoleElement?.focus({preventScroll:true});consoleElement?.scrollIntoView({behavior:'instant',block:'start'});});
   }
 
   async function submit(request: SequenceRequest) {
@@ -140,41 +146,44 @@ export function ExplorerScreen() {
     }
   }
 
+  const picker=<CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id=>{activeExampleLoad.current?.abort();activeExampleLoad.current=null;setSelectedExampleId(id);setExampleError('');}} onLoad={()=>void loadExample()}/>;
+  const showConsole=!!sequence||search.phase!=='idle';
   return (
-    <div id="top" className={styles.site}>
-      <a className="skip-link" href="#explorer">Skip to the explorer</a>
+    <div id="top" className={styles.site} data-loaded={!!sequence}>
+      <a className="skip-link" href="#field-command">Skip to field controls</a>
       <header className={styles.header}>
         <Brand />
-        <nav aria-label="Main navigation"><a href="#explorer">EXPLORER</a><a href="#guide">HOW TO LOOK</a><a href="https://spherex.caltech.edu/" target="_blank" rel="noreferrer">THE MISSION <span aria-hidden="true">↗</span></a></nav>
-        <span className={styles.buildLabel}>DEVELOPMENT SCAFFOLD</span>
+        <nav aria-label="Main navigation"><a href="#field-command">EXPLORE</a><a href="#guide">HOW TO LOOK</a><button onClick={()=>{setMissionOpen(true);requestAnimationFrame(()=>document.getElementById('mission')?.scrollIntoView());}}>THE MISSION</button></nav>
+        <span className={styles.buildLabel}>SPHEREx / NASA SPACE APPS 2026</span>
       </header>
-
       <main>
         <section className={styles.introduction} aria-labelledby="hero-title">
-          <div><span className={styles.eyebrow}>A DIFFERENT WAY TO LOOK BACK</span><h1 id="hero-title">REWIND THE SKY.<br /><span>REVEAL THE CHANGE.</span></h1></div>
-          <p>One sky. Many moments.<br />Explore the changing infrared sky through observations from NASA's SPHEREx mission.</p>
+          <div className={styles.celestial} aria-hidden="true" />
+          <div className={styles.heroCopy}><span className={styles.eyebrow}>AN OBSERVATORY THROUGH TIME</span><h1 id="hero-title">THE SKY<br/>REMEMBERS.</h1><p>Move through real SPHEREx observations.<br/>Find what time reveals.</p><span className={styles.artLabel}>ORIGINAL CELESTIAL ILLUSTRATION</span></div>
+          {!sequence&&<aside className={styles.entryPanel} aria-label="Open saved observations"><img src="/khonsu-mark.svg" width="100" height="100" alt=""/><p className={styles.tagline}>One sky.<br/>Many moments.</p>{picker}</aside>}
         </section>
-
-        <section id="explorer" className={styles.workspace} aria-label="Sky observation explorer">
-          <div className={styles.mainInstrument}>
-            <SkyViewer sequence={sequence} activeFrameId={activeFrameId} annotations={annotations} onFrameChange={setActiveFrameId} onSelect={setSelection} />
-            <TargetPresets />
-          </div>
-          <aside className={styles.sidePanel} aria-label="Field selection and candidate notes">
-            <CoordinateForm onSubmit={request => void submit(request)} busy={search.phase === "running"} />
-            <SearchStatus state={search} canLoadExample={false} onCancel={() => void cancelSearch()} onRetry={retrySearch} onLoadExample={() => void loadExample()} />
-            <CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id => { activeExampleLoad.current?.abort(); activeExampleLoad.current = null; setSelectedExampleId(id); setExampleError(""); }} onLoad={() => void loadExample()} />
-            <AnnotationPanel selection={selection} annotations={annotations.filter(item => item.selection.sequenceId === sequence?.sequence_id)} onAdd={addAnnotation} onRemove={removeAnnotation} />
+        <section id="field-command" className={styles.command} aria-label="Choose a sky field">
+          <CoordinateForm target={selectedTarget} onSubmit={request=>void submit(request)} busy={search.phase==='running'}/>
+          <TargetPresets targets={targets} selected={selectedTarget?.preset_id} error={catalogError} onChoose={target=>{setSelectedTarget({...target});document.getElementById('ra')?.focus();}}/>
+        </section>
+        {showConsole&&<section id="explorer" tabIndex={-1} className={styles.workspace} aria-label="Sky observation explorer">
+          <div className={styles.mainInstrument}><SkyViewer sequence={sequence} activeFrameId={activeFrameId} annotations={annotations} onFrameChange={setActiveFrameId} onSelect={setSelection}/></div>
+          <aside className={styles.sidePanel} aria-label="Observation context and candidate notes">
+            <SearchStatus state={search} canLoadExample={false} onCancel={()=>void cancelSearch()} onRetry={retrySearch} onLoadExample={()=>void loadExample()}/>
+            {picker}
+            <AnnotationPanel selection={selection} annotations={annotations.filter(item=>item.selection.sequenceId===sequence?.sequence_id)} onAdd={addAnnotation} onRemove={removeAnnotation}/>
           </aside>
-        </section>
-
+        </section>}
         <section id="guide" className={styles.guide} aria-labelledby="guide-title">
           <div><span className={styles.eyebrow}>THE OBSERVER'S FIELD GUIDE</span><h2 id="guide-title">Pause. Compare. Notice.</h2></div>
-          <ol><li><span>01</span><h3>Choose your field</h3><p>Search a sky position, then review the observations that actually cover it.</p></li><li><span>02</span><h3>Move through time</h3><p>Compare dated frames with matching coordinates and compatible wavelength coverage.</p></li><li><span>03</span><h3>Keep the evidence</h3><p>Mark a candidate and record its frame, position, and quality information. A change still needs verification.</p></li></ol>
+          <ol><li><span>01</span><h3>Find your field</h3><p>Choose a known target or enter coordinates. Open saved observations for a quick first look.</p></li><li><span>02</span><h3>Rewind the observations</h3><p>Drag through actual dates. Pan for a closer look. Hold or blink to compare two visits.</p></li><li><span>03</span><h3>Question the change</h3><p>Adjust the shared display, inspect quality, and keep a candidate note. Apparent change needs verification.</p></li></ol>
         </section>
+        <details id="mission" className={styles.mission} open={missionOpen} onToggle={event=>setMissionOpen(event.currentTarget.open)}>
+          <summary>THE MISSION <span>Explore SPHEREx in 3D</span></summary>
+          {missionOpen&&<><div className={styles.missionHeading}><div><h2>The instrument behind the observations.</h2><p>NASA Eyes mission simulation. Its simulation clock is separate from your selected observation dates.</p></div><button className={styles.secondaryButton} onClick={()=>setMissionOpen(false)}>CLOSE MISSION</button></div><iframe src="https://eyes.nasa.gov/apps/solar-system/#/sc_spherex" title="NASA Eyes SPHEREx mission simulation" allow="fullscreen" referrerPolicy="no-referrer"/><p>NASA/JPL-Caltech. If the interactive view cannot load, <a href="https://eyes.nasa.gov/apps/solar-system/#/sc_spherex" target="_blank" rel="noreferrer">open NASA Eyes in a new tab</a>. <a href="https://spherex.caltech.edu/" target="_blank" rel="noreferrer">Read about SPHEREx</a>.</p></>}
+        </details>
       </main>
-
-      <footer className={styles.footer}><span>KHONSU / BYTEBOYZ</span><p>NASA Space Apps Challenge 2026. Independent participant project.</p><a href="https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/" target="_blank" rel="noreferrer">CHALLENGE BRIEF ↗</a></footer>
+      <footer className={styles.footer}><span>KHONSU / BYTEBOYZ</span><p>NASA Space Apps Challenge 2026. Independent participant project.</p><a href="https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/" target="_blank" rel="noreferrer">CHALLENGE BRIEF</a></footer>
     </div>
   );
 }

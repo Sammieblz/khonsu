@@ -1,6 +1,6 @@
 # Khonsu design system
 
-Status: proposed product language plus an initial frontend scaffold. The scaffold intentionally contains no real observation sequence. All dates, wavelengths, and image provenance must come from the backend contract before live observation claims are made.
+Status: implemented console redesign in the Samuel follow-up pass, GitHub #35. The entry uses original illustrative celestial art; the loaded console uses genuine backend observations and their actual metadata.
 
 The name is **Khonsu**, with this spelling. The direction is a lunar observatory: cinematic scale, restrained editorial typography, instrument controls, and a stable scientific image display.
 
@@ -17,7 +17,7 @@ The Moon Knight reference inspires the sensation of moving through the sky's his
 ## Brand language
 
 - Primary line: **Find what time reveals.**
-- Hero line: **Rewind the sky. Reveal the change.**
+- Hero line: **The sky remembers.**
 - Supporting line: **One sky. Many moments.**
 - Product explanation: Explore the changing infrared sky through observations from NASA's SPHEREx mission.
 - Guidance: **Pause. Compare. Notice.**
@@ -33,7 +33,7 @@ Use evocative headlines with literal supporting text. Describe a marked change a
 | `--surface-raised` | `#152134` | Active layered surfaces |
 | `--ivory` | `#F1F0E9` | Primary text |
 | `--silver` | `#AAB5C7` | Supporting text and quiet labels |
-| `--amber` | `#D9AE6A` | Main action, active controls, focus |
+| `--amber` | `#EDB85E` | Main action, active controls, focus |
 | `--cyan` | `#79C7E8` | Optional comparison context |
 | `--danger` | `#F4AA98` | Actionable error text |
 | `--line` | Ivory at 15% opacity | Fine instrument borders |
@@ -55,7 +55,7 @@ Large type should lead the entry experience. Metadata should remain legible in t
 ## Geometry and surfaces
 
 - Use a 4 px spacing base with 16, 24, and 32 px working intervals.
-- Controls use a 4 px radius. Instrument panels use fine rectangular borders.
+- Controls use sharp rectangular corners (0 px radius). Instrument panels use fine rectangular borders.
 - Circular geometry belongs to the time dial, optical reticle, instrument rings, and brand mark.
 - Use limited depth and quiet backgrounds. Avoid repeated floating rounded cards.
 - Reserve a strong amber fill for the main action. Secondary controls use line and text treatments.
@@ -99,3 +99,17 @@ An inspectable SPHEREx model, spectral iris, circular epoch comparison lens, and
 ## Ownership
 
 Robel owns global tokens, shared UI, typography, and page composition. Michael owns viewer motion and transport controls. Aryan owns evidence and annotation interactions. Samuel owns scientific display behavior. Tyrone owns the metadata needed for truthful interface states.
+
+
+## Implemented entry and mission context
+
+The command strip contains explicit degree/arcminute inputs and a large amber
+Explore the sky action. All five presets come from the backend catalog and
+populate its documented coordinate values. Saved observations load explicitly
+and remain labelled cached-real. The large title collapses once a field opens.
+
+The image, toolbar and time controls share one console width. Display controls
+and provenance remain outside science pixels. Main actions retain 44px targets,
+keyboard alternatives and visible focus. The optional NASA Eyes section loads
+only on request and has its own mission simulation label and close control.
+See [assets](assets.md) for original art and the bundled display font license.

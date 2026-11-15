@@ -6,6 +6,12 @@ export type SequenceRequest = components["schemas"]["SequenceRequest"];
 export type SequenceJob = components["schemas"]["SequenceJob"];
 export type SequenceManifest = components["schemas"]["SequenceManifest"];
 export type JobStatus = SequenceJob["status"];
+export type PresetTarget = components['schemas']['PresetTarget'];
+export async function listPresets(signal?:AbortSignal):Promise<PresetTarget[]> {
+  const items=await requestJson<PresetTarget[]>('/v1/presets',{signal});
+  if(!Array.isArray(items))throw new ApiClientError('The target catalog is unavailable.',502,'INVALID_RESPONSE');
+  return items;
+}
 
 /** Client-side codes for failures that never reach an API error body. */
 export const CLIENT_ERROR = {

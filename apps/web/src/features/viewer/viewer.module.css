@@ -2,8 +2,9 @@
 .expanded { position: fixed; inset: 0; z-index: 90; max-width: none; overflow: auto; padding: 24px max(20px, calc((100vw - 800px)/2)); background: #070b12; }
 .instrumentHeading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; font: 11px var(--font-data); color: var(--silver); }
 .instrumentHeading span:last-child { color: var(--amber); text-align: right; }
+.activeDate { margin: -4px 0 16px; font: 13px var(--font-data); color: var(--amber); }
 .tools, .transportButtons, .epochButtons, .comparison { display: flex; gap: 6px; flex-wrap: wrap; }
-.instrument button, .instrument select { border: 1px solid #556071; border-radius: 0; background: transparent; color: var(--ivory); min-height: 44px; padding: 9px 13px; font: 11px var(--font-data); }
+.instrument button, .instrument select { border: 1px solid #556071; border-radius: 0; background: transparent; color: var(--ivory); min-height: 44px; padding: 9px 13px; font: 12px var(--font-data); }
 .instrument button:hover { border-color: var(--amber); }
 .instrument button[aria-pressed="true"], .instrument .playButton { background: var(--amber); color: #070b12; border-color: var(--amber); }
 .tools { margin-bottom: 12px; }
