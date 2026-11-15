@@ -17,3 +17,20 @@
 .coordinates { font-family: var(--font-data); font-size: 8px; line-height: 1.7; color: var(--silver); overflow-wrap: anywhere; }
 @media (max-width: 1100px) { .panel { padding: 24px; } }
 @media (min-width: 521px) and (max-width: 800px) { .panel { border-top: 0; border-left: 1px solid var(--line); } }
+.selection p { color: var(--silver); font-size: 10px; line-height: 1.8; margin: 0 0 6px; }
+.selection .sky { color: var(--ivory); font-family: var(--font-data); font-size: 9px; }
+.warning, .selection .warning { color: var(--danger); }
+.storage { margin: 14px 0 0; color: var(--danger); font-size: 10px; line-height: 1.8; }
+.storage p { margin: 0 0 8px; }
+.storage span, .editForm span, .candidateActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.storage button, .editForm button, .candidateActions button { min-height: 32px; padding: 0 10px; background: transparent; color: var(--amber); border: 1px solid var(--line); font-family: var(--font-data); font-size: 8px; }
+.candidateActions button { min-width: 32px; display: grid; place-items: center; }
+.candidateHeading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.candidateList li.selected { border-top-color: var(--cyan); }
+.candidateList li.selected .candidateNumber { color: var(--cyan); }
+.editForm label { margin-top: 10px; }
+.editForm textarea { margin-bottom: 8px; }
+.others { margin: 4px 0 12px; }
+.others summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; }
+.guidance { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 14px 0 6px; }
+.coordinates strong { color: var(--danger); font-weight: 500; }
