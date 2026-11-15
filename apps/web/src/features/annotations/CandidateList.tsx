@@ -17,6 +17,7 @@ interface CandidateListProps {
   onShow?: (id: string) => void;
   onUpdate: (id: string, note: string) => void;
   onRemove: (id: string) => void;
+  onExport: (id: string) => void;
 }
 
 function frameName(frames: FrameSummary[] | null, frameId: string): string {
@@ -25,7 +26,7 @@ function frameName(frames: FrameSummary[] | null, frameId: string): string {
   return `observation ${index + 1}, ${observationLabel(frames[index]!.observed_start_utc)}`;
 }
 
-export function CandidateList({ annotations, framesFor, selectedId, onShow, onUpdate, onRemove }: CandidateListProps) {
+export function CandidateList({ annotations, framesFor, selectedId, onShow, onUpdate, onRemove, onExport }: CandidateListProps) {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   // Return focus to a control that still exists, so keyboard users keep their place.
@@ -52,6 +53,7 @@ export function CandidateList({ annotations, framesFor, selectedId, onShow, onUp
         <span className={styles.candidateActions}>
           {onShow && <button type="button" onClick={() => onShow(item.id)} aria-label={`Show candidate ${number} on the image`}>SHOW</button>}
           <button id={`candidate-edit-${item.id}`} type="button" onClick={() => { setEditing(item.id); setDraft(item.note); }} aria-label={`Edit the note for candidate ${number}`}>EDIT</button>
+          <button type="button" onClick={() => onExport(item.id)} aria-label={`Export candidate ${number} as an evidence file`}>EXPORT</button>
           <button type="button" aria-label={`Delete candidate ${number}`} onClick={() => remove(item.id)}><Icon name="close" size={16} /></button>
         </span>
       </div>

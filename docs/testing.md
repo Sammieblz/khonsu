@@ -1,6 +1,6 @@
 # Verification
 
-Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The integrated observation console has [recorded browser acceptance](console-acceptance.md); export, public hosting and submission still have separate gates.
+Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The integrated observation console has [recorded browser acceptance](console-acceptance.md); public hosting and submission still have separate gates.
 
 ## Automated commands
 
@@ -44,8 +44,9 @@ Run `node scripts/verify-observatory.mjs` against a static export for the curren
 console acceptance suite. [Setup, recorded results and manual steps](console-acceptance.md)
 cover Playwright installation, browser paths and the local API. The script uses
 both authentic cached bundles plus explicitly synthetic display ramps and
-transport failures. It does not claim the outstanding query-URL/export features
-pass or replace public-origin deployment acceptance.
+transport failures. It checks marking and the saved candidate record, but not
+shared links or evidence export, which have their own unit tests and browser
+checks; it does not replace public-origin deployment acceptance.
 
 ## Release rehearsal
 

@@ -34,3 +34,10 @@
 .others summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; }
 .guidance { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 14px 0 6px; }
 .coordinates strong { color: var(--danger); font-weight: 500; }
+.export { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.export > button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; background: transparent; color: var(--amber); border: 1px solid var(--line); font-family: var(--font-data); font-size: 9px; }
+.export > button:disabled { opacity: .5; cursor: not-allowed; }
+.export p { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 10px 0 0; }
+.export details { margin-top: 10px; }
+.export summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; }
+.export pre { max-height: 320px; overflow: auto; margin: 8px 0 0; padding: 10px; border: 1px solid var(--line); background: var(--space); color: var(--ivory); font-family: var(--font-data); font-size: 8px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
