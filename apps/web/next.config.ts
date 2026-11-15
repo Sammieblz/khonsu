@@ -10,6 +10,7 @@ if (process.env.CF_PAGES === "1" && !/^https:\/\/[^/\s]+\/?$/.test(process.env.N
 }
 
 const nextConfig: NextConfig = {
+  agentRules: false,
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
