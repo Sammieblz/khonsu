@@ -61,6 +61,38 @@ The address bar describes the live search on screen, so copying it, or using **C
 
 Opening a link fills the form; the visitor still chooses **Explore the sky**, so a link never starts an archive download by itself. The frame count stays the form's fixed bound because links cannot carry it. Coordinates are validated with the same rules as typed input and are never wrapped, clamped or rounded, so a link cannot silently move the requested position. Unknown parameters are ignored, and values that look like URLs are never used. Loading a cached example clears the parameters, because a link cannot reproduce it. Candidate notes stay in the browser and are never part of a link. The frontend does not yet expose wavelength or time filters, so links do not carry them.
 
+## Candidate marks
+
+A candidate is a person's local mark on a sequence, not a detection. The viewer's Mark tool emits an `ImageSelection` (`apps/web/src/features/explorer/interfaces.ts`). It holds the zero-based column and row on the common output grid with a top-left origin, the frame on screen, the A/B comparison chosen at that moment, and whether the frame's verified raster mask has data at that pixel (`null` when only a PNG is available). Clicks outside the displayed canvas produce no selection.
+
+Saving a note creates a `CandidateAnnotation` (record version 2, `origin: "human"`).
+
+- **Sky position.** `rasterToSky` in `apps/web/src/features/annotations/sky.ts` converts the grid pixel to ICRS RA and Dec in degrees using the sequence's `grid.wcs_header` and `raster_to_wcs`.
+  - It implements only the TAN projection that processing writes, following FITS WCS Paper II.
+  - It refuses distortion terms, other projections, other frames or units, and singular matrices.
+  - A refused or missing WCS leaves `sky: null` with a stated `skyUnavailableReason`, so RA and Dec are never estimated.
+  - `apps/web/tests/sky.test.ts` checks it against astropy 7.0.1. It agrees within 1e-6″ for both committed real grids, a field near the pole, a field crossing RA 0, a rotated CD matrix and a PC matrix.
+- **Sequence snapshot.** Alongside the candidate, the browser keeps a snapshot of its sequence (`SequenceContext`). The snapshot copies these from the manifest on screen:
+  - every frame's real UTC times, release, detector, wavelength, masked fraction, source FITS URL and warnings;
+  - the grid and WCS;
+  - the display settings, processing record and sequence warnings.
+
+  It also keeps the search that reproduces the field: the search link, for live and cached-real data, or none for synthetic fixtures. The candidate stays explainable after a live job expires or the page reloads. A snapshot is removed when its last candidate is deleted.
+- **On the image.** Every frame shares one grid, so a mark is the same sky position on every epoch.
+  - The viewer draws each mark of the sequence on every frame: solid on the frame it was made on, dashed on the others.
+  - Marks are numbered as in the candidate list, and the selected one is cyan.
+  - Marks are drawn on the transformed canvas, so pan and zoom move them with the image.
+  - Marks from other sequences are listed but not drawn, since their grid is not on screen.
+
+![The cached real WISE 0855 sequence on its second observation, with two marks made on the first observation drawn dashed at the same grid positions, next to the candidate panel. Each candidate shows its ICRS position, grid pixel, marked observation and A/B comparison. One is flagged as having no valid data at its pixel, and the other shows when its note was edited.](images/candidate-marks.png)
+
+Records live in browser storage under `khonsu.candidates.v2` as `{ "schema": "khonsu-candidates", "version": 2, "candidates": [...], "sequences": {...} }`, holding at most 200 candidates and 2,000,000 characters.
+
+- Version 1 notes are migrated as pixel-only candidates.
+- A candidate or snapshot this version cannot read is kept under `unreadable` and written back unchanged.
+- Unreadable or incompatible data is left untouched. The panel offers to download it or to replace it with the current page's candidates.
+- If storage is unavailable or a save fails, candidates keep working for the visit, and the panel says they will not survive a reload.
+
 ## Error and data modes
 
 The UI distinguishes live data, previously acquired real data, and synthetic development fixtures. Labels persist through exported evidence. Show actionable states for missing coverage, too few comparable epochs, incompatible wavelengths, masked targets, timeouts, download bounds, processing failure, job expiry, failed frame loads and unavailable backend. Do not switch silently to synthetic data.
