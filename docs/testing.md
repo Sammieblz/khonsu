@@ -47,6 +47,8 @@ both authentic cached bundles plus explicitly synthetic display ramps and
 transport failures. It does not claim the outstanding query-URL/export features
 pass or replace public-origin deployment acceptance.
 
+Run `node scripts/audit-accessibility.mjs` against a static export for viewport overflow, 44 px targets, axe-core WCAG 2.1 AA rules, reduced motion and the keyboard-only journey through export. [Results and setup](accessibility-acceptance.md) list what it does not cover.
+
 ## Release rehearsal
 
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.
