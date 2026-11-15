@@ -5,10 +5,10 @@ import { PlaybackControls } from "./PlaybackControls";
 import { useFrameLoader } from "./useFrameLoader";
 import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
-import { boundedView, clientPointToRaster, displayScale, FIT, zoomAt } from "./viewport";
+import { boundedView, clientPointToRaster, FIT, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
 import { usePreparedFrames } from './usePreparedFrames';
-import type { DisplayOptions } from './display';
+import { displaySize, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
 const EMPTY_FRAMES: ObservationFrame[] = [];
 
@@ -20,9 +20,12 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
   const [tool, setTool] = useState<ViewerTool>('time');
   const [view, setView] = useState(FIT), [expanded, setExpanded] = useState(false);
   const [speed, setSpeed] = useState(700), [blink, setBlink] = useState(false);
-  const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'quiet'};
+  const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'quiet',sampling:'smooth',detail:0};
   const [display,setDisplay]=useState<DisplayOptions>({...original,a:.3});
+  const [originalHeld,setOriginalHeld]=useState(false),[outputSize,setOutputSize]=useState({width:1,height:1});
+  const effectiveDisplay=useMemo(()=>({...display,detail:originalHeld||tool==='mark'?0:display.detail}),[display,originalHeld,tool]);
   const [forceCpu,setForceCpu]=useState(false),[rendererMode,setRendererMode]=useState('Preparing display'),[rendering,setRendering]=useState(false);
+  const [adapter,setAdapter]=useState('');
   const [rendererRevision,setRendererRevision]=useState(0);
   const renderer=useRef<DisplayRenderer|null>(null),revision=useRef(0),drawing=useRef(false),latestDraw=useRef<(()=>Promise<void>)|null>(null);
   const [a, setA] = useState(0), [b, setB] = useState(Math.max(0,(sequence?.frames.length ?? 1)-1));
@@ -37,17 +40,17 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
   const {images,failedIds,retry}=useFrameLoader(frames,index,[a,b]);
   const {rasters,failed:rasterFailed}=usePreparedFrames(frames,sequence?.grid.width_px??0,sequence?.grid.height_px??0,index,[a,b]);
   const raster=active?rasters.get(active.frame_id):undefined;
+  const displayAvailable=!!raster&&!rendererMode.startsWith('Original PNG');
   const preparedFailed=!!active&&rasterFailed.includes(active.frame_id);
   const ready=!!active && images.has(active.frame_id)&&(!active.raster||!!raster||preparedFailed);
   const {playing,setPlaying}=usePlayback(frameIds,active?.frame_id ?? null,onFrameChange,speed,ready&&!rendering);
-  const scale=sequence?displayScale(sequence.grid.width_px,sequence.grid.height_px):1;
   useLayoutEffect(()=>{renderer.current=new DisplayRenderer(()=>setRendererRevision(value=>value+1),forceCpu);return()=>{revision.current++;latestDraw.current=null;renderer.current?.dispose();renderer.current=null;};},[forceCpu]);
 
   function releaseHold(){ if(held.current){onFrameChange(held.current);held.current=null;} }
   function stop(){setPlaying(false);setBlink(false);releaseHold();}
   function selectIndex(next:number){stop();if(frames[next])onFrameChange(frames[next].frame_id);}
   function beginHold(){if(!ready||a===b)return;setPlaying(false);setBlink(false);if(!held.current)held.current=active.frame_id;onFrameChange(frames[b]!.frame_id);}
-  useEffect(()=>{const release=()=>{setBlink(false);setPlaying(false);releaseHold();pointers.current.clear();drag.current=null;};window.addEventListener('blur',release);return()=>window.removeEventListener('blur',release);});
+  useEffect(()=>{const release=()=>{setBlink(false);setPlaying(false);setOriginalHeld(false);releaseHold();pointers.current.clear();drag.current=null;};window.addEventListener('blur',release);return()=>window.removeEventListener('blur',release);});
   useEffect(()=>{
     if(!blink||a===b||!images.has(frames[a]?.frame_id ?? '')||!images.has(frames[b]?.frame_id ?? ''))return;
     const timer=window.setInterval(()=>onFrameChange(active?.frame_id===frames[a]!.frame_id?frames[b]!.frame_id:frames[a]!.frame_id),speed);
@@ -55,9 +58,14 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
   },[blink,a,b,images,frames,active,onFrameChange,speed]);
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
-    const observer=new ResizeObserver(()=>setView(current=>boundedView(current,element.clientWidth,element.clientHeight)));
-    observer.observe(element);return()=>observer.disconnect();
-  },[]);
+    const resize=()=>{
+      setView(current=>boundedView(current,element.clientWidth,element.clientHeight));
+      const size=displaySize(Math.max(1,element.clientWidth*window.devicePixelRatio*view.zoom),Math.max(1,element.clientHeight*window.devicePixelRatio*view.zoom));
+      setOutputSize(old=>old.width===size.width&&old.height===size.height?old:size);
+    };
+    const observer=new ResizeObserver(resize);resize();observer.observe(element);window.addEventListener('resize',resize);
+    return()=>{observer.disconnect();window.removeEventListener('resize',resize);};
+  },[view.zoom]);
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
     const wheel=(event:WheelEvent)=>{if(tool!=='pan'||!sequence)return;event.preventDefault();const rect=element.getBoundingClientRect();setView(current=>zoomAt(current,Math.exp(-event.deltaY*.002),event.clientX-rect.left-rect.width/2,event.clientY-rect.top-rect.height/2,rect.width,rect.height));};
@@ -66,27 +74,27 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
   useLayoutEffect(()=>{
     if(!sequence||!active||!canvas.current)return;
     const context=canvas.current.getContext('2d');if(!context)return;
-    const width=sequence.grid.width_px*scale,height=sequence.grid.height_px*scale;
+    const {width,height}=outputSize,scaleX=width/sequence.grid.width_px,scaleY=height/sequence.grid.height_px;
     context.clearRect(0,0,width,height);
     const token=++revision.current,image=images.get(active.frame_id);if(!image||!ready)return;
     setRendering(true);
     latestDraw.current=async()=>{
       let rendered:HTMLCanvasElement|ImageBitmap|ImageData|HTMLImageElement=image;
       try{
-        if(raster&&renderer.current)rendered=await renderer.current.render(raster,display);
+        if(raster&&renderer.current)rendered=await renderer.current.render(raster,effectiveDisplay,outputSize);
         if(token!==revision.current)return;
         context.fillStyle='#273140';context.fillRect(0,0,width,height);context.imageSmoothingEnabled=false;
         if(rendered instanceof ImageData){const temporary=document.createElement('canvas');temporary.width=rendered.width;temporary.height=rendered.height;temporary.getContext('2d')!.putImageData(rendered,0,0);context.drawImage(temporary,0,0,width,height);}
         else context.drawImage(rendered,0,0,width,height);
         context.strokeStyle='#f3bc60';context.lineWidth=Math.max(2,width/400);
-        for(const note of annotations.filter(note=>note.selection.sequenceId===sequence.sequence_id&&note.selection.frameId===active.frame_id)){context.beginPath();context.arc((note.selection.x+.5)*scale,(note.selection.y+.5)*scale,Math.max(10,width/40),0,Math.PI*2);context.stroke();}
-        if(tool==='mark'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scale,cursor.y*scale,scale,scale);}
-        setRendererMode(raster?(renderer.current?.mode??'CPU canvas'):'Original PNG');setRendering(false);
+        for(const note of annotations.filter(note=>note.selection.sequenceId===sequence.sequence_id&&note.selection.frameId===active.frame_id)){context.beginPath();context.arc((note.selection.x+.5)*scaleX,(note.selection.y+.5)*scaleY,Math.max(10,width/40),0,Math.PI*2);context.stroke();}
+        if(tool==='mark'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scaleX,cursor.y*scaleY,scaleX,scaleY);}
+        setRendererMode(raster?(renderer.current?.mode??'CPU canvas'):'Original PNG');setAdapter(raster?(renderer.current?.adapter??''):'');setRendering(false);
       }catch{if(token===revision.current){context.fillStyle='#273140';context.fillRect(0,0,width,height);context.drawImage(image,0,0,width,height);setRendererMode('Original PNG: display renderer unavailable');setRendering(false);}}
       finally{if(rendered instanceof ImageBitmap)rendered.close();}
     };
     if(!drawing.current){drawing.current=true;void(async()=>{while(latestDraw.current){const job=latestDraw.current;latestDraw.current=null;await job();}drawing.current=false;})();}
-  },[sequence,active,images,annotations,scale,cursor,tool,raster,ready,display,forceCpu,rendererRevision]);
+  },[sequence,active,images,annotations,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision]);
   function mark(x:number,y:number){if(!sequence||!active||!ready)return;onSelect({sequenceId:sequence.sequence_id,frameId:active.frame_id,x,y,coordinateSpace:'natural-raster',pixelOrigin:'top-left'});}
   function pointerDown(event:PointerEvent<HTMLDivElement>){
     if(!active)return;stop();event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.focus();
@@ -126,10 +134,19 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
       <button disabled={!active} onClick={()=>setView(FIT)}>FIT / RESET</button><button onClick={()=>setExpanded(!expanded)} aria-pressed={expanded}>{expanded?'CONTRACT':'EXPAND'}</button>
     </div>
     <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
-      {sequence&&active?<><canvas ref={canvas} className={styles.canvas} style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={sequence.grid.width_px*scale} height={sequence.grid.height_px*scale} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
+      {sequence&&active?<><canvas ref={canvas} className={styles.canvas} data-sampling={displayAvailable?display.sampling:'pixels'} style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={outputSize.width} height={outputSize.height} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
     </div>
     <div className={styles.orientation}><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
     <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
+    {active&&<div className={styles.imageModes}>
+      <div role="group" aria-label="Image sampling">
+        <button disabled={!displayAvailable} aria-pressed={displayAvailable&&display.sampling==='smooth'} onClick={()=>setDisplay(old=>({...old,sampling:'smooth'}))}>SMOOTH</button>
+        <button disabled={!displayAvailable} aria-pressed={!displayAvailable||display.sampling==='pixels'} onClick={()=>setDisplay(old=>({...old,sampling:'pixels'}))}>PIXELS</button>
+      </div>
+      <button disabled={!displayAvailable||tool==='mark'} aria-pressed={displayAvailable&&(display.detail??0)>0} onClick={()=>setDisplay(old=>({...old,detail:old.detail?0:.35}))}>DETAIL EXPERIMENT</button>
+      <button disabled={!displayAvailable||!display.detail||tool==='mark'} onPointerDown={event=>{stop();event.currentTarget.setPointerCapture(event.pointerId);setOriginalHeld(true);}} onPointerUp={()=>setOriginalHeld(false)} onPointerCancel={()=>setOriginalHeld(false)} onLostPointerCapture={()=>setOriginalHeld(false)} onBlur={()=>setOriginalHeld(false)} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();stop();setOriginalHeld(true);}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')setOriginalHeld(false);}}>HOLD ORIGINAL</button>
+      <p className={styles.hint} data-detail={displayAvailable&&effectiveDisplay.detail?'on':'off'}>{!displayAvailable?'PREPARED PNG: interactive intensity display is unavailable.':tool==='mark'?'Mark uses original intensities. Detail is paused.':effectiveDisplay.detail?'EXPERIMENTAL DETAIL: visual emphasis only. Hold original to compare without it.':'ORIGINAL INTENSITIES: smooth viewing adds no measured resolution.'}</p>
+    </div>}
     <PlaybackControls frames={frames} index={index} playing={playing} speed={speed} onSpeed={setSpeed} onIndexChange={selectIndex} onToggle={()=>{setBlink(false);releaseHold();if(!playing&&index===frames.length-1&&frames[0])onFrameChange(frames[0].frame_id);setPlaying(!playing);}} />
     {active&&<div className={styles.comparison}>
       <label>REFERENCE / A<select aria-label="Comparison A" value={a} onChange={event=>{stop();setA(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>
@@ -141,16 +158,18 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
       <summary>IMAGE DISPLAY <span data-renderer={rendererMode}>{rendererMode}</span></summary>
       {preparedFailed&&<p role="status">Interactive intensity data could not be verified. Showing the original prepared PNG.</p>}
       {!active.raster&&<p>This sequence contains prepared PNGs only. Intensity adjustments need aligned raster data.</p>}
-      <fieldset disabled={!raster}>
+      <fieldset disabled={!displayAvailable}>
         <label>Black level<input aria-label="Black level" type="range" min={original.low-(original.high-original.low)*.2} max={Math.min(original.high,display.high)-(original.high-original.low)*.01} step={(original.high-original.low)/500} value={display.low} onChange={event=>setDisplay(old=>({...old,low:Number(event.target.value)}))}/></label>
         <label>White level<input aria-label="White level" type="range" min={Math.max(original.low,display.low)+(original.high-original.low)*.01} max={original.high+(original.high-original.low)} step={(original.high-original.low)/500} value={display.high} onChange={event=>setDisplay(old=>({...old,high:Number(event.target.value)}))}/></label>
         <label>Stretch<select aria-label="Display stretch" value={display.curve} onChange={event=>setDisplay(old=>({...old,curve:event.target.value as DisplayOptions['curve']}))}><option value="asinh">Asinh</option><option value="linear">Linear</option></select></label>
         <label>Asinh softness<input aria-label="Asinh softness" type="range" min="0.05" max="1" step=".01" value={display.a} disabled={display.curve!=='asinh'} onChange={event=>setDisplay(old=>({...old,a:Number(event.target.value)}))}/></label>
         <label>Gamma<input aria-label="Gamma" type="range" min=".5" max="2" step=".05" value={display.gamma} onChange={event=>setDisplay(old=>({...old,gamma:Number(event.target.value)}))}/></label>
         <label>No-data style<select aria-label="No-data style" value={display.mask} onChange={event=>setDisplay(old=>({...old,mask:event.target.value as DisplayOptions['mask']}))}><option value="quiet">Quiet slate</option><option value="hatch">Detailed hatch</option></select></label>
+        <label>Detail amount (experimental)<input aria-label="Detail amount" type="range" min="0" max=".5" step=".05" value={display.detail??0} disabled={tool==='mark'} onChange={event=>setDisplay(old=>({...old,detail:Number(event.target.value)}))}/></label>
         <button onClick={()=>setDisplay({...original,a:.3})}>QUIET PRESET</button><button onClick={()=>setDisplay(original)}>ORIGINAL / RESET</button>
       </fieldset>
       <label className={styles.rendererChoice}>Rendering <select aria-label="Rendering mode" value={forceCpu?'cpu':'auto'} onChange={event=>setForceCpu(event.target.value==='cpu')}><option value="auto">Automatic GPU / CPU</option><option value="cpu">CPU</option></select></label>
+      <p className={styles.hint} data-adapter={adapter}>{rendererMode==='WebGL2'?`Graphics adapter: ${adapter}`:rendererMode.startsWith('CPU')?'CPU display active. GPU availability depends on this browser and device.':''}</p>
       <p className={styles.hint}>One display setting across all epochs. Black {display.low.toPrecision(4)} / white {display.high.toPrecision(4)} MJy/sr | {display.curve} {display.a.toFixed(2)} | gamma {display.gamma.toFixed(2)}. Display changes do not add measured detail.</p>
     </details>}
     {sequence&&<details className={styles.provenance}><summary>Observation details & quality</summary><p>{sequence.disclosure}</p><p>{active?.observation_id} · {active?.release} · {active?.wavelength_um?.toFixed(4)} μm · {((active?.masked_fraction ?? 0)*100).toFixed(1)}% masked</p>{active?.source_fits_url&&<a href={active.source_fits_url} target="_blank" rel="noreferrer">Source FITS at IRSA</a>}{[...(sequence.warnings??[]),...(active?.warnings??[])].map((warning,i)=><p key={i}>{warning.message}</p>)}</details>}

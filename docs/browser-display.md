@@ -2,8 +2,10 @@
 
 Samuel's console pass: GitHub #35, Linear BYT-36. CPython retains FITS reading,
 calibration, WCS registration, wavelength compatibility and validity decisions.
-The browser only maps prepared intensities to display colors and transforms the
-viewport. An adjusted image is not calibrated photometry or a discovery.
+The browser maps prepared intensities to display colors, transforms the viewport
+and optionally emphasizes detail in a separate visual copy. The scoped extension
+is [#49 / BYT-42](enhancement-research.md). An adjusted image is not calibrated
+photometry or a discovery.
 
 ## Prepared assets
 
@@ -45,7 +47,10 @@ created and no masked source is recovered by contrast changes.
 
 The browser's quiet preset uses asinh 0.3 with the original shared limits;
 Original restores the manifest curve (currently 0.1). Every displayed epoch
-shares the same settings. Retain 6 arcminutes for the validated examples;
+shares the same settings. Smooth is now the default screen sampling, with Pixels
+available beside the image. Both presets disable experimental detail. The
+[new comparison and research](enhancement-research.md) records the current choice.
+Retain 6 arcminutes for the validated examples;
 10-12 arcminute live searches are available through the existing bounded field
 input but their coverage and comparison quality require a new archive result.
 Do not relabel the existing cache as a larger field.
@@ -57,10 +62,16 @@ WebGL2/CPU benchmarks establish a useful benefit on these small fields.
 
 ## Browser implementation and recovery
 
-WebGL2 uploads Float32 intensities and integer validity textures with nearest
-sampling. The shader maps shared black/white, asinh/linear, gamma and no-data
-style to colors. Scientific registration and validity decisions remain Python.
-The CPU path uses the same formula in a Web Worker; OffscreenCanvas transfers
+WebGL2 uploads Float32 intensities and integer validity textures. The display
+shader explicitly performs nearest or validity-weighted bilinear sampling, then
+maps shared black/white, asinh/linear, gamma and no-data style to colors. It writes
+at viewport times device-pixel-ratio times zoom, bounded to 1536 pixels per side.
+An optional native-grid float pass adds a thresholded, capped detail residual;
+it skips any two-pixel neighborhood touching an invalid sample. Detail is off by
+default and paused in Mark mode. Scientific registration and validity decisions
+remain Python. Uploaded textures and unchanged detail results are reused.
+
+The CPU path uses the same formulas in a module Web Worker; OffscreenCanvas transfers
 an ImageBitmap when available, otherwise the worker returns RGBA bytes. Canvas
 on the main thread remains the final fallback when Workers are unavailable.
 
@@ -70,10 +81,17 @@ of five. Loading and stale-result guards keep metadata and the shown frame
 together. Context loss triggers CPU rendering; selecting CPU explicitly also
 works. Missing or corrupt intensity assets preserve the original PNG and show
 why interactive intensity controls are unavailable. They do not fabricate data.
+The worker uses an explicit module constructor so the static build emits
+executable worker code. Acceptance now asserts `CPU worker`, preventing a failed
+worker from silently counting as worker support merely because Canvas recovered.
+Missing float-render targets use CPU for detail and can still use WebGL2 when
+detail is off. Graphics adapter information is shown when the browser provides it.
 
 The first production-export browser check passed in Chromium and Firefox with
 the authentic cached WISE field: maximum CPU/GPU byte difference was zero,
 forced WebGL context loss recovered, and disabling both WebGL2 and Workers
 still rendered through Canvas. These results establish tested compatibility,
-not guaranteed acceleration on every device. See the
+not guaranteed acceleration on every device. That historical report predates
+the smooth/detail pass and its worker correction. See the
 [recorded result](evidence/console/display-report.json).
+Current checks and timing are recorded in [enhancement research](enhancement-research.md).

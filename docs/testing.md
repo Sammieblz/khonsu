@@ -47,6 +47,16 @@ both authentic cached bundles plus explicitly synthetic display ramps and
 transport failures. It does not claim the outstanding query-URL/export features
 pass or replace public-origin deployment acceptance.
 
+For the optional smooth/detail renderer, also run
+`node scripts/verify-enhancement.mjs` against the static export served from
+`apps/web/out/` on the configured test URL. It temporarily writes isolated
+renderer modules under the ignored export's `__enhancement/` directory so both
+browsers can execute real module Workers, then removes those files on success.
+The suite asserts the production CPU worker starts, compares every cached frame
+across sampling/detail modes, checks fallbacks and records warm rendering times.
+The [research report](enhancement-research.md) includes scientific controls and
+manual steps. GPU/CPU agreement and display speed do not validate deconvolution.
+
 ## Release rehearsal
 
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.

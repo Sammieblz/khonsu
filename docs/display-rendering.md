@@ -4,7 +4,7 @@ How the processor turns SPHEREx cutouts into the frames the viewer shows, and wh
 
 ## What the image can show
 
-A SPHEREx pixel covers about 6.15 arcseconds. A 6 arcminute field is about 58 native pixels across, from one exposure. Khonsu never shows detail finer than that: no upscaling model, sharpening, super-resolution, inpainting, stacking of epochs or interpolated epochs. Pan and zoom ([viewer interactions](viewer-interactions.md)) are the way to look closer.
+A SPHEREx pixel covers about 6.15 arcseconds. A 6 arcminute field is about 58 native pixels across, from one exposure. Enlarging the display does not add measured resolution. The scientific products use no upscaling model, sharpening, super-resolution, inpainting, stacking of epochs or interpolated epochs. The separately labelled [browser detail experiment](enhancement-research.md) modifies a visual copy only; it is not a new science product. Pan and zoom ([viewer interactions](viewer-interactions.md)) are the way to look closer.
 
 ## Cutout
 
@@ -43,9 +43,13 @@ The manifest's `display.vmin`, `display.vmax` and `processing` fields record the
 
 ## No-data display
 
-Masked and uncovered pixels are transparent in each PNG. The viewer draws them as a neutral hatch (fill `#2E3440`, diagonal lines `#5C6474`) and shows a "No data" key beside the orientation marks. They never show the page background, and the hatch cannot be mistaken for dark sky. Because the hatch is identical in every frame, a mask that changes between epochs stays visible as missing data during stepping or blink.
+Masked and uncovered pixels are transparent in each PNG. The current viewer fills them with slate `#273140`, optionally with detailed hatch lines `#465263`, and shows a "No data" key beside the orientation marks. They never show the page background. The same style applies in every frame, so a mask that changes between epochs stays visible during stepping or blink.
 
-The viewer draws each grid pixel as an equal, crisp block: the canvas is an integer multiple of the grid with image smoothing off, and CSS uses `image-rendering: pixelated`.
+The viewer now offers Smooth and Pixels modes and renders at the bounded display
+size. Smooth interpolates valid intensities before the display stretch; the
+nearest source validity still decides the mask. Pixels selects nearest samples
+for inspecting the prepared grid. This replaces the former integer canvas
+enlargement and mandatory CSS pixelation. See [browser display](browser-display.md).
 
 ## Verification
 

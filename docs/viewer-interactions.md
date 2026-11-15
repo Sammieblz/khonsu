@@ -22,6 +22,13 @@ state and resets it when sequence identity changes.
 - Comparison: select A/B, blink crisply or hold to show B. Releasing, cancelling
   or losing focus restores the frame held before comparison. View transforms
   remain shared between epochs. Timers stop on blur and sequence replacement.
+- Image sampling: Smooth interpolates display intensities; Pixels shows nearest
+  prepared samples. Both retain masks and natural-raster coordinates. The canvas
+  follows viewport size, device pixel ratio and zoom with a 1536-pixel bound.
+- Detail experiment: optional capped visual emphasis, off initially. Hold
+  Original compares the same frame with detail off and unchanged stretch/sampling.
+  Pointer release/cancel, key release and blur restore the prior display. Mark
+  pauses detail automatically. Settings stay shared across genuine epochs.
 
 The SVG time arc and accessible range input provide the same real-date mapping.
 Unknown dates use an index fallback and remain labelled unavailable. The display
@@ -39,6 +46,8 @@ sit outside the science raster. Original output dimensions and angular field
 remain visible. No-data pixels use a distinct slate fill and legend. Optional
 intensity controls consume the prepared arrays described in
 [browser display](browser-display.md).
+The [enhancement experiment](enhancement-research.md) documents the algorithms,
+research findings, original comparison and actual rendering path.
 
 ## Verification
 

@@ -34,3 +34,20 @@ WebGL2 accelerates display mapping of prepared Float32 values. Worker and Canvas
 fallbacks preserve compatibility and context-loss recovery. WebGPU, independent
 background matching, PSF matching, and a larger cached field require separate
 measurements before adoption. Existing 6-arcminute caches remain their true size.
+
+## November 14, 2026: Bounded derived display enhancement
+
+The user explicitly requested app-owned GPU image enhancement and deconvolution
+research, tracked by [#49](https://github.com/Sammieblz/khonsu/issues/49) and
+[BYT-42](https://linear.app/byteboyz/issue/BYT-42). This authorizes a small visual
+processing extension to the browser-display boundary: smooth screen sampling
+and an optional thresholded detail copy, with original comparison, mask
+preservation and CPU recovery. FITS, calibration, registration, PSF research and
+authoritative scientific interpretation remain normal CPython. No API contract,
+dependency, cached science product or independent epoch normalization changes.
+
+Keep Wiener-Hunt, Richardson-Lucy and Fourier filtering in the reproducible
+research script until their forward/noise model and artifact behavior support
+a validated product choice. Blind restoration was researched but not implemented.
+See [the experiment and evidence](enhancement-research.md). Retain the existing
+Khonsu controls, time arc and real-observation sky swipe.

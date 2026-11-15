@@ -74,7 +74,7 @@ async function cpuGpu(page) {
   await openDisplay(page);
   await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent !== 'Preparing display');
   const initialMode = await page.locator('[data-renderer]').textContent();
-  assert.equal(initialMode, 'GPU WebGL2', 'This parity run requires WebGL2; fallback runs are separate');
+  assert.equal(initialMode, 'WebGL2', 'This parity run requires WebGL2; fallback runs are separate');
   await capture(page, '__gpu');
   await page.getByLabel('Rendering mode', { exact: true }).selectOption('cpu');
   await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent?.startsWith('CPU'));
@@ -109,7 +109,7 @@ async function rampCheck(page) {
       for (const curve of ['linear', 'asinh']) for (const mask of ['quiet', 'hatch']) {
         const options = { low: 0, high: 1, a: .3, gamma: 1.35, curve, mask };
         const result = await renderer.render(raster, options);
-        if (renderer.mode !== 'GPU WebGL2') throw Error('Ramp did not use GPU');
+        if (renderer.mode !== 'WebGL2') throw Error('Ramp did not use WebGL2');
         context.drawImage(result, 0, 0);
         const gpu = context.getImageData(0, 0, 64, 8).data, cpu = renderPixels(raster, options);
         let difference = 0;
@@ -179,7 +179,7 @@ for (const engine of [chromium, firefox]) {
     assert.equal(await page.getByLabel('Asinh softness', { exact: true }).inputValue(), '0.1');
     await button(page, 'QUIET PRESET').click();
     await page.getByLabel('Rendering mode', { exact: true }).selectOption('auto');
-    await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent === 'GPU WebGL2');
+    await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent === 'WebGL2');
     await page.evaluate(() => window.__glContexts.findLast(gl => !gl.isContextLost()).getExtension('WEBGL_lose_context').loseContext());
     await page.waitForFunction(() => document.querySelector('[data-renderer]')?.textContent?.startsWith('CPU'));
     await waitRender(page); result.contextLossRecovery = true;

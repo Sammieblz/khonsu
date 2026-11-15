@@ -12,16 +12,6 @@ export function zoomAt(view: ViewTransform, factor: number, x: number, y: number
   return boundedView({ zoom, x: x - (x - view.x) * ratio, y: y - (y - view.y) * ratio }, width, height);
 }
 
-// Backing-store pixels per science-grid pixel. An integer multiple keeps every
-// grid pixel a crisp, equal block instead of letting the browser resample it.
-export const DISPLAY_TARGET_PX = 1024;
-
-export function displayScale(rasterWidth: number, rasterHeight: number): number {
-  const largest = Math.max(rasterWidth, rasterHeight);
-  if (!Number.isFinite(largest) || largest <= 0) return 1;
-  return Math.max(1, Math.ceil(DISPLAY_TARGET_PX / largest));
-}
-
 // The rectangle must be the actual displayed canvas, excluding surrounding bars.
 // Coordinates use integer pixel centers with a top-left browser origin.
 export function clientPointToRaster(
