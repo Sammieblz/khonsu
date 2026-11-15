@@ -1,12 +1,9 @@
-import styles from "./explorer.module.css";
-
-const referenceTargets = ["Barnard's Star", "Epsilon Indi B", "WISE 0855", "RW Aurigae", "R Draconis"];
-
-export function TargetPresets() {
-  return (
-    <section className={styles.referenceTargets} aria-labelledby="reference-targets-title">
-      <div><span className={styles.eyebrow} id="reference-targets-title">CHALLENGE REFERENCE TARGETS</span><p>Coordinates and verified sequences will be connected here.</p></div>
-      <ol>{referenceTargets.map((target, index) => <li key={target}><span>{String(index + 1).padStart(2, "0")}</span>{target}</li>)}</ol>
-    </section>
-  );
+import type { PresetTarget } from '@/lib/api/client';
+import styles from './explorer.module.css';
+export function TargetPresets({targets,onChoose,selected,error}:{targets:PresetTarget[];onChoose:(target:PresetTarget)=>void;selected:string|undefined;error:string}){
+ return <section className={styles.referenceTargets} aria-label="Challenge target presets">
+  <span className={styles.eyebrow}>CHOOSE A KNOWN FIELD</span>
+  {error&&<p role="status">{error} You can still enter coordinates above.</p>}
+  <div>{targets.map((target,i)=><button key={target.preset_id} aria-pressed={selected===target.preset_id} disabled={target.ra_deg==null||target.dec_deg==null} onClick={()=>onChoose(target)}><span>{String(i+1).padStart(2,'0')}</span>{target.label}</button>)}</div>
+ </section>;
 }

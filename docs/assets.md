@@ -24,3 +24,26 @@ References:
 - https://github.com/IBM/plex
 
 Before adding a Blender or third-party satellite model, record the exact source, license, author, attribution, optimization and scientific fidelity. No downloadable SPHEREx model has been verified for this scaffold. A new 3D asset pipeline is deferred beyond the MVP.
+
+
+## Console redesign assets, November 14, 2026
+
+`apps/web/public/observatory-sky.svg` is original project-authored vector art:
+deterministically positioned illustrative stars, shaded spherical limb and light
+rim. It is decorative, not a measured sky, a Planet X image or a reconstruction
+of ancient constellations. It uses the repository MIT license. No Marvel asset,
+footage or audio is included.
+
+The local `BarlowCondensed-SemiBold.ttf` is an unmodified official Google Fonts
+copy, 109,428 bytes. Copyright 2017 The Barlow Project Authors. Its SIL Open
+Font License 1.1 is bundled as `apps/web/public/fonts/Barlow-OFL.txt`.
+[Official font source](https://github.com/google/fonts/tree/main/ofl/barlowcondensed).
+Manrope and IBM Plex Mono retain the existing browser stylesheet and system
+fallbacks. The principal display heading works without that remote stylesheet.
+
+The optional mission iframe loads the official
+[NASA Eyes SPHEREx view](https://eyes.nasa.gov/apps/solar-system/#/sc_spherex)
+only when the user opens Mission. It retains NASA/JPL-Caltech attribution and a
+separate simulation-clock label, plus an external-link fallback. No extracted
+spacecraft model or Eyes source code is redistributed. The
+[SPHEREx site](https://spherex.caltech.edu/) also embeds NASA Eyes.

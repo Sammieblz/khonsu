@@ -1,3 +1,4 @@
+@font-face { font-family: "Khonsu Display"; src: url('/fonts/BarlowCondensed-SemiBold.ttf') format('truetype'); font-style: normal; font-weight: 500 700; font-display: swap; }
 :root {
   color-scheme: dark;
   --space: #070b12;
@@ -5,14 +6,14 @@
   --surface-raised: #152134;
   --ivory: #f1f0e9;
   --silver: #aab5c7;
-  --amber: #d9ae6a;
+  --amber: #edb85e;
   --cyan: #79c7e8;
   --danger: #f4aa98;
   --line: rgb(241 240 233 / 15%);
-  --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --font-display: "Khonsu Display", "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
   --font-body: "Manrope", Arial, sans-serif;
   --font-data: "IBM Plex Mono", Consolas, monospace;
-  --radius: 4px;
+  --radius: 0px;
 }
 
 * { box-sizing: border-box; }

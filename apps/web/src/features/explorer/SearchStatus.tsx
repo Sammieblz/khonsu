@@ -35,7 +35,7 @@ interface CachedExampleProps {
 export function CachedExamplePicker({ examples, selectedId, error, loading, onSelect, onLoad }: CachedExampleProps) {
   return <section className={styles.searchStatus} aria-labelledby="cached-example-title">
     <span className={styles.eyebrow} id="cached-example-title">SAVED OBSERVATIONS</span>
-    <p className={styles.statusDetail}>Explore a previously acquired real field without contacting IRSA. The local observation service must still be running. Your form coordinates stay unchanged.</p>
+    <p className={styles.statusDetail}>Open authentic saved observations and start comparing. A new archive search uses the coordinates in your command strip.</p>
     {loading ? <p role="status">Checking cached examples...</p> : error ? <p role="alert">{error}</p> : examples.length === 0 ? <p>No verified cached observation example is bundled with this service.</p> : <>
       <label htmlFor="cached-example">Cached real field</label>
       <select id="cached-example" className={styles.secondaryButton} value={selectedId} onChange={event => onSelect(event.target.value)}>
