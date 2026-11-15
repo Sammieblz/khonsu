@@ -1,0 +1,156 @@
+{
+  "startedAt": "2026-11-15T00:35:30.505Z",
+  "origin": "http://localhost:3000",
+  "query": {
+    "ra_deg": 270,
+    "dec_deg": 66.5607,
+    "fov_arcmin": 6,
+    "max_frames": 16
+  },
+  "manifest": {
+    "schema_version": "1.0",
+    "sequence_id": "job-e8e918af973c49d498cd6d2826994d26",
+    "data_mode": "live",
+    "title": "SPHEREx observation sequence",
+    "disclosure": "Real archive observations rendered on one celestial grid. Display wavelengths are approximate; unmatched PSFs/backgrounds can resemble change. Candidate annotations require independent investigation.",
+    "target": {
+      "ra_deg": 270,
+      "dec_deg": 66.5607,
+      "coordinate_frame": "ICRS"
+    },
+    "requested_fov_arcmin": 6,
+    "grid": {
+      "width_px": 118,
+      "height_px": 118,
+      "pixel_origin": "top-left",
+      "orientation": "north-up-east-left",
+      "pixel_center_convention": "zero-based-integer-centers",
+      "wcs_header": {
+        "WCSAXES": 2,
+        "CRPIX1": 59.5,
+        "CRPIX2": 59.5,
+        "CDELT1": -0.00084745762711864,
+        "CDELT2": 0.00084745762711864,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 270,
+        "CRVAL2": 66.5607,
+        "LONPOLE": 180,
+        "LATPOLE": 66.5607,
+        "MJDREF": 0,
+        "RADESYS": "ICRS"
+      },
+      "raster_to_wcs": "flip-y"
+    },
+    "display": {
+      "stretch": "asinh",
+      "vmin": 0.08295521850585938,
+      "vmax": 1.2063929450511932
+    },
+    "frames": [
+      {
+        "frame_id": "frame-0001",
+        "label": "2025-05-11T06:02:47.529600+00:00",
+        "image_url": "/v1/sequences/job-e8e918af973c49d498cd6d2826994d26/frames/frame-0001.png",
+        "raster": {
+          "url": "/v1/sequences/job-e8e918af973c49d498cd6d2826994d26/frames/frame-0001.bin",
+          "encoding": "float32-le-mask8-v1",
+          "size_bytes": 69620,
+          "sha256": "2dcc98db660c57d7a9ed25791e211d68d230c369b07f671a1013e601f9194cba"
+        },
+        "observed_start_utc": "2025-05-11T06:02:47.529600Z",
+        "observed_end_utc": "2025-05-11T06:04:42.614400Z",
+        "wavelength_um": 3.9208075363183617,
+        "bandwidth_um": 0.036085160741585035,
+        "detector": 5,
+        "release": "DR1",
+        "observation_id": "2025W19_2B_0431_1",
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/5/level2_2025W19_2B_0431_1D5_spx_l2b-v27-2026-198.fits?center=270.0000000000%2C66.5607000000&size=0.1500000000",
+        "masked_fraction": 0.025782821028440095,
+        "warnings": []
+      },
+      {
+        "frame_id": "frame-0002",
+        "label": "2026-02-03T14:19:10.473600+00:00",
+        "image_url": "/v1/sequences/job-e8e918af973c49d498cd6d2826994d26/frames/frame-0002.png",
+        "raster": {
+          "url": "/v1/sequences/job-e8e918af973c49d498cd6d2826994d26/frames/frame-0002.bin",
+          "encoding": "float32-le-mask8-v1",
+          "size_bytes": 69620,
+          "sha256": "ab9352249f8498b53c771d8cfe81552a86b10e5db4240c745b39bca56e99f8dc"
+        },
+        "observed_start_utc": "2026-02-03T14:19:10.473600Z",
+        "observed_end_utc": "2026-02-03T14:21:05.644800Z",
+        "wavelength_um": 3.9207985770067273,
+        "bandwidth_um": 0.0360855299127284,
+        "detector": 5,
+        "release": "DR1",
+        "observation_id": "2026W06_1A_0327_1",
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W06_1A/l2b-v27-2026-221/5/level2_2026W06_1A_0327_1D5_spx_l2b-v27-2026-221.fits?center=270.0000000000%2C66.5607000000&size=0.1500000000",
+        "masked_fraction": 0.042516518241884516,
+        "warnings": []
+      }
+    ],
+    "warnings": [
+      {
+        "code": "DISPLAY_COMPARISON_ONLY",
+        "message": "Common WCS and stretch support visual inspection. PSFs and backgrounds are not matched; apparent change is not a confirmed detection or calibrated variability measurement."
+      },
+      {
+        "code": "TARGET_SPECTRAL_MATCH",
+        "message": "Spectral matching is checked at the requested target position using approximate WCS-WAVE values. Wavelength varies across each image; other positions can have different spectral responses."
+      },
+      {
+        "code": "VARIANCE_VALIDITY_ONLY",
+        "message": "Input VARIANCE excludes invalid pixels. Resampling uncertainty and covariance are not propagated; no flux significance or photometric error bars are claimed."
+      },
+      {
+        "code": "INPUTS_EXCLUDED",
+        "message": "Selected 2 of 14 supplied observations after spectral, provenance and coverage checks. Other detector/wavelength groups were not merged."
+      },
+      {
+        "code": "ARCHIVE_DOWNLOADS_SKIPPED",
+        "message": "2 of 16 selected IRSA cutouts were left out because the archive was busy or returned an unusable response. This sequence uses only the observations that downloaded."
+      }
+    ],
+    "processing": {
+      "pipeline_version": "khonsu-display-0.3.0",
+      "science_unit": "MJy/sr",
+      "reprojection": "validity-weighted bilinear over valid pixels only, common ICRS TAN grid",
+      "mask_interpolation": "nearest-neighbor: an output pixel is valid only when its nearest input pixel is valid and inside coverage",
+      "grid_width_px": 118,
+      "grid_scale_arcsec": 3.0508474576271185,
+      "grid_oversample_target": 2,
+      "flags_policy": "IRSA SDT bad flags plus OUTLIER/PHANMISS; SOURCE/FULLSAMPLE retained; unknown excluded",
+      "wavelength_policy": "same detector; target center spread <= 0.25 * smallest bandwidth",
+      "wavelength_lookup": "WCS-WAVE alternate WCS W; display approximation, not calibrated spectroscopy",
+      "target_wavelength_min_um": 3.9207985770067273,
+      "target_wavelength_max_um": 3.9208075363183617,
+      "maximum_center_spread_um": 0.009021290185396259,
+      "native_pixel_scale_arcsec": 6.1453678783474235,
+      "asinh_a": 0.1,
+      "stretch_reference": "sky median and robust sigma (1.4826 * MAD) of valid pixels across all frames",
+      "stretch_low_sigma_below_sky": 2,
+      "stretch_high_percentile": 99.5,
+      "stretch_min_span_sigma": 50,
+      "background_subtracted": false,
+      "zodiacal_light_subtracted": false,
+      "psf_matched": false,
+      "variance_policy": "input variance finite and positive for validity; no output uncertainty propagation",
+      "resampling_uncertainty_propagated": false,
+      "input_count": 14,
+      "selected_count": 2,
+      "version_numpy": "2.2.5",
+      "version_astropy": "7.0.1",
+      "version_reproject": "0.14.1",
+      "version_pillow": "11.2.1",
+      "archive_downloads_skipped": 2,
+      "archive_busy_responses": 20
+    }
+  },
+  "outcome": "ready",
+  "selectedDate": "03 Feb 2026, 14:19 UTC",
+  "finishedAt": "2026-11-15T00:36:35.407Z"
+}
