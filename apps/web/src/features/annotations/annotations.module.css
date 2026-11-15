@@ -39,5 +39,5 @@
 .export > button:disabled { opacity: .5; cursor: not-allowed; }
 .export p { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 10px 0 0; }
 .export details { margin-top: 10px; }
-.export summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; }
+.export summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; min-height: 44px; padding-top: 12px; box-sizing: border-box; }
 .export pre { max-height: 320px; overflow: auto; margin: 8px 0 0; padding: 10px; border: 1px solid var(--line); background: var(--space); color: var(--ivory); font-family: var(--font-data); font-size: 8px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
