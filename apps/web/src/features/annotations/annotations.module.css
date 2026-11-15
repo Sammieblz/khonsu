@@ -31,7 +31,7 @@
 .editForm label { margin-top: 10px; }
 .editForm textarea { margin-bottom: 8px; }
 .others { margin: 4px 0 12px; }
-.others summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; }
+.others summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; min-height: 44px; padding-top: 12px; box-sizing: border-box; }
 .guidance { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 14px 0 6px; }
 .coordinates strong { color: var(--danger); font-weight: 500; }
 .export { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line); }
