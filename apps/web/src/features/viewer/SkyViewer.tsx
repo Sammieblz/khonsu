@@ -2,11 +2,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent, type KeyboardEvent } from "react";
 import type { ObservationFrame, SkyViewerProps, ViewerTool } from "@/features/explorer/interfaces";
 import { PlaybackControls } from "./PlaybackControls";
+import { describeComparison } from "./comparison";
 import { useFrameLoader } from "./useFrameLoader";
 import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
 import { boundedView, clientPointToRaster, FIT, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
+import { ObservationDetails } from '@/features/annotations/ObservationDetails';
 import { usePreparedFrames } from './usePreparedFrames';
 import { displaySize, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
@@ -149,7 +151,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
       {sequence&&active?<><canvas ref={canvas} className={styles.canvas} data-sampling={displayAvailable?display.sampling:'pixels'} style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={outputSize.width} height={outputSize.height} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
     </div>
-    <div className={styles.orientation}><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
+    <div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool==='pan'?'PAN':'MARK'} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
     <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
     {active&&<div className={styles.imageModes}>
       <div role="group" aria-label="Image sampling">
@@ -166,6 +168,13 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       <label>COMPARE / B<select aria-label="Comparison B" value={b} onChange={event=>{stop();setB(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>
       <button disabled={a===b} aria-pressed={blink} onClick={()=>{setPlaying(false);releaseHold();onFrameChange(frames[a]!.frame_id);setBlink(!blink);}}>{blink?'STOP BLINK':'BLINK A/B'}</button>
       <button disabled={a===b} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);beginHold();}} onPointerUp={releaseHold} onPointerCancel={releaseHold} onLostPointerCapture={releaseHold} onBlur={releaseHold} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();beginHold();}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')releaseHold();}}>HOLD FOR B</button>
+      {/* One press switches between A and B, for anyone who cannot hold a button or prefers no blinking. */}
+      <button disabled={a===b} aria-label={active.frame_id===frames[b]?.frame_id?`Show A, ${observationLabel(frames[a]?.observed_start_utc)}`:`Show B, ${observationLabel(frames[b]?.observed_start_utc)}`} onClick={()=>{stop();onFrameChange(active.frame_id===frames[b]!.frame_id?frames[a]!.frame_id:frames[b]!.frame_id);}}>{active.frame_id===frames[b]?.frame_id?'SHOW A':'SHOW B'}</button>
+      {blink&&a!==b&&[a,b].some(i=>!images.has(frames[i]?.frame_id ?? ''))&&<p className={styles.comparisonStatus} role="status">{[a,b].some(i=>failedIds.includes(frames[i]?.frame_id ?? ''))?<>Observation {[a,b].filter(i=>failedIds.includes(frames[i]?.frame_id ?? '')).map(i=>i===a?'A':'B').join(' and ')} could not be loaded, so blinking is paused. <button onClick={retry}>RETRY IMAGE</button></>:'Blinking starts when both observations have loaded.'}</p>}
+      {(()=>{const comparison=sequence?describeComparison(sequence,a,b):null;if(!comparison)return null;return <div className={styles.comparisonNotes}>
+        <p>{comparison.sides[0]}</p><p>{comparison.sides[1]}</p>
+        {comparison.notes.length>0&&<ul aria-label="Limits of this comparison">{comparison.notes.map(note=><li key={note}>{note}</li>)}</ul>}
+      </div>;})()}
     </div>}
     {active&&<details className={styles.displayControls}>
       <summary>IMAGE DISPLAY <span data-renderer={rendererMode}>{rendererMode}</span></summary>
@@ -185,6 +194,6 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       <p className={styles.hint} data-adapter={adapter}>{rendererMode==='WebGL2'?`Graphics adapter: ${adapter}`:rendererMode.startsWith('CPU')?'CPU display active. GPU availability depends on this browser and device.':''}</p>
       <p className={styles.hint}>One display setting across all epochs. Black {display.low.toPrecision(4)} / white {display.high.toPrecision(4)} MJy/sr | {display.curve} {display.a.toFixed(2)} | gamma {display.gamma.toFixed(2)}. Display changes do not add measured detail.</p>
     </details>}
-    {sequence&&<details className={styles.provenance}><summary>Observation details & quality</summary><p>{sequence.disclosure}</p><p>{active?.observation_id} · {active?.release} · {active?.wavelength_um?.toFixed(4)} μm · {((active?.masked_fraction ?? 0)*100).toFixed(1)}% masked</p>{active?.source_fits_url&&<a href={active.source_fits_url} target="_blank" rel="noreferrer">Source FITS at IRSA</a>}{[...(sequence.warnings??[]),...(active?.warnings??[])].map((warning,i)=><p key={i}>{warning.message}</p>)}</details>}
+    {sequence&&<ObservationDetails sequence={sequence} activeFrameId={active?.frame_id ?? null} comparison={frames.length?{a,b}:null} />}
   </section>;
 }

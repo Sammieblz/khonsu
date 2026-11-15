@@ -36,6 +36,19 @@ The SVG time arc and accessible range input provide the same real-date mapping.
 Unknown dates use an index fallback and remain labelled unavailable. The display
 does not interpolate sources, crossfade observations or alter a celestial WCS.
 
+**Comparison notes.** **Show A / Show B** switches between the pair with one press, for keyboard, touch and reduced-motion users who should not need to hold or blink. If A or B fails to load, blinking pauses with a message and a Retry button instead of waiting silently. Under the controls, `describeComparison` (`features/viewer/comparison.ts`) states in words:
+
+- each side's date, observation ID, release, wavelength and missing data;
+- how far apart the dates are;
+- a DR1/QR3 pairing, quoting IRSA's statement that they are meant to be used together;
+- a wavelength or detector difference;
+- coverage gaps (either side at least 10% missing, or 5 points apart);
+- each frame's own warnings;
+- that PSFs and backgrounds are not matched;
+- and that A and B are the same observation, when they are.
+
+![The A/B comparison controls for the backup Epsilon Indi B field, with each side's observation, release, wavelength and missing data, and notes on the 508-day gap, the DR1 and QR3 pairing, the wavelength difference and unmatched PSFs; below, the WISE 0855 field with observation B blocked, showing that blinking is paused with a Retry button](images/ab-comparison.png)
+
 ## Image resources and geometry
 
 Load the current frame, previous/next and selected A/B, deduplicated to at most
@@ -50,6 +63,29 @@ intensity controls consume the prepared arrays described in
 [browser display](browser-display.md).
 The [enhancement experiment](enhancement-research.md) documents the algorithms,
 research findings, original comparison and actual rendering path.
+
+## Provenance and quality
+
+**Observation details & quality**, under the viewer, opens by default. Its labels and values come only from the manifest:
+
+- a data-mode label in words: live archive result, cached real observations with their acquisition time, or synthetic development data;
+- the target in ICRS degrees;
+- the requested field, output grid and pixel scale;
+- the shared display stretch and a processing summary.
+
+A table lists every observation with:
+
+- its UTC start time to the second;
+- its observation ID, linked to the source FITS at IRSA;
+- its release, detector, wavelength and band;
+- its share of pixels without valid data;
+- whether it is showing, A or B, in words rather than colour alone.
+
+Quality notes repeat every sequence and frame warning with its code. Any frame with at least 10% missing data gets its own note. The full processing record is one click further. The page's field guide walks through load, rewind and blink, check quality, mark and export, and explains the difference between motion and brightness change. The Data & credits section carries IRSA's requested SPHEREx acknowledgement, the DR1 DOI and the NASA non-endorsement notice.
+
+![Observation details and quality for the cached real WISE 0855 sequence: the cached-observations label with its acquisition time, the field and processing summary, three observations with UTC times, linked IDs, release, detector, wavelength and missing data, the showing, A and B roles, and the four quality notes](images/observation-details.png)
+
+![The Data & credits section with IRSA's SPHEREx acknowledgement, the DR1 DOI, IRSA's note on DR1 and QR3, the NASA non-endorsement notice and the independent-project statement](images/data-credits.png)
 
 ## Verification
 

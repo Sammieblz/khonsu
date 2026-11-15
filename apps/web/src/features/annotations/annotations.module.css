@@ -12,7 +12,7 @@
 .candidateList li { padding: 14px 0; border-top: 1px solid var(--line); }
 .candidateList li > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .candidateNumber { font-family: var(--font-data); font-size: 9px; color: var(--amber); }
-.candidateList button { display: grid; place-items: center; min-width: 32px; min-height: 32px; color: var(--silver); border: 1px solid var(--line); background: transparent; }
+.candidateList button { display: grid; place-items: center; min-width: 44px; min-height: 44px; color: var(--silver); border: 1px solid var(--line); background: transparent; }
 .candidateList p { font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
 .coordinates { font-family: var(--font-data); font-size: 8px; line-height: 1.7; color: var(--silver); overflow-wrap: anywhere; }
 @media (max-width: 1100px) { .panel { padding: 24px; } }
@@ -23,14 +23,21 @@
 .storage { margin: 14px 0 0; color: var(--danger); font-size: 10px; line-height: 1.8; }
 .storage p { margin: 0 0 8px; }
 .storage span, .editForm span, .candidateActions { display: flex; flex-wrap: wrap; gap: 8px; }
-.storage button, .editForm button, .candidateActions button { min-height: 32px; padding: 0 10px; background: transparent; color: var(--amber); border: 1px solid var(--line); font-family: var(--font-data); font-size: 8px; }
-.candidateActions button { min-width: 32px; display: grid; place-items: center; }
+.storage button, .editForm button, .candidateActions button { min-height: 44px; padding: 0 10px; background: transparent; color: var(--amber); border: 1px solid var(--line); font-family: var(--font-data); font-size: 8px; }
+.candidateActions button { min-width: 44px; display: grid; place-items: center; }
 .candidateHeading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .candidateList li.selected { border-top-color: var(--cyan); }
 .candidateList li.selected .candidateNumber { color: var(--cyan); }
 .editForm label { margin-top: 10px; }
 .editForm textarea { margin-bottom: 8px; }
 .others { margin: 4px 0 12px; }
-.others summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; }
+.others summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; min-height: 44px; padding-top: 12px; box-sizing: border-box; }
 .guidance { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 14px 0 6px; }
 .coordinates strong { color: var(--danger); font-weight: 500; }
+.export { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.export > button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; background: transparent; color: var(--amber); border: 1px solid var(--line); font-family: var(--font-data); font-size: 9px; }
+.export > button:disabled { opacity: .5; cursor: not-allowed; }
+.export p { color: var(--silver); font-size: 9px; line-height: 1.8; margin: 10px 0 0; }
+.export details { margin-top: 10px; }
+.export summary { cursor: pointer; color: var(--silver); font-family: var(--font-data); font-size: 9px; line-height: 2; min-height: 44px; padding-top: 12px; box-sizing: border-box; }
+.export pre { max-height: 320px; overflow: auto; margin: 8px 0 0; padding: 10px; border: 1px solid var(--line); background: var(--space); color: var(--ivory); font-family: var(--font-data); font-size: 8px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }

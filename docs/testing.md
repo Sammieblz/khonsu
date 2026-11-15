@@ -1,6 +1,6 @@
 # Verification
 
-Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The integrated observation console has [recorded browser acceptance](console-acceptance.md); export, public hosting and submission still have separate gates.
+Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The integrated observation console has [recorded browser acceptance](console-acceptance.md); public hosting and submission still have separate gates.
 
 ## Automated commands
 
@@ -39,6 +39,8 @@ Commit a five-target coverage report, including actual epoch coordinates, dates 
 Verify the main journey at 390px and desktop widths. Test keyboard focus, labelled icons, reduced motion, pointer cancellation, visible selection and readable contrast. In Time mode, dragging selects genuine epochs. Pan mode changes viewport only. Mark mode records the correct image/sky position at zoom and after panning. A/B blink uses two real frames with crisp transitions and a pause control.
 
 Verify invalid RA/Dec, no coverage, one usable frame, incompatible wavelength, failed image, backend offline, archive timeout, cancelled query, expired job and container restart. Ensure stale network responses cannot overwrite a newer query. Confirm a shared URL reproduces the query and candidate export contains source lineage and limitations.
+
+Run `node scripts/audit-accessibility.mjs` against a static export for viewport overflow, 44 px targets, axe-core WCAG 2.1 AA rules, reduced motion and the keyboard-only journey through export. [Results and setup](accessibility-acceptance.md) list what it does not cover.
 
 Run `node scripts/verify-observatory.mjs` against a static export for the current
 console acceptance suite. [Setup, recorded results and manual steps](console-acceptance.md)
