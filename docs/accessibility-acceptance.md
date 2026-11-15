@@ -47,7 +47,7 @@ Primary actions checked: load cached example, Rewind, Pan, Mark, Next, Previous,
 
 **Not colour alone.**
 
-- The viewer hint names the selected tool: "REWIND TOOL", "PAN TOOL" or "MARK TOOL", and tool buttons expose `aria-pressed`.
+- The bar under the image names the selected tool: "REWIND TOOL", "PAN TOOL" or "MARK TOOL", and tool buttons expose `aria-pressed`.
 - Data mode, A/B roles and warnings are written out in words (#52, #53).
 - Missing data is described in words and as a percentage.
 
@@ -60,7 +60,7 @@ Primary actions checked: load cached example, Rewind, Pan, Mark, Next, Previous,
 | Header links on narrow screens, coordinate inputs, time and display sliders, Image display and Quality notes toggles, zoom buttons, footer link | Raised to 44 px | This branch |
 | Focus after loading an example | Moves to the explorer instead of the page body, because the entry panel that held the button closes | This branch |
 | Disclosure toggles | Share the amber focus ring | This branch |
-| Selected tool | Named in words in the viewer hint | This branch |
+| Selected tool | Named in words in the bar under the image | This branch |
 | Candidate Show, Edit, Export, Delete, storage and edit buttons, other-sequences toggle | Raised from 32 px to 44 px | #50 |
 | Evidence preview toggle | Raised from 18 px to 44 px | #51 |
 

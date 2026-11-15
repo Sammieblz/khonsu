@@ -40,14 +40,14 @@ Verify the main journey at 390px and desktop widths. Test keyboard focus, labell
 
 Verify invalid RA/Dec, no coverage, one usable frame, incompatible wavelength, failed image, backend offline, archive timeout, cancelled query, expired job and container restart. Ensure stale network responses cannot overwrite a newer query. Confirm a shared URL reproduces the query and candidate export contains source lineage and limitations.
 
+Run `node scripts/audit-accessibility.mjs` against a static export for viewport overflow, 44 px targets, axe-core WCAG 2.1 AA rules, reduced motion and the keyboard-only journey through export. [Results and setup](accessibility-acceptance.md) list what it does not cover.
+
 Run `node scripts/verify-observatory.mjs` against a static export for the current
 console acceptance suite. [Setup, recorded results and manual steps](console-acceptance.md)
 cover Playwright installation, browser paths and the local API. The script uses
 both authentic cached bundles plus explicitly synthetic display ramps and
 transport failures. It does not claim the outstanding query-URL/export features
 pass or replace public-origin deployment acceptance.
-
-Run `node scripts/audit-accessibility.mjs` against a static export for viewport overflow, 44 px targets, axe-core WCAG 2.1 AA rules, reduced motion and the keyboard-only journey through export. [Results and setup](accessibility-acceptance.md) list what it does not cover.
 
 ## Release rehearsal
 
