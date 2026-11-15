@@ -47,3 +47,10 @@
 .displayControls .rendererChoice { flex-direction: row; align-items: center; flex-wrap: wrap; }
 @media(min-width:1100px){ .instrument:not(.expanded){max-width:clamp(480px,calc(100svh - 500px),780px);} }
 @media(max-width:520px){ .instrument{padding:12px;} .instrumentHeading{font-size:10px;} .tools button{flex:1;padding:8px;} .transportButtons button{flex:1;} .transportButtons label{width:100%;margin-top:6px;} }
+/* A/B comparison notes and blink status (BYT-25). */
+.comparisonNotes, .comparisonStatus { flex: 1 1 100%; margin: 4px 0 0; color: var(--silver); font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
+.comparisonNotes p { margin: 0; font: 10px/1.7 var(--font-data); }
+.comparisonNotes ul { margin: 8px 0 0; padding-left: 18px; }
+.comparisonNotes li { margin-bottom: 4px; }
+.comparisonStatus { color: var(--ivory); }
+.comparisonStatus button { margin-left: 8px; }

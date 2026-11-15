@@ -29,6 +29,19 @@ The SVG time arc and accessible range input provide the same real-date mapping.
 Unknown dates use an index fallback and remain labelled unavailable. The display
 does not interpolate sources, crossfade observations or alter a celestial WCS.
 
+**Comparison notes.** **Show A / Show B** switches between the pair with one press, for keyboard, touch and reduced-motion users who should not need to hold or blink. If A or B fails to load, blinking pauses with a message and a Retry button instead of waiting silently. Under the controls, `describeComparison` (`features/viewer/comparison.ts`) states in words:
+
+- each side's date, observation ID, release, wavelength and missing data;
+- how far apart the dates are;
+- a DR1/QR3 pairing, quoting IRSA's statement that they are meant to be used together;
+- a wavelength or detector difference;
+- coverage gaps (either side at least 10% missing, or 5 points apart);
+- each frame's own warnings;
+- that PSFs and backgrounds are not matched;
+- and that A and B are the same observation, when they are.
+
+![The A/B comparison controls for the backup Epsilon Indi B field, with each side's observation, release, wavelength and missing data, and notes on the 508-day gap, the DR1 and QR3 pairing, the wavelength difference and unmatched PSFs; below, the WISE 0855 field with observation B blocked, showing that blinking is paused with a Retry button](images/ab-comparison.png)
+
 ## Image resources and geometry
 
 Load the current frame, previous/next and selected A/B, deduplicated to at most
