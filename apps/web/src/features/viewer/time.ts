@@ -13,3 +13,17 @@ export function adjacentFrameIndex(index: number, direction: -1 | 1, count: numb
   const safeIndex = Math.min(count - 1, Math.max(0, index));
   return Math.min(count - 1, Math.max(0, safeIndex + direction));
 }
+
+export function timePositions(dates: (string | null | undefined)[]): number[] {
+  const values = dates.map(value => value ? Date.parse(value) : NaN);
+  const first = Math.min(...values), last = Math.max(...values);
+  if (!values.every(Number.isFinite) || last === first)
+    return dates.map((_, index) => index / Math.max(1, dates.length - 1));
+  return values.map(value => (value - first) / (last - first));
+}
+export function nearestObservation(positions: number[], value: number): number {
+  return positions.reduce((best, position, index) => Math.abs(position - value) < Math.abs((positions[best] ?? 0) - value) ? index : best, 0);
+}
+export function frameWindow(count: number, index: number, pinned: number[] = []): number[] {
+  return [...new Set([index, index - 1, index + 1, ...pinned])].filter(i => i >= 0 && i < count).slice(0, 5);
+}

@@ -1,40 +1,41 @@
-.instrument { padding: 24px 28px 0; min-width: 0; }
-.instrumentHeading { display: flex; justify-content: space-between; gap: 16px; color: var(--silver); font-family: var(--font-data); font-size: 9px; letter-spacing: .06em; }
-.instrumentHeading span:last-child { text-align: right; color: var(--amber); }
-.disclosure { padding: 10px 12px; border: 1px solid rgb(217 174 106 / 35%); font-size: 11px; line-height: 1.7; color: var(--amber); }
-.viewport { position: relative; min-height: 420px; height: clamp(420px, 35vw, 590px); margin-top: 20px; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; overflow: hidden; background: linear-gradient(rgb(241 240 233 / 2%) 1px, transparent 1px), linear-gradient(90deg, rgb(241 240 233 / 2%) 1px, transparent 1px), radial-gradient(ellipse at center, rgb(40 64 94 / 14%), transparent 72%); background-size: 80px 80px, 80px 80px, auto; }
-.emptyState { padding: 24px 16px 70px; text-align: center; }
-.reticle { position: relative; width: 86px; height: 86px; margin: 0 auto 26px; border: 1px solid rgb(217 174 106 / 32%); border-radius: 50%; }
-.reticle::before, .reticle::after { content: ""; position: absolute; background: var(--amber); opacity: .5; }
-.reticle::before { width: 1px; top: 27px; bottom: 27px; left: 50%; }
-.reticle::after { height: 1px; left: 27px; right: 27px; top: 50%; }
-.reticle span { position: absolute; inset: 8px; border: 1px dashed rgb(170 181 199 / 24%); border-radius: 50%; }
-.reticle i { position: absolute; height: 5px; width: 5px; border-radius: 50%; top: -3px; left: 40px; background: var(--amber); }
-.emptyEyebrow { font-family: var(--font-data); font-size: 9px; letter-spacing: .13em; color: var(--amber); }
-.emptyState h2 { margin: 16px 0; font-family: var(--font-display); font-size: clamp(38px, 4vw, 64px); font-weight: 500; line-height: 1.03; }
-.emptyState p { font-size: 11px; line-height: 1.9; color: var(--silver); }
-.emptyDisclosure { display: block; margin-top: 22px; font-family: var(--font-data); font-size: 8px; letter-spacing: .1em; color: var(--silver); }
-.orientation { position: absolute; left: 12px; bottom: 16px; display: flex; gap: 10px; color: var(--silver); font-family: var(--font-data); font-size: 9px; }
-.tools { position: absolute; display: flex; right: 8px; bottom: 6px; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 4px; background: rgb(7 11 18 / 92%); }
-.tools button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px; background: transparent; color: var(--silver); border: 1px solid transparent; font-size: 10px; }
-.tools button[aria-pressed="true"] { border-color: rgb(217 174 106 / 40%); color: var(--amber); }
-.canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; cursor: crosshair; image-rendering: pixelated; }
-.noDataKey { display: inline-flex; align-items: center; gap: 5px; }
-.noDataKey i { display: inline-block; width: 10px; height: 10px; border: 1px solid #5C6474; background: repeating-linear-gradient(135deg, #5C6474 0 1px, #2E3440 1px 4px); }
-.loadState { position: absolute; top: 40%; left: 20%; right: 20%; text-align: center; color: var(--amber); font-size: 12px; }
-.transport { position: relative; padding: 24px 0; }
-.timeReadout { display: flex; justify-content: space-between; align-items: center; gap: 20px; font-family: var(--font-data); font-size: 8px; letter-spacing: .03em; }
+.instrument { width: 100%; max-width: 780px; margin: 0 auto; min-width: 0; padding: 20px; background: #080d14; }
+.expanded { position: fixed; inset: 0; z-index: 90; max-width: none; overflow: auto; padding: 24px max(20px, calc((100vw - 800px)/2)); background: #070b12; }
+.instrumentHeading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; font: 11px var(--font-data); color: var(--silver); }
+.instrumentHeading span:last-child { color: var(--amber); text-align: right; }
+.tools, .transportButtons, .epochButtons, .comparison { display: flex; gap: 6px; flex-wrap: wrap; }
+.instrument button, .instrument select { border: 1px solid #556071; border-radius: 0; background: transparent; color: var(--ivory); min-height: 44px; padding: 9px 13px; font: 11px var(--font-data); }
+.instrument button:hover { border-color: var(--amber); }
+.instrument button[aria-pressed="true"], .instrument .playButton { background: var(--amber); color: #070b12; border-color: var(--amber); }
+.tools { margin-bottom: 12px; }
+.viewport { position: relative; width: 100%; overflow: hidden; background: #101722; touch-action: none; isolation: isolate; }
+.canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; transform-origin: center; }
+.loadState { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; color: var(--amber); background: #101722; }
+.emptyState { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 300px; text-align: center; color: var(--silver); padding: 30px; }
+.emptyState h2 { font: 500 clamp(48px,6vw,80px)/.95 var(--font-display); color: var(--ivory); margin: 20px 0; }
+.emptyState span,.emptyState small { font: 10px var(--font-data); letter-spacing: .12em; }
+.emptyState p { font-size: 13px; }
+.orientation { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; color: var(--silver); font: 10px var(--font-data); }
+.orientation i { display: inline-block; width: 10px; height: 10px; background: #273140; border: 1px solid #556071; }
+.hint { font-size: 11px; color: var(--silver); line-height: 1.65; }
+.transport { border-top: 1px solid var(--line); padding: 20px 0; margin-top: 14px; }
+.timeReadout { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 11px var(--font-data); }
 .timeReadout > span { color: var(--silver); }
-.timeReadout strong { font-size: 9px; font-weight: 400; color: var(--ivory); text-align: right; }
-.timeArc { height: 50px; margin: 4px 0 -25px; pointer-events: none; }
-.timeArc svg { width: 100%; height: 100%; fill: none; }
-.timeArc path:first-child { stroke: var(--line); stroke-width: 1; }
-.timeArc path:last-child { stroke: var(--silver); stroke-width: 5; opacity: .35; }
-.timeSlider { display: block; width: calc(100% - 12px); margin: 0 6px 20px; accent-color: var(--amber); height: 30px; position: relative; }
-.transportButtons { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.transportButtons button { display: grid; place-items: center; min-width: 44px; min-height: 44px; border: 1px solid var(--line); background: var(--space); color: var(--ivory); }
-.transportButtons .playButton { color: var(--amber); border-color: rgb(217 174 106 / 35%); }
-.sequenceNote { margin-left: 12px; font-family: var(--font-data); font-size: 7px; color: var(--silver); letter-spacing: .03em; }
-@media (max-width: 1100px) { .instrument { padding: 24px 20px 0; } .sequenceNote { display: none; } .timeReadout { align-items: flex-start; flex-direction: column; gap: 8px; } .timeReadout strong { text-align: left; } }
-@media (max-width: 800px) { .viewport { min-height: 380px; height: 380px; } .emptyState h2 { font-size: 48px; } .timeReadout { flex-direction: row; } }
-@media (max-width: 520px) { .instrument { padding: 20px 12px 0; } .instrumentHeading { font-size: 7px; } .viewport { min-height: 360px; height: 360px; margin-top: 12px; } .emptyState h2 { font-size: 40px; } .emptyState p { font-size: 10px; } .timeReadout { flex-direction: column; } .tools button { min-height: 44px; padding: 8px; } .tools button span { font-size: 9px; } .orientation { left: 4px; bottom: 64px; } }
+.timeReadout strong { color: var(--amber); font-size: 13px; }
+.timeArc { width: 100%; height: 70px; display: block; margin-top: 12px; overflow: visible; }
+.timeArc path { stroke: #8b7961; stroke-width: 1.5; }
+.timeArc circle { fill: var(--silver); cursor: pointer; }
+.timeArc .selectedTick { fill: var(--amber); }
+.timeSlider { width: 100%; height: 32px; margin: 0 0 12px; accent-color: var(--amber); }
+.transportButtons { align-items: center; }
+.transportButtons label { margin-left: auto; font: 11px var(--font-data); }
+.transportButtons select { margin-left: 8px; }
+.epochButtons { margin-top: 14px; max-height: 130px; overflow: auto; }
+.epochButtons button { flex: 1; min-width: 100px; text-align: left; }
+.epochButtons small { display: block; margin-top: 6px; font-size: 10px; }
+.comparison { border-top: 1px solid var(--line); padding-top: 16px; }
+.comparison label { flex: 1 1 200px; font: 10px var(--font-data); color: var(--silver); }
+.comparison select { width: 100%; margin-top: 6px; max-width: 100%; }
+.comparison button { flex: 1; }
+.provenance { border-top: 1px solid var(--line); margin-top: 20px; padding: 16px 0; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; color: var(--silver); }
+.provenance summary { cursor: pointer; color: var(--ivory); min-height: 36px; }
+@media(max-width:520px){ .instrument{padding:12px;} .instrumentHeading{font-size:10px;} .tools button{flex:1;padding:8px;} .transportButtons button{flex:1;} .transportButtons label{width:100%;margin-top:6px;} }
