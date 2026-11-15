@@ -66,6 +66,7 @@ The UI distinguishes live data, previously acquired real data, and synthetic dev
 | SEARCH EXPIRED | `JOB_EXPIRED` (also a backend restart), `ASSET_EXPIRED` | Retry |
 | OBSERVATION SERVICE UNREACHABLE | `BACKEND_UNAVAILABLE` | Retry |
 | LIVE SEARCH NOT AVAILABLE | `SCIENCE_UNAVAILABLE`, `SCIENCE_DEPENDENCIES_MISSING` | Cached example |
+| SITE NOT CONNECTED TO A SERVICE | `API_NOT_CONFIGURED`, raised in the browser before any request when a public page would call a loopback or insecure API origin | None; the site operator must rebuild with `NEXT_PUBLIC_API_BASE_URL` (see [deployment](deployment.md#frontend-static-export)) |
 | SEARCH CANCELLED | `CANCELLED` | Search again, edit search |
 
 ![Six search panels captured from the production static build: not enough comparable observations, IRSA archive unavailable, the cached real example loaded from that failure, search expired after a backend restart, observation service unreachable, and search cancelled](images/search-recovery-states.png)

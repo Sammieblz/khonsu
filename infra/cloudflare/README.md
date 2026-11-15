@@ -30,6 +30,8 @@ npm run dev
 
 Wrangler generates runtime and binding types in `worker-configuration.d.ts`; `tsc` checks against those types. This avoids relying on stale manually declared container APIs or an old `@cloudflare/workers-types` package. Exact top-level pins are Wrangler 4.162.0, verified as a November 13 release, and TypeScript 5.9.3, matching the official Containers template. `package-lock.json` is committed; install with `npm ci` and review lockfile diffs with any dependency change. npm 11 may report that the `esbuild` and `workerd` install scripts are not covered by `allowScripts`. With npm 11.19 on Windows, the test and typecheck commands passed and the `esbuild`, `workerd` and `wrangler` binaries ran without those scripts.
 
+`npm run dev` runs the container locally only on Linux, macOS or WSL with Docker. On native Windows, Wrangler 4.162.0 stops with "Local development with containers is currently not supported on Windows". Use WSL with Docker Desktop's WSL integration enabled for that distribution, or test the parts separately as in [hosted path status](../../docs/deployment.md#hosted-path-status).
+
 `npm test` needs only Node's built-in test runner and TypeScript stripping. Tests cover request, route, CORS and body boundaries. `npm run bundle` is a non-publishing Worker dry run after configuration and dependency installation; it does not prove a container deployment or live archive integration. No dependency install or container lifecycle test is implied by a successful source-only test.
 
 ## Lifecycle and deployment review
@@ -40,7 +42,9 @@ The inactivity timeout is ten minutes and is restored after a Durable Object res
 
 Deployment requires the Workers Paid plan, starting at $5 USD per month plus applicable usage. Only after the user chooses to provision that service, configure the intended Cloudflare account and origin, review cost controls, and run `npm run deploy`. Deployment is a paid provisioning action, not a validation command. Do not connect an automatic production deploy to this starter without that decision.
 
-After an authorized deployment, verify Worker and container status, `/health`, allowed/disallowed origins, synthetic demo labeling, live endpoints' truthful unimplemented responses, cold start, restart/reset and the eventual real science flow. Set the frontend's `NEXT_PUBLIC_API_BASE_URL` to the gateway HTTPS origin before building Pages. Public Next.js environment values are frozen at build time; rebuild when this origin changes. This starter does not complete SPHEREx retrieval or processing.
+After an authorized deployment, verify Worker and container status, `/health`, allowed and disallowed origins, cold start, the cached real example, a live search through to frames, and a restart with an old job identifier. The restart check must show "Search expired". Set the frontend's `NEXT_PUBLIC_API_BASE_URL` to the gateway HTTPS origin before building Pages; a Pages build without an HTTPS origin fails deliberately. Public Next.js environment values are frozen at build time, so rebuild when this origin changes.
+
+The container runs the same API image as local Docker, including live IRSA retrieval, scientific processing and the bundled cached examples. A live search takes about one to two minutes, and the browser polls every five seconds or less while it runs. That polling keeps the Durable Object active. A job left unpolled can be lost after ten minutes of inactivity or a restart, and the frontend then reports it as expired.
 
 ## Primary references
 

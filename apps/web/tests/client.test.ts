@@ -4,7 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
-  ApiClientError, describeFailure, knownFailureCodes, recoveryFor, resolveAssetUrl, runSequenceJob,
+  ApiClientError, apiConfigurationProblem, describeFailure, knownFailureCodes, recoveryFor, resolveAssetUrl, runSequenceJob,
 } from "../src/lib/api/client.ts";
 
 interface Step { status?: number; body?: unknown; reject?: Error }
@@ -249,6 +249,56 @@ test("every error code the API can raise has an explicit failure state", () => {
   const known = new Set(knownFailureCodes());
   const missing = [...raised].filter(code => !known.has(code) && !NOT_SEARCH_FAILURES.has(code)).sort();
   assert.deepEqual(missing, [], "map these codes in describeFailure");
+});
+
+function withApiBase<T>(value: string | undefined, run: () => T): T {
+  const saved = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (value === undefined) delete process.env.NEXT_PUBLIC_API_BASE_URL;
+  else process.env.NEXT_PUBLIC_API_BASE_URL = value;
+  try { return run(); } finally {
+    if (saved === undefined) delete process.env.NEXT_PUBLIC_API_BASE_URL;
+    else process.env.NEXT_PUBLIC_API_BASE_URL = saved;
+  }
+}
+
+test("a public page never falls back to the visitor's own localhost", () => {
+  withApiBase(undefined, () => {
+    assert.equal(apiConfigurationProblem("http://localhost:3000/"), null, "local development keeps the default");
+    assert.equal(apiConfigurationProblem("http://127.0.0.1:4173/"), null);
+    assert.match(apiConfigurationProblem("https://khonsu.pages.dev/") ?? "", /contact your own computer/);
+  });
+  withApiBase("http://127.0.0.1:8000", () => {
+    assert.match(apiConfigurationProblem("https://khonsu.pages.dev/") ?? "", /NEXT_PUBLIC_API_BASE_URL/);
+  });
+});
+
+test("a secure page needs an HTTPS API origin", () => {
+  withApiBase("https://khonsu-api.example.workers.dev", () => {
+    assert.equal(apiConfigurationProblem("https://khonsu.pages.dev/"), null);
+  });
+  withApiBase("http://khonsu-api.example.com", () => {
+    assert.match(apiConfigurationProblem("https://khonsu.pages.dev/") ?? "", /insecure/);
+  });
+  withApiBase("not a url", () => {
+    assert.match(apiConfigurationProblem("https://khonsu.pages.dev/") ?? "", /invalid/);
+  });
+});
+
+test("a misconfigured public build sends no request and shows its own state", async () => {
+  const fake = scriptFetch([]);
+  const global = globalThis as { window?: unknown };
+  global.window = { location: { href: "https://khonsu.pages.dev/" } };
+  try {
+    await withApiBase(undefined, () => assert.rejects(runSequenceJob(request, { sleep: instant }), (error: unknown) =>
+      error instanceof ApiClientError && error.code === "API_NOT_CONFIGURED"));
+    assert.equal(fake.calls.length, 0);
+    const guide = describeFailure("API_NOT_CONFIGURED");
+    assert.equal(guide.kind, "not-configured");
+    assert.equal(guide.retry || guide.cachedExample, false, "neither can work without a service");
+  } finally {
+    delete global.window;
+    fake.restore();
+  }
 });
 
 test("manifest frame paths resolve against the configured API origin", () => {
