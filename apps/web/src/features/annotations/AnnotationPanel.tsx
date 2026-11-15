@@ -5,6 +5,8 @@ import { Icon } from "@/components/ui/Icon";
 import type { AnnotationPanelProps, CandidateAnnotation, CandidateStorageState, ImageSelection, SequenceManifest } from "@/features/explorer/interfaces";
 import { observationLabel } from "@/features/viewer/time";
 import { CandidateList } from "./CandidateList";
+import { downloadText } from "./download";
+import { buildEvidence, evidenceFilename, evidenceJson } from "./evidence";
 import { MAX_CANDIDATES, MAX_NOTE_LENGTH } from "./records";
 import { formatSky, rasterToSky } from "./sky";
 import styles from "./annotations.module.css";
@@ -42,6 +44,8 @@ export function AnnotationPanel({
   onAdd, onUpdate, onRemove, onSelectCandidate, onStartFresh, onDownloadUnreadable,
 }: AnnotationPanelProps) {
   const [note, setNote] = useState("");
+  const [exportMessage, setExportMessage] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
   const current = annotations.filter(item => item.selection.sequenceId === sequence?.sequence_id);
   const others = annotations.filter(item => item.selection.sequenceId !== sequence?.sequence_id);
   const activeSelection = selection && sequence && selection.sequenceId === sequence.sequence_id ? selection : null;
@@ -50,6 +54,20 @@ export function AnnotationPanel({
     if (!activeSelection || !note.trim() || atCapacity) return;
     onAdd(activeSelection, note);
     setNote("");
+  }
+  // Works from the candidates in memory, so damaged or blocked storage never prevents an export.
+  function exportCandidates(items: CandidateAnnotation[]) {
+    if (!items.length) return;
+    const now = new Date().toISOString();
+    const name = evidenceFilename(items, now);
+    const saved = downloadText(name, evidenceJson(buildEvidence(items, contexts, now)));
+    setExportMessage(saved
+      ? `Downloaded ${name} with ${items.length} ${items.length === 1 ? "candidate" : "candidates"} and the observations behind ${items.length === 1 ? "it" : "them"}.`
+      : "This browser blocked the download. Open the preview below and copy the evidence instead.");
+  }
+  function exportOne(id: string) {
+    const item = annotations.find(candidate => candidate.id === id);
+    if (item) exportCandidates([item]);
   }
   function framesFor(item: CandidateAnnotation) {
     if (sequence && item.selection.sequenceId === sequence.sequence_id) return contexts[sequence.sequence_id]?.frames ?? sequence.frames.map(frame => ({
@@ -73,15 +91,24 @@ export function AnnotationPanel({
       {atCapacity && <p className={styles.storage}>This browser holds the maximum of {MAX_CANDIDATES} candidates. Delete some to add more.</p>}
     </form>
     {current.length
-      ? <CandidateList annotations={current} framesFor={framesFor} selectedId={selectedCandidateId} onShow={id => onSelectCandidate(id === selectedCandidateId ? null : id)} onUpdate={onUpdate} onRemove={onRemove} />
+      ? <CandidateList annotations={current} framesFor={framesFor} selectedId={selectedCandidateId} onShow={id => onSelectCandidate(id === selectedCandidateId ? null : id)} onUpdate={onUpdate} onRemove={onRemove} onExport={exportOne} />
       : <p className={styles.empty}>No candidate notes for this sequence yet.</p>}
     {others.length > 0 && <details className={styles.others}>
       <summary>{others.length} {others.length === 1 ? "candidate" : "candidates"} saved from other sequences</summary>
       <p className={styles.instructions}>These marks belong to sequences that are not on screen, so they are not drawn on this image. Their positions and observation details are kept.</p>
-      <CandidateList annotations={others} framesFor={framesFor} selectedId={null} onUpdate={onUpdate} onRemove={onRemove} />
+      <CandidateList annotations={others} framesFor={framesFor} selectedId={null} onUpdate={onUpdate} onRemove={onRemove} onExport={exportOne} />
     </details>}
+    <div className={styles.export}>
+      <button type="button" disabled={!annotations.length} onClick={() => exportCandidates(annotations)}>EXPORT ALL SAVED CANDIDATES ({annotations.length})</button>
+      {exportMessage && <p role="status">{exportMessage}</p>}
+      <p>An evidence file holds each note, its grid and ICRS position, the observations compared, their real UTC times, release, wavelength, source FITS links, quality warnings and the search that reproduces the field.</p>
+      {annotations.length > 0 && <details onToggle={event => setPreviewOpen(event.currentTarget.open)}>
+        <summary>Preview the evidence file</summary>
+        {previewOpen && <pre tabIndex={0} aria-label="Evidence file preview">{evidenceJson(buildEvidence(annotations, contexts, new Date().toISOString()))}</pre>}
+      </details>}
+    </div>
     <StorageMessage storage={storage} onStartFresh={onStartFresh} onDownloadUnreadable={onDownloadUnreadable} />
     <p className={styles.guidance}>Apparent movement or brightening can come from noise, detector artifacts, unmatched point spread functions or remaining registration error. Check the quality notes and other epochs before trusting a change.</p>
-    <p className={styles.disclaimer}>Notes stay in this browser. A search link repeats the search but never includes notes. A candidate is an observation to investigate, not a confirmed discovery.</p>
+    <p className={styles.disclaimer}>Notes stay in this browser. A search link repeats the search but never includes notes; export an evidence file to share them. A candidate is an observation to investigate, not a confirmed discovery.</p>
   </section>;
 }

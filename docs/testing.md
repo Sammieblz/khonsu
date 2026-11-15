@@ -1,6 +1,6 @@
 # Verification
 
-Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The integrated observation console has [recorded browser acceptance](console-acceptance.md); export, public hosting and submission still have separate gates.
+Test the feature's acceptance criteria and scientific assumptions. A successful build proves compilation, not a working real-data MVP. The integrated observation console has [recorded browser acceptance](console-acceptance.md); public hosting and submission still have separate gates.
 
 ## Automated commands
 
