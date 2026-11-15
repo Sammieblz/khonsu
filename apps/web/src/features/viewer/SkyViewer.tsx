@@ -5,6 +5,7 @@ import { PlaybackControls } from "./PlaybackControls";
 import { useFrameLoader } from "./useFrameLoader";
 import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
+import { describeComparison } from "./comparison";
 import { boundedView, clientPointToRaster, displayScale, FIT, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
 import { usePreparedFrames } from './usePreparedFrames';
@@ -136,6 +137,13 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
       <label>COMPARE / B<select aria-label="Comparison B" value={b} onChange={event=>{stop();setB(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>
       <button disabled={a===b} aria-pressed={blink} onClick={()=>{setPlaying(false);releaseHold();onFrameChange(frames[a]!.frame_id);setBlink(!blink);}}>{blink?'STOP BLINK':'BLINK A/B'}</button>
       <button disabled={a===b} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);beginHold();}} onPointerUp={releaseHold} onPointerCancel={releaseHold} onLostPointerCapture={releaseHold} onBlur={releaseHold} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();beginHold();}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')releaseHold();}}>HOLD FOR B</button>
+      {/* One press switches between A and B, for anyone who cannot hold a button or prefers no blinking. */}
+      <button disabled={a===b} aria-label={active.frame_id===frames[b]?.frame_id?`Show A, ${observationLabel(frames[a]?.observed_start_utc)}`:`Show B, ${observationLabel(frames[b]?.observed_start_utc)}`} onClick={()=>{stop();onFrameChange(active.frame_id===frames[b]!.frame_id?frames[a]!.frame_id:frames[b]!.frame_id);}}>{active.frame_id===frames[b]?.frame_id?'SHOW A':'SHOW B'}</button>
+      {blink&&a!==b&&[a,b].some(i=>!images.has(frames[i]?.frame_id ?? ''))&&<p className={styles.comparisonStatus} role="status">{[a,b].some(i=>failedIds.includes(frames[i]?.frame_id ?? ''))?<>Observation {[a,b].filter(i=>failedIds.includes(frames[i]?.frame_id ?? '')).map(i=>i===a?'A':'B').join(' and ')} could not be loaded, so blinking is paused. <button onClick={retry}>RETRY IMAGE</button></>:'Blinking starts when both observations have loaded.'}</p>}
+      {(()=>{const comparison=sequence?describeComparison(sequence,a,b):null;if(!comparison)return null;return <div className={styles.comparisonNotes}>
+        <p>{comparison.sides[0]}</p><p>{comparison.sides[1]}</p>
+        {comparison.notes.length>0&&<ul aria-label="Limits of this comparison">{comparison.notes.map(note=><li key={note}>{note}</li>)}</ul>}
+      </div>;})()}
     </div>}
     {active&&<details className={styles.displayControls}>
       <summary>IMAGE DISPLAY <span data-renderer={rendererMode}>{rendererMode}</span></summary>

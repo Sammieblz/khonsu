@@ -37,6 +37,12 @@
 .comparison label { flex: 1 1 200px; font: 10px var(--font-data); color: var(--silver); }
 .comparison select { width: 100%; margin-top: 6px; max-width: 100%; }
 .comparison button { flex: 1; }
+.comparisonNotes, .comparisonStatus { flex: 1 1 100%; margin: 4px 0 0; color: var(--silver); font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
+.comparisonNotes p { margin: 0; font: 10px/1.7 var(--font-data); }
+.comparisonNotes ul { margin: 8px 0 0; padding-left: 18px; }
+.comparisonNotes li { margin-bottom: 4px; }
+.comparisonStatus { color: var(--ivory); }
+.comparisonStatus button { margin-left: 8px; }
 .provenance { border-top: 1px solid var(--line); margin-top: 20px; padding: 16px 0; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; color: var(--silver); }
 .provenance summary { cursor: pointer; color: var(--ivory); min-height: 36px; }
 .displayControls { margin: 18px 0; padding: 16px 0; border-top: 1px solid var(--line); font: 11px var(--font-data); }
