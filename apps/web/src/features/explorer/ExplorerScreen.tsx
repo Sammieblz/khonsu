@@ -204,6 +204,14 @@ export function ExplorerScreen() {
     setAddress(sharedSearchQuery(requestValues(search.request), frame?.observation_id ?? null));
   }, [search, activeFrameId]);
 
+  // Opening a sequence can remove the control a keyboard user just pressed
+  // (the entry panel closes). Move focus to the explorer instead of the page body.
+  useEffect(() => {
+    if (!sequence) return;
+    const focused = document.activeElement;
+    if (!focused || focused === document.body) document.getElementById("explorer")?.focus({ preventScroll: true });
+  }, [sequence]);
+
   const picker=<CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id=>{activeExampleLoad.current?.abort();activeExampleLoad.current=null;setSelectedExampleId(id);setExampleError('');}} onLoad={()=>void loadExample()}/>;
   const showConsole=!!sequence||search.phase!=='idle';
   return (
