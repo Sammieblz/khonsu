@@ -1,8 +1,7 @@
 # Observation console interactions
 
 Samuel's user-authorized integration pass extends Michael's viewer and Robel's
-composition boundaries through GitHub #37 / Linear BYT-38. The existing
-`SkyViewerProps` and natural-raster annotation event remain unchanged. The parent
+composition boundaries through GitHub #37 / Linear BYT-38. The parent
 owns the manifest and selected frame; the console owns temporary interaction
 state and resets it when sequence identity changes.
 
@@ -17,6 +16,9 @@ state and resets it when sequence identity changes.
 - Mark: click an image pixel, or focus the observation canvas and move the
   keyboard cursor with arrows, then Enter. The transformed canvas rectangle
   maps back to integer natural-raster coordinates. Pixel origin remains top-left.
+  The selection also records the A/B frames and whether the verified raster has
+  data at that pixel. Saved marks are drawn on every epoch of their sequence:
+  solid on the marked frame, dashed elsewhere, cyan when selected.
 - Playback: explicit Play/Pause, Previous/Next and rate. Playback waits for the
   selected image to load. It never starts automatically, including reduced motion.
 - Comparison: select A/B, blink crisply or hold to show B. Releasing, cancelling
@@ -58,7 +60,7 @@ sequence, keyboard marking, step controls, A/B hold restoration, blink and
 [console evidence](evidence/console/controls-desktop.png) and
 [mobile evidence](evidence/console/controls-mobile.png).
 
-Annotation notes still use Aryan's local storage component. A natural-raster
-selection is not a sky-coordinate evidence export; the wider #14/#15 acceptance
-remains tracked separately. Review source quality, spectral compatibility and
-unmatched PSFs/backgrounds before interpreting apparent change.
+Candidate records, their ICRS conversion and local storage are described in
+[candidate marks](integration.md#candidate-marks). Review source quality,
+spectral compatibility and unmatched PSFs/backgrounds before interpreting
+apparent change.

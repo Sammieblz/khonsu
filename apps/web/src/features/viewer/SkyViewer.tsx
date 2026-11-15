@@ -15,7 +15,7 @@ const EMPTY_FRAMES: ObservationFrame[] = [];
 export function SkyViewer(props: SkyViewerProps) {
   return <ObservationConsole key={props.sequence?.sequence_id ?? 'empty'} {...props} />;
 }
-function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChange, onSelect }: SkyViewerProps) {
+function ObservationConsole({ sequence, activeFrameId, annotations, selectedCandidateId = null, onFrameChange, onSelect }: SkyViewerProps) {
   const canvas = useRef<HTMLCanvasElement>(null), viewport = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<ViewerTool>('time');
   const [view, setView] = useState(FIT), [expanded, setExpanded] = useState(false);
@@ -87,15 +87,28 @@ function ObservationConsole({ sequence, activeFrameId, annotations, onFrameChang
         if(rendered instanceof ImageData){const temporary=document.createElement('canvas');temporary.width=rendered.width;temporary.height=rendered.height;temporary.getContext('2d')!.putImageData(rendered,0,0);context.drawImage(temporary,0,0,width,height);}
         else context.drawImage(rendered,0,0,width,height);
         context.strokeStyle='#f3bc60';context.lineWidth=Math.max(2,width/400);
-        for(const note of annotations.filter(note=>note.selection.sequenceId===sequence.sequence_id&&note.selection.frameId===active.frame_id)){context.beginPath();context.arc((note.selection.x+.5)*scaleX,(note.selection.y+.5)*scaleY,Math.max(10,width/40),0,Math.PI*2);context.stroke();}
+        // Every frame shares one grid, so a mark is the same sky position on every epoch.
+        // Solid on the observation it was made on, dashed on the others, numbered as in the list.
+        annotations.filter(note=>note.selection.sequenceId===sequence.sequence_id).forEach((note,number)=>{
+          const radius=Math.max(10,width/40),x=(note.selection.x+.5)*scaleX,y=(note.selection.y+.5)*scaleY,selected=note.id===selectedCandidateId;
+          context.save();context.strokeStyle=context.fillStyle=selected?'#79c7e8':'#f3bc60';context.lineWidth=Math.max(2,width/400)*(selected?1.8:1);
+          context.setLineDash(note.selection.frameId===active.frame_id?[]:[radius/3,radius/4]);context.beginPath();context.arc(x,y,radius,0,Math.PI*2);context.stroke();
+          context.setLineDash([]);context.font=`${Math.max(14,Math.round(width/36))}px monospace`;context.fillText(String(number+1).padStart(2,'0'),x+radius*.75,y-radius*.75);context.restore();
+        });
         if(tool==='mark'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scaleX,cursor.y*scaleY,scaleX,scaleY);}
         setRendererMode(raster?(renderer.current?.mode??'CPU canvas'):'Original PNG');setAdapter(raster?(renderer.current?.adapter??''):'');setRendering(false);
       }catch{if(token===revision.current){context.fillStyle='#273140';context.fillRect(0,0,width,height);context.drawImage(image,0,0,width,height);setRendererMode('Original PNG: display renderer unavailable');setRendering(false);}}
       finally{if(rendered instanceof ImageBitmap)rendered.close();}
     };
     if(!drawing.current){drawing.current=true;void(async()=>{while(latestDraw.current){const job=latestDraw.current;latestDraw.current=null;await job();}drawing.current=false;})();}
-  },[sequence,active,images,annotations,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision]);
-  function mark(x:number,y:number){if(!sequence||!active||!ready)return;onSelect({sequenceId:sequence.sequence_id,frameId:active.frame_id,x,y,coordinateSpace:'natural-raster',pixelOrigin:'top-left'});}
+  },[sequence,active,images,annotations,selectedCandidateId,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision]);
+  function mark(x:number,y:number){
+    if(!sequence||!active||!ready)return;
+    // Validity comes from the verified raster mask; a PNG-only frame cannot say.
+    const pixelHasData=raster?raster.valid[y*raster.width+x]===1:null;
+    const comparison=a!==b&&frames[a]&&frames[b]?{aFrameId:frames[a].frame_id,bFrameId:frames[b].frame_id}:null;
+    onSelect({sequenceId:sequence.sequence_id,frameId:active.frame_id,x,y,coordinateSpace:'natural-raster',pixelOrigin:'top-left',comparison,pixelHasData});
+  }
   function pointerDown(event:PointerEvent<HTMLDivElement>){
     if(!active)return;stop();event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.focus();
     pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});drag.current={x:event.clientX,y:event.clientY,position:positions[index] ?? 0,moved:false};

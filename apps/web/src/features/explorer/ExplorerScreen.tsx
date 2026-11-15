@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Brand } from "@/components/ui/Brand";
 import { AnnotationPanel } from "@/features/annotations/AnnotationPanel";
+import { downloadText } from "@/features/annotations/download";
+import { sequenceContext } from "@/features/annotations/records";
 import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
 import { ApiClientError, describeFailure, listExamples, listPresets, type PresetTarget, runSequenceJob } from "@/lib/api/client";
@@ -18,6 +20,7 @@ export function ExplorerScreen() {
   const [sequence, setSequence] = useState<SequenceManifest | null>(null);
   const [activeFrameId, setActiveFrameId] = useState<string | null>(null);
   const [selection, setSelection] = useState<ImageSelection | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [search, setSearch] = useState<SearchState>({ phase: "idle" });
   const [examples, setExamples] = useState<SequenceManifest[]>([]);
   const [selectedExampleId, setSelectedExampleId] = useState("");
@@ -33,7 +36,7 @@ export function ExplorerScreen() {
   // One live search at a time; replacing or leaving it cancels its server job.
   const session = useRef<SequenceSession | null>(null);
   const activeExampleLoad = useRef<AbortController | null>(null);
-  const { annotations, addAnnotation, removeAnnotation } = useAnnotations();
+  const candidates = useAnnotations();
 
   function requestValues(request: SequenceRequest): CoordinateValues {
     return { ra_deg: request.ra_deg, dec_deg: request.dec_deg, fov_arcmin: request.fov_arcmin ?? DEFAULT_FOV_ARCMIN };
@@ -88,6 +91,7 @@ export function ExplorerScreen() {
     setSequence(manifest);
     setActiveFrameId(manifest.frames[0]?.frame_id ?? null);
     setSelection(null);
+    setSelectedCandidateId(null);
     requestAnimationFrame(()=>{const consoleElement=document.getElementById('explorer');consoleElement?.focus({preventScroll:true});consoleElement?.scrollIntoView({behavior:'instant',block:'start'});});
   }
 
@@ -167,6 +171,32 @@ export function ExplorerScreen() {
     }
   }
 
+  // A candidate keeps a snapshot of its sequence and the search that produced
+  // it, so its evidence survives the live job expiring or a page reload.
+  function addCandidate(candidateSelection: ImageSelection, note: string) {
+    if (!sequence) return;
+    const query = search.phase === "ready" && search.manifest.sequence_id === sequence.sequence_id ? requestValues(search.request) : null;
+    let pageBase: string | null = null;
+    try { pageBase = `${window.location.origin}${window.location.pathname}`; } catch { /* The link is optional evidence. */ }
+    candidates.add(candidateSelection, note, sequenceContext(sequence, query, pageBase, new Date().toISOString()));
+  }
+
+  function selectCandidate(candidateId: string | null) {
+    setSelectedCandidateId(candidateId);
+    const candidate = candidates.annotations.find(item => item.id === candidateId);
+    if (candidate && sequence && candidate.selection.sequenceId === sequence.sequence_id) setActiveFrameId(candidate.selection.frameId);
+  }
+
+  function removeCandidate(candidateId: string) {
+    if (candidateId === selectedCandidateId) setSelectedCandidateId(null);
+    candidates.remove(candidateId);
+  }
+
+  function downloadUnreadable() {
+    const raw = candidates.unreadableData();
+    if (raw !== null) downloadText(`khonsu-unreadable-candidates-${new Date().toISOString().slice(0, 10)}.json`, raw);
+  }
+
   // Keep the selected observation in the link once a live sequence is shown.
   useEffect(() => {
     if (search.phase !== "ready") return;
@@ -195,11 +225,11 @@ export function ExplorerScreen() {
           <TargetPresets targets={targets} selected={selectedTarget?.preset_id} error={catalogError} onChoose={target=>{setSelectedTarget({...target});document.getElementById('ra')?.focus();}}/>
         </section>
         {showConsole&&<section id="explorer" tabIndex={-1} className={styles.workspace} aria-label="Sky observation explorer">
-          <div className={styles.mainInstrument}><SkyViewer sequence={sequence} activeFrameId={activeFrameId} annotations={annotations} onFrameChange={setActiveFrameId} onSelect={setSelection}/></div>
+          <div className={styles.mainInstrument}><SkyViewer sequence={sequence} activeFrameId={activeFrameId} annotations={candidates.annotations} selectedCandidateId={selectedCandidateId} onFrameChange={setActiveFrameId} onSelect={setSelection}/></div>
           <aside className={styles.sidePanel} aria-label="Observation context and candidate notes">
             <SearchStatus state={search} canLoadExample={examples.length > 0} onCancel={cancelSearch} onRetry={retrySearch} onEditSearch={editSearch} onLoadExample={()=>void loadExample()}/>
             {picker}
-            <AnnotationPanel selection={selection} annotations={annotations.filter(item=>item.selection.sequenceId===sequence?.sequence_id)} onAdd={addAnnotation} onRemove={removeAnnotation}/>
+            <AnnotationPanel sequence={sequence} selection={selection} annotations={candidates.annotations} contexts={candidates.contexts} selectedCandidateId={selectedCandidateId} storage={candidates.storage} atCapacity={candidates.atCapacity} onAdd={addCandidate} onUpdate={candidates.updateNote} onRemove={removeCandidate} onSelectCandidate={selectCandidate} onStartFresh={candidates.startFresh} onDownloadUnreadable={downloadUnreadable}/>
           </aside>
         </section>}
         <section id="guide" className={styles.guide} aria-labelledby="guide-title">

@@ -1,32 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { CandidateAnnotation, ImageSelection } from "@/features/explorer/interfaces";
-import { ANNOTATIONS_KEY, parseStoredAnnotations } from "./storage";
+import { useEffect, useRef, useState } from "react";
+import type { CandidateStorageState, ImageSelection, SequenceContext } from "@/features/explorer/interfaces";
+import { addCandidate, createCandidate, emptyStore, MAX_CANDIDATES, removeCandidate, updateCandidateNote, type CandidateStore } from "./records";
+import { LEGACY_KEY, loadStore, MAX_STORE_CHARS, serializeStore, STORE_KEY } from "./storage";
 
 export function useAnnotations() {
-  const [annotations, setAnnotations] = useState<CandidateAnnotation[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    try { setAnnotations(parseStoredAnnotations(window.localStorage.getItem(ANNOTATIONS_KEY))); }
-    catch { /* Browser storage may be unavailable. Notes still work for this session. */ }
-    setLoaded(true);
-  }, []);
-  useEffect(() => {
-    if (!loaded) return;
-    try { window.localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(annotations)); }
-    catch { /* Keep in-memory notes if storage is full or disabled. */ }
-  }, [annotations, loaded]);
+  const [store, setStore] = useState<CandidateStore>(emptyStore);
+  const [storage, setStorage] = useState<CandidateStorageState>({ kind: "loading" });
+  // Writes are allowed only after a readable load, or after the visitor chooses
+  // to replace unreadable saved data. Candidates always work in memory.
+  const writable = useRef(false);
+  const unreadableRaw = useRef<string | null>(null);
 
-  function addAnnotation(selection: ImageSelection, note: string) {
-    const trimmedNote = note.trim().slice(0, 500);
-    if (!trimmedNote) return;
-    setAnnotations(previous => [...previous, {
-      id: crypto.randomUUID(), selection, note: trimmedNote, createdAt: new Date().toISOString(),
-    }]);
+  useEffect(() => {
+    let raw: string | null, legacy: string | null = null;
+    try {
+      raw = window.localStorage.getItem(STORE_KEY);
+      if (raw === null) legacy = window.localStorage.getItem(LEGACY_KEY);
+    } catch {
+      setStorage({ kind: "unavailable" });
+      return;
+    }
+    const loaded = loadStore(raw, legacy);
+    if (loaded.ok) {
+      writable.current = true;
+      setStore(loaded.store);
+    } else {
+      unreadableRaw.current = raw;
+      setStorage({ kind: "unreadable", reason: loaded.reason });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!writable.current) return;
+    const text = serializeStore(store);
+    if (text.length > MAX_STORE_CHARS) { setStorage({ kind: "too-large" }); return; }
+    try {
+      window.localStorage.setItem(STORE_KEY, text);
+      setStorage({ kind: "saved", preservedUnreadable: store.unreadable.length });
+    } catch {
+      setStorage({ kind: "write-failed" });
+    }
+  }, [store]);
+
+  function add(selection: ImageSelection, note: string, context: SequenceContext | null) {
+    const now = new Date().toISOString();
+    setStore(previous => addCandidate(previous, createCandidate(selection, note, context, crypto.randomUUID(), now), context));
   }
-  function removeAnnotation(annotationId: string) {
-    setAnnotations(previous => previous.filter(item => item.id !== annotationId));
+  function updateNote(id: string, note: string) {
+    setStore(previous => updateCandidateNote(previous, id, note, new Date().toISOString()));
   }
-  return { annotations, addAnnotation, removeAnnotation };
+  function remove(id: string) {
+    setStore(previous => removeCandidate(previous, id));
+  }
+  /** Replace unreadable saved data with this session's candidates, after the visitor asks. */
+  function startFresh() {
+    writable.current = true;
+    unreadableRaw.current = null;
+    setStore(previous => ({ ...previous }));
+  }
+  return {
+    annotations: store.candidates,
+    contexts: store.sequences,
+    storage,
+    atCapacity: store.candidates.length >= MAX_CANDIDATES,
+    unreadableData: () => unreadableRaw.current,
+    add, updateNote, remove, startFresh,
+  };
 }

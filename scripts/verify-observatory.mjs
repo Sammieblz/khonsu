@@ -216,14 +216,17 @@ for (const engine of [chromium, firefox]) {
     const x = Math.floor(primary.grid.width_px / 2), y = Math.floor(primary.grid.height_px / 2);
     await page.mouse.click(canvasBox.x + (x + .5) / primary.grid.width_px * canvasBox.width,
       canvasBox.y + (y + .5) / primary.grid.height_px * canvasBox.height);
-    assert.match(await page.locator('#explorer').innerText(), new RegExp(`Selected pixel ${x}, ${y} in frame`));
+    assert.match(await page.locator('#explorer').innerText(), new RegExp(`Grid pixel X ${x}, Y ${y} on observation`));
     await field.focus(); await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter');
-    assert.match(await page.locator('#explorer').innerText(), new RegExp(`Selected pixel ${x + 1}, ${y} in frame`));
+    assert.match(await page.locator('#explorer').innerText(), new RegExp(`Grid pixel X ${x + 1}, Y ${y} on observation`));
     await page.getByLabel('Observation note', { exact: true }).fill('Acceptance note: investigate, not a discovery.');
     await button(page, 'SAVE CANDIDATE NOTE').click();
-    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('khonsu.annotations.v1')));
-    assert.equal(stored.length, 1); assert.equal(stored[0].selection.x, x + 1); assert.equal(stored[0].selection.y, y);
-    assert.equal(stored[0].selection.coordinateSpace, 'natural-raster');
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('khonsu.candidates.v2')));
+    assert.equal(stored.version, 2); assert.equal(stored.candidates.length, 1);
+    assert.equal(stored.candidates[0].selection.x, x + 1); assert.equal(stored.candidates[0].selection.y, y);
+    assert.equal(stored.candidates[0].selection.coordinateSpace, 'natural-raster');
+    assert.equal(stored.candidates[0].sky.frame, 'ICRS'); assert.equal(stored.candidates[0].sky.unit, 'deg');
+    assert.equal(stored.sequences[primary.sequence_id].frames.length, primary.frames.length);
     await button(page, 'FIT / RESET').click();
     await page.waitForFunction(() => getComputedStyle(document.querySelector('canvas')).transform === 'matrix(1, 0, 0, 1, 0, 0)');
     assert.equal(await page.locator('canvas').evaluate(element => getComputedStyle(element).transform), 'matrix(1, 0, 0, 1, 0, 0)');
