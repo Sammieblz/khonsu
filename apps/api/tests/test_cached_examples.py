@@ -37,6 +37,27 @@ def rewrite_inventory(bundle, name):
     lineage_path.write_text(json.dumps(lineage))
 
 
+def test_estimates_cannot_cover_measured_pixels_even_with_new_checksums(copied_bundles):
+    import numpy as np
+    from app.examples import validate_bundle, CachedExampleError
+    bundle = copied_bundles / 'real/real-wise-0855'
+    payload = json.loads((bundle / 'manifest.json').read_text())
+    frame = payload['frames'][0]
+    count = payload['grid']['width_px'] * payload['grid']['height_px']
+    original = (bundle / (frame['frame_id'] + '.bin')).read_bytes()
+    measured = np.flatnonzero(np.frombuffer(original, np.uint8, offset=count*4) == 1)[0]
+    filename = frame['frame_id'] + '-fill.bin'
+    raw = bytearray((bundle / filename).read_bytes())
+    raw[count*4 + measured] = 1
+    (bundle / filename).write_bytes(raw)
+    frame['gap_fill']['sha256'] = hashlib.sha256(raw).hexdigest()
+    (bundle / 'manifest.json').write_text(json.dumps(payload))
+    rewrite_inventory(bundle, filename)
+    rewrite_inventory(bundle, 'manifest.json')
+    with pytest.raises(CachedExampleError, match='original mask'):
+        validate_bundle(bundle)
+
+
 def test_cached_fields_load_without_any_archive_requests(copied_bundles, monkeypatch):
     async def no_archive(*args, **kwargs):
         raise AssertionError('A cached example must never contact IRSA')
@@ -151,6 +172,10 @@ def test_legacy_binary_masks_remain_readable_and_warning_counts_fail_closed(copi
     frame['raster']['encoding'] = 'float32-le-mask8-v1'
     frame['raster']['sha256'] = hashlib.sha256(raw).hexdigest()
     frame['warning_fraction'] = 0
+    frame['gap_fill'] = None
+    frame['estimated_fraction'] = 0
+    lineage['files'].pop(frame['frame_id'] + '-fill.bin', None)
+    lineage['source_observations'][0]['estimated_fraction'] = 0
     lineage['source_observations'][0]['warning_fraction'] = 0
     (bundle/'manifest.json').write_text(json.dumps(payload))
     (bundle/'lineage.json').write_text(json.dumps(lineage))

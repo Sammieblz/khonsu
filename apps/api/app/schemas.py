@@ -126,7 +126,7 @@ class DisplaySettings(ApiModel):
 
 class PreparedRaster(ApiModel):
     url: str = Field(min_length=1, max_length=2048)
-    encoding: Literal["float32-le-mask8-v1", "float32-le-quality8-v2"] = "float32-le-mask8-v1"
+    encoding: Literal["float32-le-mask8-v1", "float32-le-quality8-v2", "float32-le-estimate8-v1"] = "float32-le-mask8-v1"
     size_bytes: int = Field(gt=0, le=MAX_RASTER_BYTES)
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
@@ -136,6 +136,8 @@ class Frame(ApiModel):
     label: str = Field(min_length=1, max_length=160)
     image_url: str = Field(min_length=1, max_length=2048)
     raster: PreparedRaster | None = None
+    gap_fill: PreparedRaster | None = None
+    estimated_fraction: float = Field(default=0.0, ge=0, le=0.1)
     observed_start_utc: datetime | None = None
     observed_end_utc: datetime | None = None
     wavelength_um: Wavelength | None = None
@@ -150,6 +152,15 @@ class Frame(ApiModel):
 
     @model_validator(mode="after")
     def validate_exposure(self) -> "Frame":
+        if self.raster and self.raster.encoding == "float32-le-estimate8-v1":
+            raise ValueError("Display estimates cannot be an observation raster")
+        if self.estimated_fraction > self.masked_fraction + 1e-7:
+            raise ValueError("Estimates must be within the original masked fraction")
+        if self.gap_fill:
+            if not self.raster or self.gap_fill.encoding != "float32-le-estimate8-v1" or not self.estimated_fraction:
+                raise ValueError("Gap filling requires a separate estimate asset and original raster")
+        elif self.estimated_fraction:
+            raise ValueError("Estimated fraction requires a gap-fill asset")
         if self.warning_fraction > self.masked_fraction + 1e-7:
             raise ValueError("Warning-only pixels must be part of the strictly masked fraction")
         for name in ("observed_start_utc", "observed_end_utc"):
@@ -188,6 +199,8 @@ class SequenceManifest(ApiModel):
         for frame in self.frames:
             if frame.raster and frame.raster.size_bytes != self.grid.width_px * self.grid.height_px * 5:
                 raise ValueError("Prepared raster size must match the common grid")
+            if frame.gap_fill and frame.gap_fill.size_bytes != self.grid.width_px * self.grid.height_px * 5:
+                raise ValueError("Gap-fill raster size must match the common grid")
         if len({frame.frame_id for frame in self.frames}) != len(self.frames):
             raise ValueError("Frame IDs must be unique within a sequence")
         if self.data_mode != "synthetic":

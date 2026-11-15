@@ -1,7 +1,27 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {decodeRaster,renderPixels,detailValues,displaySize,measuredResolution,HD_DISPLAY_SIDE,MAX_DISPLAY_SIDE,MAX_DISPLAY_PIXELS} from '../src/features/viewer/display.ts';
+import {attachGapFill,decodeRaster,renderPixels,detailValues,displaySize,measuredResolution,HD_DISPLAY_SIDE,MAX_DISPLAY_SIDE,MAX_DISPLAY_PIXELS} from '../src/features/viewer/display.ts';
 const options={low:0,high:10,a:.3,gamma:1,curve:'linear' as const,mask:'quiet' as const};
+test('gap estimates never become validity, replace observations or affect original rendering',()=>{
+ const original={width:20,height:1,values:new Float32Array(20).fill(5),valid:new Uint8Array(20).fill(1),warning:new Uint8Array(20)};
+ original.valid[10]=0;original.warning[10]=1;original.values[10]=9;
+ const buffer=new ArrayBuffer(100);new DataView(buffer).setFloat32(40,3,true);new Uint8Array(buffer,80)[10]=1;
+ const fill=decodeRaster(buffer,20,1,'float32-le-estimate8-v1');assert.equal(fill.valid[10],0);
+ const raster=attachGapFill(original,fill,.05),before=renderPixels(original,options);
+ assert.deepEqual(renderPixels(raster,options),before);
+ const clean=renderPixels(raster,{...options,cleanView:true});
+ assert.equal(clean[40],77);assert.equal(original.values[10],9);assert.equal(raster.valid[10],0);
+ assert.equal(renderPixels(raster,{...options,cleanView:true,includeWarnings:true})[40],230);
+ for(let i=0;i<20;i++)if(i!==10)assert.equal(clean[i*4],before[i*4]);
+ original.valid[10]=1;assert.throws(()=>attachGapFill(original,fill,.05),/overlaps/);
+});
+test('estimated smoothing cannot influence measured neighbors',()=>{
+ const raster={width:2,height:1,values:new Float32Array([5,0]),valid:new Uint8Array([1,0]),estimated:new Uint8Array([0,1]),estimates:new Float32Array([0,10])};
+ const original=renderPixels(raster,{...options,sampling:'smooth'},{width:8,height:1});
+ const clean=renderPixels(raster,{...options,sampling:'smooth',cleanView:true},{width:8,height:1});
+ assert.deepEqual(clean.slice(0,16),original.slice(0,16));
+ assert(clean[24]!>original[24]!);
+});
 test('display retains unclipped signed intensities, with explicit mask colors',()=>{
  const buffer=new ArrayBuffer(20),view=new DataView(buffer);
  [-3,5,30,0].forEach((v,i)=>view.setFloat32(i*4,v,true));new Uint8Array(buffer,16).set([1,1,1,0]);

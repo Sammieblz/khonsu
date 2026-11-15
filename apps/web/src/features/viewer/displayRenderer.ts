@@ -7,11 +7,14 @@ precision highp float;
 precision highp int;
 uniform sampler2D intensity;
 uniform highp usampler2D validity;
+uniform sampler2D estimates;
 uniform ivec2 sourceSize;
 uniform float low; uniform float high;
 ivec2 bounded(ivec2 p){return clamp(p,ivec2(0),sourceSize-1);}
 bool validAt(ivec2 p){return texelFetch(validity,bounded(p),0).r==uint(1);}
-bool warningAt(ivec2 p){return texelFetch(validity,bounded(p),0).r==uint(2);}
+bool warningAt(ivec2 p){uint q=texelFetch(validity,bounded(p),0).r;return q==uint(2)||q==uint(4);}
+bool estimatedAt(ivec2 p){uint q=texelFetch(validity,bounded(p),0).r;return q==uint(3)||q==uint(4);}
+float estimateAt(ivec2 p){return texelFetch(estimates,bounded(p),0).r;}
 float valueAt(ivec2 p){return texelFetch(intensity,bounded(p),0).r;}
 `;
 const displayFragment = `#version 300 es
@@ -20,6 +23,7 @@ uniform ivec2 outputSize;
 uniform float a; uniform float gammaValue;
 uniform int useAsinh; uniform int hatch; uniform int smoothView;
 uniform int subtle; uniform int includeWarnings;
+uniform int cleanView; uniform int showEstimates;
 out vec4 color;
 float inverseSinh(float x){return log(x+sqrt(x*x+1.));}
 void main(){
@@ -27,23 +31,26 @@ void main(){
  ivec2 outputPixel=ivec2(int(gl_FragCoord.x),outputSize.y-1-int(gl_FragCoord.y));
  ivec2 nearest=(2*outputPixel+1)*sourceSize/(2*outputSize);
  bool warning=includeWarnings==1&&warningAt(nearest);
- if(!validAt(nearest)&&!warning){
+ bool estimated=cleanView==1&&!warning&&estimatedAt(nearest);
+ if(!validAt(nearest)&&!warning&&!estimated){
   bool line=hatch==1&&(nearest.x+nearest.y)%8<2;
   color=vec4(line?vec3(70.,82.,99.)/255.:(subtle==1?vec3(7.,11.,18.):vec3(39.,49.,64.))/255.,1.);return;
  }
- float value=valueAt(nearest);
+ float value=estimated?estimateAt(nearest):valueAt(nearest);
  if(smoothView==1){
   ivec2 base=ivec2(floor(s));vec2 fraction=fract(s);float total=0.,weight=0.;
   for(int y=0;y<2;y++)for(int x=0;x<2;x++){
    ivec2 p=base+ivec2(x,y);
    float w=(x==0?1.-fraction.x:fraction.x)*(y==0?1.-fraction.y:fraction.y);
-   if(validAt(p)||(warning&&warningAt(p))){total+=valueAt(p)*w;weight+=w;}
+   bool fill=estimated&&estimatedAt(p);
+   if(validAt(p)||(warning&&warningAt(p))||fill){total+=(fill?estimateAt(p):valueAt(p))*w;weight+=w;}
   }
   value=total/max(weight,1e-8);
  }
  value=clamp((value-low)/(high-low),0.,1.);
  if(useAsinh==1)value=inverseSinh(value/a)/inverseSinh(1./a);
  value=floor(pow(value,1./gammaValue)*255.+.5)/255.;color=vec4(vec3(value),1.);
+ if(estimated&&showEstimates==1&&(nearest.x+nearest.y)%4<2)color=vec4(243./255.,188./255.,96./255.,1.);
 }`;
 const detailFragment = `#version 300 es
 ${common}
@@ -113,7 +120,7 @@ export class DisplayRenderer {
         this.gl=gl;this.displayProgram=program(gl,displayFragment);
         this.floatTargets=!!gl.getExtension('EXT_color_buffer_float');
         if(this.floatTargets){this.detailProgram=program(gl,detailFragment);this.framebuffer=gl.createFramebuffer();}
-        for(let i=0;i<3;i++){const texture=gl.createTexture();if(!texture)throw Error('Display texture unavailable');this.textures.push(texture);}
+        for(let i=0;i<4;i++){const texture=gl.createTexture();if(!texture)throw Error('Display texture unavailable');this.textures.push(texture);}
         const debug=gl.getExtension('WEBGL_debug_renderer_info');
         this.adapter=debug?String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)):'Adapter information unavailable';
         this.mode='WebGL2';
@@ -155,15 +162,17 @@ export class DisplayRenderer {
     if(this.uploaded===raster)return;
     const gl=this.gl!;gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
     this.bindTexture(0);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.width,raster.height,0,gl.RED,gl.FLOAT,raster.values);
-    const quality=raster.warning?raster.valid.map((valid,i)=>valid===1?1:raster.warning![i]===1?2:0):raster.valid;
+    const quality=raster.valid.map((valid,i)=>valid===1?1:raster.estimated?.[i]===1&&raster.estimates?(raster.warning?.[i]===1?4:3):raster.warning?.[i]===1?2:0);
     this.bindTexture(1);gl.texImage2D(gl.TEXTURE_2D,0,gl.R8UI,raster.width,raster.height,0,gl.RED_INTEGER,gl.UNSIGNED_BYTE,quality);
     if(this.floatTargets){this.bindTexture(2);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.width,raster.height,0,gl.RED,gl.FLOAT,null);}
+    this.bindTexture(3);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.estimates?raster.width:1,raster.estimates?raster.height:1,0,gl.RED,gl.FLOAT,raster.estimates??null);
     this.uploaded=raster;this.processedKey='';
   }
 
   private shared(program:WebGLProgram,raster:Raster,options:DisplayOptions){
     const gl=this.gl!,uniform=(name:string)=>gl.getUniformLocation(program,name);
     gl.uniform1i(uniform('intensity'),0);gl.uniform1i(uniform('validity'),1);
+    gl.uniform1i(uniform('estimates'),3);
     gl.uniform2i(uniform('sourceSize'),raster.width,raster.height);
     gl.uniform1f(uniform('low'),options.low);gl.uniform1f(uniform('high'),options.high);
   }
@@ -187,7 +196,7 @@ export class DisplayRenderer {
         this.processedKey=key;
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,size.width,size.height);gl.useProgram(display);
-      this.bindTexture(amount>0?2:0,0);this.bindTexture(1,1);this.shared(display,raster,options);
+      this.bindTexture(amount>0?2:0,0);this.bindTexture(1,1);this.bindTexture(3,3);this.shared(display,raster,options);
       const uniform=(name:string)=>gl.getUniformLocation(display,name);
       gl.uniform2i(uniform('outputSize'),size.width,size.height);
       gl.uniform1i(uniform('smoothView'),options.sampling==='smooth'?1:0);
@@ -195,6 +204,8 @@ export class DisplayRenderer {
       gl.uniform1i(uniform('hatch'),options.mask==='hatch'?1:0);
       gl.uniform1i(uniform('subtle'),options.mask==='subtle'?1:0);
       gl.uniform1i(uniform('includeWarnings'),options.includeWarnings?1:0);
+      gl.uniform1i(uniform('cleanView'),options.cleanView?1:0);
+      gl.uniform1i(uniform('showEstimates'),options.showEstimates?1:0);
       gl.uniform1f(uniform('a'),options.a);gl.uniform1f(uniform('gammaValue'),options.gamma);
       gl.drawArrays(gl.TRIANGLES,0,3);
       if(gl.getError()!==gl.NO_ERROR)throw Error('WebGL display unavailable');

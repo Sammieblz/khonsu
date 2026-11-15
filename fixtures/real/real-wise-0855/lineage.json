@@ -19,7 +19,8 @@
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
       "masked_fraction": 0.03167193335248497,
       "warnings": [],
-      "warning_fraction": 0.015943694340706693
+      "warning_fraction": 0.015943694340706693,
+      "estimated_fraction": 0.019606434932490664
     },
     {
       "frame_id": "frame-0002",
@@ -34,7 +35,8 @@
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0479_1D2_spx_l2b-v27-2026-210.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
       "masked_fraction": 0.030163746049985618,
       "warnings": [],
-      "warning_fraction": 0.013932777937374317
+      "warning_fraction": 0.013932777937374317,
+      "estimated_fraction": 0.023197357081298477
     },
     {
       "frame_id": "frame-0003",
@@ -49,7 +51,8 @@
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W18_2A/l2b-v27-2026-244/2/level2_2026W18_2A_0663_1D2_spx_l2b-v27-2026-244.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
       "masked_fraction": 0.024705544383797795,
       "warnings": [],
-      "warning_fraction": 0.0154409652398736
+      "warning_fraction": 0.0154409652398736,
+      "estimated_fraction": 0.021401896006894572
     }
   ],
   "files": {
@@ -70,8 +73,8 @@
       "sha256": "d23fb384a7c8736d49c6f0564a7abf9ad68e13e76d1edacb9f1f7726a5a0ef28"
     },
     "manifest.json": {
-      "size_bytes": 7520,
-      "sha256": "481c5d950c5dcba0538bbc5603d280af083dfaab09a5ebbfb269dde16867e210"
+      "sha256": "caafcfcbfdab14b80f766cd1d7b630b526a6e8b80b6d7c4dd5005ccfeb306a39",
+      "size_bytes": 8810
     },
     "source-manifest.json": {
       "size_bytes": 6149,
@@ -88,6 +91,18 @@
     "frame-0003.bin": {
       "size_bytes": 69620,
       "sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d"
+    },
+    "frame-0001-fill.bin": {
+      "sha256": "c407014e813f3afb759cef2d31609811f380e69751831b5f1e8bd4037503663e",
+      "size_bytes": 69620
+    },
+    "frame-0002-fill.bin": {
+      "sha256": "2856b9c3216cac3406cb2ae530db1e9d3103361c7841cf01a3cc882601c830e2",
+      "size_bytes": 69620
+    },
+    "frame-0003-fill.bin": {
+      "sha256": "ae5dbaf13a22b31a1f4531886fcf2b940800bb000052c87f7289c360b2181b77",
+      "size_bytes": 69620
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
@@ -137,5 +152,22 @@
       "method": "IRSA OUTLIER/OVERFLOW-only finite samples; separate weighted reprojection; strict values unchanged"
     }
   },
-  "quality_updated_at_utc": "2026-11-15T18:25:02.798136+00:00"
+  "quality_updated_at_utc": "2026-11-15T18:25:02.798136+00:00",
+  "gap_fill_revision": {
+    "frame-0001": {
+      "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+      "method": "small-gap-harmonic-v1",
+      "estimated_fraction": 0.019606434932490664
+    },
+    "frame-0002": {
+      "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+      "method": "small-gap-harmonic-v1",
+      "estimated_fraction": 0.023197357081298477
+    },
+    "frame-0003": {
+      "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+      "method": "small-gap-harmonic-v1",
+      "estimated_fraction": 0.021401896006894572
+    }
+  }
 }

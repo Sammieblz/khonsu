@@ -13,6 +13,7 @@ import { usePreparedFrames } from './usePreparedFrames';
 import { displaySize, measuredResolution, HD_DISPLAY_SIDE, MAX_DISPLAY_SIDE, type AutoResolution, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
 const EMPTY_FRAMES: ObservationFrame[] = [];
+const CLEAN_VIEW_KEY='khonsu.clean-view.v1';
 
 export function SkyViewer(props: SkyViewerProps) {
   return <ObservationConsole key={props.sequence?.sequence_id ?? 'empty'} {...props} />;
@@ -25,11 +26,13 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'subtle',sampling:'smooth',detail:0,includeWarnings:false};
   const [display,setDisplay]=useState<DisplayOptions>({...original,a:.3});
   const [originalHeld,setOriginalHeld]=useState(false),[outputSize,setOutputSize]=useState({width:1,height:1});
+  const [cleanView,setCleanView]=useState(true),[showEstimates,setShowEstimates]=useState(false),[originalShown,setOriginalShown]=useState(false);
+  useEffect(()=>{try{const saved=localStorage.getItem(CLEAN_VIEW_KEY);if(saved==='off')setCleanView(false);}catch{/* Optional preference storage. */}},[]);
   const [viewportSize,setViewportSize]=useState({width:1,height:1});
   const [resolution,setResolution]=useState<'auto'|'hd'|'4k'>('auto'),[autoResolution,setAutoResolution]=useState<AutoResolution>('checking');
   const [renderMs,setRenderMs]=useState<number|null>(null);
   const maxSide=resolution==='4k'||(resolution==='auto'&&autoResolution==='4k')?MAX_DISPLAY_SIDE:HD_DISPLAY_SIDE;
-  const effectiveDisplay=useMemo(()=>({...display,detail:originalHeld||tool==='mark'?0:display.detail}),[display,originalHeld,tool]);
+  const effectiveDisplay=useMemo(()=>({...display,detail:originalHeld||originalShown||tool==='mark'?0:display.detail,includeWarnings:originalHeld||originalShown||tool==='mark'?false:display.includeWarnings,cleanView:cleanView&&!originalHeld&&!originalShown&&tool!=='mark',showEstimates}),[display,originalHeld,originalShown,tool,cleanView,showEstimates]);
   const [forceCpu,setForceCpu]=useState(false),[rendererMode,setRendererMode]=useState('Preparing display'),[rendering,setRendering]=useState(false);
   const [adapter,setAdapter]=useState('');
   const [rendererRevision,setRendererRevision]=useState(0);
@@ -47,7 +50,9 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const {rasters,failed:rasterFailed}=usePreparedFrames(frames,sequence?.grid.width_px??0,sequence?.grid.height_px??0,index,[a,b]);
   const raster=active?rasters.get(active.frame_id):undefined;
   const displayAvailable=!!raster&&!rendererMode.startsWith('Original PNG');
-  const warningsShown=displayAvailable&&!!raster?.warning&&!!display.includeWarnings;
+  const warningsShown=displayAvailable&&!!raster?.warning&&!!effectiveDisplay.includeWarnings;
+  const cleanAvailable=displayAvailable&&!!raster?.estimated;
+  const estimatesShown=cleanAvailable&&!!effectiveDisplay.cleanView;
   const preparedFailed=!!active&&rasterFailed.includes(active.frame_id);
   const frameReady=(frame:ObservationFrame|undefined)=>!!frame&&images.has(frame.frame_id)&&(!frame.raster||rasters.has(frame.frame_id)||rasterFailed.includes(frame.frame_id));
   const ready=frameReady(active),comparisonReady=a!==b&&frameReady(frames[a])&&frameReady(frames[b]);
@@ -58,6 +63,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
 
   function releaseHold(){ if(held.current){onFrameChange(held.current);held.current=null;} }
   function stop(){setPlaying(false);setBlink(false);releaseHold();}
+  function toggleClean(){stop();const next=originalShown?true:!cleanView;setOriginalShown(false);setCleanView(next);try{localStorage.setItem(CLEAN_VIEW_KEY,next?'on':'off');}catch{/* Keep controls usable without storage. */}}
   function selectIndex(next:number){stop();if(frames[next])onFrameChange(frames[next].frame_id);}
   function beginHold(){if(!active||!ready||a===b)return;setPlaying(false);setBlink(false);if(!held.current)held.current=active.frame_id;onFrameChange(frames[b]!.frame_id);}
   useEffect(()=>{const release=()=>{setBlink(false);setPlaying(false);setOriginalHeld(false);releaseHold();pointers.current.clear();drag.current=null;};window.addEventListener('blur',release);return()=>window.removeEventListener('blur',release);});
@@ -131,7 +137,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     onSelect({sequenceId:sequence.sequence_id,frameId:active.frame_id,x,y,coordinateSpace:'natural-raster',pixelOrigin:'top-left',comparison,pixelHasData,pixelQuality});
   }
   function pointerDown(event:PointerEvent<HTMLDivElement>){
-    if(!active)return;stop();event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.focus();
+    if(!active)return;stop();event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.focus({preventScroll:true});
     pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});drag.current={x:event.clientX,y:event.clientY,position:positions[index] ?? 0,moved:false};
   }
   function pointerMove(event:PointerEvent<HTMLDivElement>){
@@ -146,7 +152,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
   }
   function pointerEnd(event:PointerEvent<HTMLDivElement>){
-    if(event.type==='pointerup'&&tool==='mark'&&!drag.current?.moved&&sequence&&canvas.current){const point=clientPointToRaster(event.clientX,event.clientY,canvas.current.getBoundingClientRect(),sequence.grid.width_px,sequence.grid.height_px);if(point){setCursor(point);mark(point.x,point.y);}}
+    if(event.type==='pointerup'&&tool==='mark'&&!rendering&&!drag.current?.moved&&sequence&&canvas.current){const point=clientPointToRaster(event.clientX,event.clientY,canvas.current.getBoundingClientRect(),sequence.grid.width_px,sequence.grid.height_px);if(point){setCursor(point);mark(point.x,point.y);}}
     pointers.current.delete(event.pointerId);drag.current=null;
   }
   function zoom(factor:number){const element=viewport.current;if(element)setView(current=>zoomAt(current,factor,0,0,element.clientWidth,element.clientHeight));}
@@ -168,6 +174,14 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       <button disabled={!active} onClick={()=>setView(FIT)}>FIT / RESET</button><button onClick={()=>setExpanded(!expanded)} aria-pressed={expanded}>{expanded?'CONTRACT':'EXPAND'}</button>
       <button disabled={!active||nativeAcross===null} title="One native sample per display pixel when the field is large enough" onClick={()=>{stop();setView(boundedView({zoom:nativeAcross!/(viewportSize.width*window.devicePixelRatio),x:0,y:0},viewportSize.width,viewportSize.height));}}>NATIVE SCALE</button>
     </div>
+    {active&&<div className={styles.cleanControls} role="group" aria-label="Clean view controls">
+      <button aria-pressed={estimatesShown} disabled={!cleanAvailable||tool==='mark'} onClick={toggleClean}>CLEAN VIEW</button>
+      <button aria-pressed={originalShown} disabled={!displayAvailable||tool==='mark'} onClick={()=>{stop();setOriginalShown(value=>!value);}}>SHOW ORIGINAL</button>
+      <button aria-pressed={showEstimates&&estimatesShown} disabled={!estimatesShown} onClick={()=>{stop();setShowEstimates(value=>!value);}}>SHOW ESTIMATED AREAS</button>
+      <p className={styles.cleanNotice} data-clean-view={estimatesShown?'on':'off'} role="status">
+        {tool==='mark'?'Original shown while marking. Estimates are excluded from measurements.':raster?.gapFillFailed?'Clean View could not load. The original observation is shown.':!displayAvailable?(ready?'Original observation shown. Clean View is unavailable for this image.':'Loading the original observation.'):estimatesShown?`Some missing areas are estimated (${((active.estimated_fraction??0)*100).toFixed(1)}%). ${showEstimates?'Amber stripes show estimated areas.':'Larger gaps remain visible.'}`:originalShown||originalHeld?'Original observation shown. Gap filling and detail are paused.':cleanAvailable?'Original observation shown. Turn on Clean View to fill small gaps.':'No eligible small gaps in this observation.'}
+      </p>
+    </div>}
     <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
       {view.zoom>1&&active&&ready&&<button className={styles.overview} aria-label="Field overview: click to recenter, Enter to center the field" onPointerDown={event=>event.stopPropagation()} onKeyDown={event=>{if(event.key!=='Escape')event.stopPropagation();}} onClick={event=>{event.stopPropagation();stop();const rect=event.currentTarget.getBoundingClientRect();const x=event.detail===0 ? .5 : (event.clientX-rect.left)/rect.width,y=event.detail===0 ? .5 : (event.clientY-rect.top)/rect.height;setView(current=>centerField(current,x,y,viewportSize.width,viewportSize.height));}}>
         <img src={images.get(active.frame_id)!.src} crossOrigin="anonymous" alt="" draggable={false}/>
@@ -178,20 +192,6 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     </div>
     <div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool==='pan'?'PAN':'MARK'} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
     <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
-    {sequence&&<p className={styles.samplingReadout} data-native-samples={nativeAcross??undefined}>
-      {nativeAcross===null?'Native sampling unavailable':`About ${Math.round(nativeAcross)} native samples across the full field`} · {sequence.grid.width_px} × {sequence.grid.height_px} prepared pixels · {outputSize.width} × {outputSize.height} display pixels.
-      {nativeAcross!==null&&<> Enlarging the view does not add measured detail.</>}
-    </p>}
-    {active&&<p className={styles.hint} data-quality={warningsShown?'warnings':'strict'}>{warningsShown?'WARNING SAMPLES VISIBLE. These are excluded from trusted measurements.':'STRICT SAMPLES. Warning-only and unavailable pixels remain masked.'} {active.raster?.encoding==='float32-le-quality8-v2'?`${((active.warning_fraction??0)*100).toFixed(1)}% warning-only; ${(Math.max(0,(active.masked_fraction??0)-(active.warning_fraction??0))*100).toFixed(1)}% unavailable.`:'This older mask does not distinguish warning-only samples.'} Dark navy marks excluded samples; it is not measured darkness.</p>}
-    {active&&<div className={styles.imageModes}>
-      <div role="group" aria-label="Image sampling">
-        <button disabled={!displayAvailable} aria-pressed={displayAvailable&&display.sampling==='smooth'} onClick={()=>setDisplay(old=>({...old,sampling:'smooth'}))}>SMOOTH</button>
-        <button disabled={!displayAvailable} aria-pressed={!displayAvailable||display.sampling==='pixels'} onClick={()=>setDisplay(old=>({...old,sampling:'pixels'}))}>PIXELS</button>
-      </div>
-      <button disabled={!displayAvailable||tool==='mark'} aria-pressed={displayAvailable&&(display.detail??0)>0} onClick={()=>setDisplay(old=>({...old,detail:old.detail?0:.35}))}>DETAIL EXPERIMENT</button>
-      <button disabled={!displayAvailable||!display.detail||tool==='mark'} onPointerDown={event=>{stop();event.currentTarget.setPointerCapture(event.pointerId);setOriginalHeld(true);}} onPointerUp={()=>setOriginalHeld(false)} onPointerCancel={()=>setOriginalHeld(false)} onLostPointerCapture={()=>setOriginalHeld(false)} onBlur={()=>setOriginalHeld(false)} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();stop();setOriginalHeld(true);}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')setOriginalHeld(false);}}>HOLD ORIGINAL</button>
-      <p className={styles.hint} data-detail={displayAvailable&&effectiveDisplay.detail?'on':'off'}>{!displayAvailable?'PREPARED PNG: interactive intensity display is unavailable.':tool==='mark'?'Mark uses original intensities. Detail is paused.':effectiveDisplay.detail?'EXPERIMENTAL DETAIL: visual emphasis only. Hold original to compare without it.':'ORIGINAL INTENSITIES: smooth viewing adds no measured resolution.'}</p>
-    </div>}
     <PlaybackControls frames={frames} index={index} playing={playing} speed={speed} onSpeed={setSpeed} onIndexChange={selectIndex} onToggle={()=>{setBlink(false);releaseHold();if(!playing&&index===frames.length-1&&frames[0])onFrameChange(frames[0].frame_id);setPlaying(!playing);}} />
     {active&&<div className={styles.comparison}>
       <label>REFERENCE / A<select aria-label="Comparison A" value={a} onChange={event=>{stop();setA(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>
@@ -207,7 +207,22 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       </div>;})()}
     </div>}
     {active&&<details className={styles.displayControls}>
-      <summary>IMAGE DISPLAY <span data-renderer={rendererMode}>{rendererMode}</span></summary>
+      <summary>ADVANCED IMAGE DISPLAY <span data-renderer={rendererMode}>{rendererMode}</span></summary>
+      {sequence&&<p className={styles.samplingReadout} data-native-samples={nativeAcross??undefined}>
+        {nativeAcross===null?'Native sampling unavailable':`About ${Math.round(nativeAcross)} native samples across the full field`} · {sequence.grid.width_px} × {sequence.grid.height_px} prepared pixels · {outputSize.width} × {outputSize.height} display pixels.
+        {nativeAcross!==null&&<> Enlarging the view does not add measured detail.</>}
+      </p>}
+      {active&&<p className={styles.hint} data-quality={warningsShown?'warnings':'strict'}>{warningsShown?'WARNING SAMPLES VISIBLE. These are excluded from trusted measurements.':'STRICT SOURCE SAMPLES. Any Clean View estimates are displayed separately.'} {active.raster?.encoding==='float32-le-quality8-v2'?`${((active.warning_fraction??0)*100).toFixed(1)}% warning-only; ${(Math.max(0,(active.masked_fraction??0)-(active.warning_fraction??0))*100).toFixed(1)}% unavailable.`:'This older mask does not distinguish warning-only samples.'} Dark navy marks unfilled excluded samples; it is not measured darkness.</p>}
+      {active&&<div className={styles.imageModes}>
+        <div role="group" aria-label="Image sampling">
+          <button disabled={!displayAvailable} aria-pressed={displayAvailable&&display.sampling==='smooth'} onClick={()=>setDisplay(old=>({...old,sampling:'smooth'}))}>SMOOTH</button>
+          <button disabled={!displayAvailable} aria-pressed={!displayAvailable||display.sampling==='pixels'} onClick={()=>setDisplay(old=>({...old,sampling:'pixels'}))}>PIXELS</button>
+        </div>
+        <button disabled={!displayAvailable||tool==='mark'} aria-pressed={displayAvailable&&(display.detail??0)>0} onClick={()=>setDisplay(old=>({...old,detail:old.detail?0:.35}))}>DETAIL EXPERIMENT</button>
+        <button disabled={!displayAvailable||!display.detail||tool==='mark'} onPointerDown={event=>{stop();event.currentTarget.setPointerCapture(event.pointerId);setOriginalHeld(true);}} onPointerUp={()=>setOriginalHeld(false)} onPointerCancel={()=>setOriginalHeld(false)} onLostPointerCapture={()=>setOriginalHeld(false)} onBlur={()=>setOriginalHeld(false)} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();stop();setOriginalHeld(true);}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')setOriginalHeld(false);}}>HOLD ORIGINAL</button>
+        <p className={styles.hint} data-detail={displayAvailable&&effectiveDisplay.detail?'on':'off'}>{!displayAvailable?'PREPARED PNG: interactive intensity display is unavailable.':tool==='mark'?'Mark uses original intensities. Detail is paused.':effectiveDisplay.detail?'EXPERIMENTAL DETAIL: visual emphasis only. Hold original to compare without it.':'Smooth viewing adds no measured resolution. Clean View estimates are separately labelled.'}</p>
+      </div>}
+
       {preparedFailed&&<p role="status">Interactive intensity data could not be verified. Showing the original prepared PNG.</p>}
       {!active.raster&&<p>This sequence contains prepared PNGs only. Intensity adjustments need aligned raster data.</p>}
       <fieldset disabled={!displayAvailable}>

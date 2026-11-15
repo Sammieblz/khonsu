@@ -2,11 +2,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ObservationFrame } from '@/features/explorer/interfaces';
 import { resolveAssetUrl } from '@/lib/api/client';
-import { decodeRaster, MAX_RASTER_BYTES, type Raster } from './display';
+import { attachGapFill, decodeRaster, MAX_RASTER_BYTES, type Raster } from './display';
 import { frameCacheWindow } from './time';
-export async function readPrepared(frame:ObservationFrame,width:number,height:number,signal:AbortSignal):Promise<Raster>{
-  const meta=frame.raster;
-  if(!meta||!['float32-le-mask8-v1','float32-le-quality8-v2'].includes(meta.encoding??'float32-le-mask8-v1')||meta.size_bytes!==width*height*5||meta.size_bytes>MAX_RASTER_BYTES||!/^\/v1\/(sequences|examples)\/[a-zA-Z0-9_-]+\/frames\/[a-zA-Z0-9_-]+\.bin$/.test(meta.url))throw Error('Prepared asset metadata is invalid.');
+async function readAsset(meta:ObservationFrame['raster'],width:number,height:number,signal:AbortSignal):Promise<Raster>{
+  if(!meta||!['float32-le-mask8-v1','float32-le-quality8-v2','float32-le-estimate8-v1'].includes(meta.encoding??'float32-le-mask8-v1')||meta.size_bytes!==width*height*5||meta.size_bytes>MAX_RASTER_BYTES||!/^\/v1\/(sequences|examples)\/[a-zA-Z0-9_-]+\/frames\/[a-zA-Z0-9_-]+\.bin$/.test(meta.url))throw Error('Prepared asset metadata is invalid.');
   const response=await fetch(resolveAssetUrl(meta.url),{signal});
   if(!response.ok||!response.body)throw Error('Prepared image is unavailable.');
   const reader=response.body.getReader(),buffer=new Uint8Array(meta.size_bytes);let offset=0;
@@ -15,6 +14,16 @@ export async function readPrepared(frame:ObservationFrame,width:number,height:nu
   const hash=await crypto.subtle.digest('SHA-256',buffer),hex=Array.from(new Uint8Array(hash),byte=>byte.toString(16).padStart(2,'0')).join('');
   if(hex!==meta.sha256)throw Error('Prepared asset checksum failed.');
   return decodeRaster(buffer.buffer,width,height,meta.encoding);
+}
+export async function readPrepared(frame:ObservationFrame,width:number,height:number,signal:AbortSignal):Promise<Raster>{
+  if(frame.raster?.encoding==='float32-le-estimate8-v1')throw Error('Estimates cannot replace an observation.');
+  const original=await readAsset(frame.raster,width,height,signal);
+  if(!frame.gap_fill)return original;
+  try{
+    if(frame.gap_fill.encoding!=='float32-le-estimate8-v1')throw Error('Invalid estimate encoding.');
+    const bounded=AbortSignal.any([signal,AbortSignal.timeout(15000)]);
+    return attachGapFill(original,await readAsset(frame.gap_fill,width,height,bounded),frame.estimated_fraction??0);
+  }catch(error){if(signal.aborted)throw error;return {...original,gapFillFailed:true};}
 }
 export function usePreparedFrames(frames:ObservationFrame[],width:number,height:number,index:number,pinned:number[]){
   const cache=useRef(new Map<string,Raster>()),identity=useRef(frames);

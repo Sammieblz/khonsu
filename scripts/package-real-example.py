@@ -56,6 +56,13 @@ def package(manifest_path: Path, assets: Path, output: Path, sequence_id: str,
             raster_name = frame['frame_id'] + '.bin'
             files[raster_name] = read_bounded(assets / old_raster, MAX_BUNDLE_BYTES)
             frame['raster']['url'] = f'/v1/examples/{sequence_id}/frames/{raster_name}'
+        if frame.get('gap_fill'):
+            old_fill = frame['gap_fill']['url'].rsplit('/', 1)[-1]
+            if not re.fullmatch(r'[a-zA-Z0-9_-]{1,85}\.bin', old_fill):
+                raise ValueError('Only local prepared estimate filenames are accepted.')
+            fill_name = frame['frame_id'] + '-fill.bin'
+            files[fill_name] = read_bounded(assets / old_fill, MAX_BUNDLE_BYTES)
+            frame['gap_fill']['url'] = f'/v1/examples/{sequence_id}/frames/{fill_name}'
     validated = SequenceManifest.model_validate(payload)
     files['manifest.json'] = (validated.model_dump_json(indent=2) + '\n').encode()
     if sum(map(len, files.values())) > MAX_BUNDLE_BYTES:
@@ -68,7 +75,11 @@ def package(manifest_path: Path, assets: Path, output: Path, sequence_id: str,
         'acquired_at_utc': acquired_at, 'acquisition_reference': acquisition_reference,
         'packaged_at_utc': datetime.now(timezone.utc).isoformat(),
         'source_manifest_sha256': hashlib.sha256(original).hexdigest(),
-        'source_observations': [frame.model_dump(mode='json', exclude={'image_url', 'raster'}) for frame in validated.frames],
+        'source_observations': [frame.model_dump(mode='json', exclude={'image_url', 'raster', 'gap_fill'}) for frame in validated.frames],
+        'gap_fill_revision': {frame.frame_id: {'input_raster_sha256': frame.raster.sha256,
+                             'method': validated.processing.get('gap_fill_method'),
+                             'estimated_fraction': frame.estimated_fraction}
+                             for frame in validated.frames if frame.gap_fill},
         'files': {name: {'size_bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for name, data in sorted(files.items())},
         'data_use_terms': 'https://irsa.ipac.caltech.edu/data_use_terms.html',
         'irsa_acknowledgements': 'https://irsa.ipac.caltech.edu/ack.html',

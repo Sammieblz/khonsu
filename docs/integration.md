@@ -37,6 +37,13 @@ The checked-in OpenAPI file is the exact field and status-code contract. Real fr
 
 ## Scientific handoff
 
+The [Clean View contract](clean-view.md#additive-api-contract-and-provenance) adds
+optional `Frame.gap_fill` and `estimated_fraction`. Original raster bytes and
+strict quality remain unchanged. A `float32-le-estimate8-v1` asset identifies
+estimated display values only; its mask cannot be treated as observation validity.
+Both assets share the exact grid, individual byte cap and normal asset allowlists.
+Older manifests without estimates remain supported. Marking uses original validity.
+
 Tyrone's retrieval adapter returns downloaded local files plus source URL, release, observation ID, detector, actual observation time, wavelength metadata, quality information and target position. Samuel's processing entry point receives these files, query, processing settings and an output directory. It returns a manifest and artifacts or a typed, actionable failure. Network retries belong to retrieval. Scientific validation belongs to processing.
 
 The manifest must carry common output WCS and angular field of view, image dimensions, mask information, actual per-frame dates, effective wavelength information at the target, processing/stretch settings, and traceable source identifiers. A detector number alone does not establish spectral compatibility. See `docs/science-integrity.md` before choosing or combining frames.

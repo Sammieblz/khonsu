@@ -118,3 +118,15 @@ quality decisions; the browser displays prepared arrays. No model-based gap
 inpainting or new optical resolution is claimed. The 219-pair real audit found
 no compatible short-epoch coadd pair, so real stacks and PSF-matched differences
 remain unavailable. Frontend design tickets #61-63 remain planning only.
+
+## November 15: public Clean View, #66 / BYT-50
+
+Samuel authorized [small-gap display estimates](clean-view.md), enabled initially
+with a remembered preference, a plain-language estimated-area notice, original
+comparison and optional highlighted estimates. Technical controls move into
+Advanced. The scientific-integrity exception is limited to explicitly labelled
+display derivatives; original measurements and validity remain authoritative.
+CPython produces a separate bounded estimate asset. Mark mode shows the original.
+Bright boundaries, large star cores and external coverage stay unfilled. There is
+no generative model, temporal borrowing, new dependency or optional frontend
+design-phase implementation. Tyrone reviews the additive manifest contract.

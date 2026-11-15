@@ -179,6 +179,23 @@ def options(sequence_id="synthetic-processing-control"):
     )
 
 
+def test_live_processor_writes_separate_estimates_without_changing_validity(tmp_path):
+    inputs = [make_observation(tmp_path, i, defects=True) for i in range(2)]
+    output = tmp_path / 'processed'
+    manifest = AstronomyProcessor().process(inputs, options(), output)
+    assert manifest.processing['gap_fill_method'] == 'small-gap-harmonic-v1'
+    for frame in manifest.frames:
+        assert frame.gap_fill and 0 < frame.estimated_fraction <= frame.masked_fraction
+        original = (output / (frame.frame_id + '.bin')).read_bytes()
+        fill = (output / (frame.frame_id + '-fill.bin')).read_bytes()
+        valid = np.frombuffer(original, np.uint8, offset=SIZE*SIZE*4) == 1
+        estimated = np.frombuffer(fill, np.uint8, offset=SIZE*SIZE*4) == 1
+        assert not (valid & estimated).any()
+        with fits.open(output / (frame.frame_id + '.fits')) as data:
+            np.testing.assert_array_equal(valid.reshape(SIZE, SIZE), np.flipud(data['VALID'].data > 0))
+        assert frame.gap_fill.encoding == 'float32-le-estimate8-v1'
+
+
 def test_flags_mask_defects_but_keep_source_and_fullsample(tmp_path):
     loaded = read_observation(make_observation(tmp_path, 0, defects=True), RA, DEC)
     assert "TRANSIENT" in BAD_FLAG_NAMES

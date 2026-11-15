@@ -52,6 +52,8 @@ for (const engine of inspect ? [chromium] : [chromium, firefox]) {
       throw Error(`Unexpected replay request: ${request.method()} ${path}`);
     });
     await page.goto(`${base}/?ra_deg=${manifest.target.ra_deg}&dec_deg=${manifest.target.dec_deg}&fov_arcmin=120`, { waitUntil: 'domcontentloaded' });
+    // Wait for hydration and shared-link restoration before changing the form.
+    await page.waitForFunction(() => document.querySelector('#fov')?.value === '120');
     // Fill explicitly as well: the round-trip URL itself is covered below.
     await page.locator('#ra').fill(String(manifest.target.ra_deg));
     await page.locator('#dec').fill(String(manifest.target.dec_deg));

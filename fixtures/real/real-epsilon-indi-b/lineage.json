@@ -19,7 +19,8 @@
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W19_1B/l2b-v27-2026-197/3/level2_2025W19_1B_0344_3D3_spx_l2b-v27-2026-197.fits?center=331.0986113345%2C-56.8008041403&size=0.1500000000",
       "masked_fraction": 0.031923442179852435,
       "warnings": [],
-      "warning_fraction": 0.0
+      "warning_fraction": 0.0,
+      "estimated_fraction": 0.007816494995982175
     },
     {
       "frame_id": "frame-0002",
@@ -34,7 +35,8 @@
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W39_2A/l2b-v27-2026-271/3/level2_2026W39_2A_0581_1D3_spx_l2b-v27-2026-271.fits?center=331.0986113345%2C-56.8008041403&size=0.1500000000",
       "masked_fraction": 0.028782233910438992,
       "warnings": [],
-      "warning_fraction": 0.0
+      "warning_fraction": 0.0,
+      "estimated_fraction": 0.011469062751114032
     }
   ],
   "files": {
@@ -51,8 +53,8 @@
       "sha256": "893dc01d81e385c9bebb8f306f6f263c45de6ec3799a562296bf61f4e95e32e4"
     },
     "manifest.json": {
-      "size_bytes": 6477,
-      "sha256": "8b406786d49fc0454f23734948dc23aec8c51c7dbafd597c1e21597e8a197dc3"
+      "sha256": "685e2a615b436130ae600c7a97b491f36d6d77a4034279f274aa55414c1c5ee2",
+      "size_bytes": 7464
     },
     "source-manifest.json": {
       "size_bytes": 5428,
@@ -65,6 +67,14 @@
     "frame-0002.bin": {
       "size_bytes": 68445,
       "sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de"
+    },
+    "frame-0001-fill.bin": {
+      "sha256": "234c6b3025dbed20682c77132bad0dd0b3cefd97491da52ba73243d6f3776c8e",
+      "size_bytes": 68445
+    },
+    "frame-0002-fill.bin": {
+      "sha256": "a129985c57b15c95f37d4639479d9dce645e1f7d8a2a85de46f76f0f4ff310f9",
+      "size_bytes": 68445
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
@@ -101,5 +111,17 @@
       "method": "IRSA OUTLIER/OVERFLOW-only finite samples; separate weighted reprojection; strict values unchanged"
     }
   },
-  "quality_updated_at_utc": "2026-11-15T18:25:05.299118+00:00"
+  "quality_updated_at_utc": "2026-11-15T18:25:05.299118+00:00",
+  "gap_fill_revision": {
+    "frame-0001": {
+      "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+      "method": "small-gap-harmonic-v1",
+      "estimated_fraction": 0.007816494995982175
+    },
+    "frame-0002": {
+      "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+      "method": "small-gap-harmonic-v1",
+      "estimated_fraction": 0.011469062751114032
+    }
+  }
 }

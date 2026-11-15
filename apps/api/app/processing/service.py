@@ -19,7 +19,7 @@ from ..limits import MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OBSERVAT
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
-PIPELINE_VERSION = "khonsu-display-0.5.0"
+PIPELINE_VERSION = "khonsu-display-0.6.0"
 
 
 def _check_cancelled(cancelled):
@@ -74,6 +74,7 @@ class AstronomyProcessor:
                 reproject_quality, shared_limits, write_calibrated_grid, write_png, write_prepared_raster,
             )
             from .fits_reader import inspect_observation, read_observation
+            from .gap_fill import POLICY as GAP_FILL_POLICY, write_gap_fill
             from .spectral import MAX_CENTER_SPREAD_IN_BANDWIDTHS, select_compatible_frames
         except ModuleNotFoundError as exc:
             raise ProcessingError("SCIENCE_DEPENDENCIES_MISSING", "Install requirements-science.txt to process FITS observations.") from exc
@@ -189,6 +190,7 @@ class AstronomyProcessor:
                 policies[f"version_{package.lower()}"] = package_metadata.version(package)
             except package_metadata.PackageNotFoundError:
                 pass
+        policies.update(GAP_FILL_POLICY)
         for index, (item, image, valid) in enumerate(projected, start=1):
             _check_cancelled(cancelled)
             stem = f"frame-{index:04d}"
@@ -196,12 +198,18 @@ class AstronomyProcessor:
             write_calibrated_grid(output_dir / f"{stem}.fits", image, valid, wcs)
             quality = qualities[item.observation.observation_id]
             raster = write_prepared_raster(output_dir / f"{stem}.bin", image, valid, quality=quality)
+            fill, estimated_fraction = write_gap_fill(
+                output_dir / f"{stem}-fill.bin", image, valid,
+                native_scale / (options.fov_arcmin * 60.0 / size),
+            )
             source = item.observation
             frame_models.append(Frame(
                 frame_id=stem,
                 label=source.observed_start_utc.isoformat(),
                 image_url=f"/v1/sequences/{options.sequence_id}/frames/{stem}.png",
                 raster={**raster, "url": f"/v1/sequences/{options.sequence_id}/frames/{stem}.bin"},
+                gap_fill={**fill, "url": f"/v1/sequences/{options.sequence_id}/frames/{stem}-fill.bin"} if fill else None,
+                estimated_fraction=estimated_fraction,
                 observed_start_utc=source.observed_start_utc,
                 observed_end_utc=source.observed_end_utc,
                 wavelength_um=item.wavelength_um,

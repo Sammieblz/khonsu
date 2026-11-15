@@ -119,6 +119,11 @@ try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
   const page = await context.newPage();
   await page.goto(base);
+  // Loading the catalog temporarily disables this control; tabbing must start
+  // once it is available, without forcing focus or bypassing keyboard navigation.
+  await page.waitForFunction(() => [...document.querySelectorAll('button')].some(
+    button => button.textContent.trim() === 'LOAD CACHED REAL EXAMPLE' && !button.disabled,
+  ));
   const step = async (name, info) => {
     report.keyboard.push({ step: name, ...info });
     assert.ok(info.visible, `${name}: focus is not visible`);
