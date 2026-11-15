@@ -1,0 +1,59 @@
+{
+  "testedAt": "2026-11-15T18:39:15.088Z",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "size": {
+        "width": 2880,
+        "height": 2880
+      },
+      "warningCandidateExcluded": true,
+      "cpuAdaptiveFallback": true,
+      "studyControls": true,
+      "mobileNoOverflow": true,
+      "maximumByteDifference": 0,
+      "checks": 24,
+      "timings": [
+        {
+          "mode": "WebGL2",
+          "milliseconds": 165.19999998807907,
+          "signalPixels": 202864
+        },
+        {
+          "mode": "CPU worker",
+          "milliseconds": 1069,
+          "signalPixels": 202863
+        }
+      ],
+      "adapter": "ANGLE (AMD, Radeon RX 580 Series (0x000067DF) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "size": {
+        "width": 2880,
+        "height": 2880
+      },
+      "warningCandidateExcluded": true,
+      "cpuAdaptiveFallback": true,
+      "studyControls": true,
+      "mobileNoOverflow": true,
+      "maximumByteDifference": 0,
+      "checks": 24,
+      "timings": [
+        {
+          "mode": "WebGL2",
+          "milliseconds": 139,
+          "signalPixels": 202864
+        },
+        {
+          "mode": "CPU worker",
+          "milliseconds": 1632,
+          "signalPixels": 202863
+        }
+      ],
+      "adapter": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar"
+    }
+  ]
+}

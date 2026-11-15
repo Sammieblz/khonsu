@@ -126,7 +126,7 @@ class DisplaySettings(ApiModel):
 
 class PreparedRaster(ApiModel):
     url: str = Field(min_length=1, max_length=2048)
-    encoding: Literal["float32-le-mask8-v1"] = "float32-le-mask8-v1"
+    encoding: Literal["float32-le-mask8-v1", "float32-le-quality8-v2"] = "float32-le-mask8-v1"
     size_bytes: int = Field(gt=0, le=MAX_RASTER_BYTES)
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
 
@@ -145,10 +145,13 @@ class Frame(ApiModel):
     observation_id: str | None = Field(default=None, max_length=160)
     source_fits_url: HttpUrl | None = None
     masked_fraction: float = Field(default=0.0, ge=0, le=1)
+    warning_fraction: float = Field(default=0.0, ge=0, le=1)
     warnings: list[QualityWarning] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_exposure(self) -> "Frame":
+        if self.warning_fraction > self.masked_fraction + 1e-7:
+            raise ValueError("Warning-only pixels must be part of the strictly masked fraction")
         for name in ("observed_start_utc", "observed_end_utc"):
             value = getattr(self, name)
             if value is not None:

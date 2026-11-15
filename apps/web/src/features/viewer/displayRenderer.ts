@@ -10,7 +10,8 @@ uniform highp usampler2D validity;
 uniform ivec2 sourceSize;
 uniform float low; uniform float high;
 ivec2 bounded(ivec2 p){return clamp(p,ivec2(0),sourceSize-1);}
-bool validAt(ivec2 p){return texelFetch(validity,bounded(p),0).r!=uint(0);}
+bool validAt(ivec2 p){return texelFetch(validity,bounded(p),0).r==uint(1);}
+bool warningAt(ivec2 p){return texelFetch(validity,bounded(p),0).r==uint(2);}
 float valueAt(ivec2 p){return texelFetch(intensity,bounded(p),0).r;}
 `;
 const displayFragment = `#version 300 es
@@ -18,15 +19,17 @@ ${common}
 uniform ivec2 outputSize;
 uniform float a; uniform float gammaValue;
 uniform int useAsinh; uniform int hatch; uniform int smoothView;
+uniform int subtle; uniform int includeWarnings;
 out vec4 color;
 float inverseSinh(float x){return log(x+sqrt(x*x+1.));}
 void main(){
  vec2 s=vec2(gl_FragCoord.x,float(outputSize.y)-gl_FragCoord.y)*vec2(sourceSize)/vec2(outputSize)-.5;
  ivec2 outputPixel=ivec2(int(gl_FragCoord.x),outputSize.y-1-int(gl_FragCoord.y));
  ivec2 nearest=(2*outputPixel+1)*sourceSize/(2*outputSize);
- if(!validAt(nearest)){
+ bool warning=includeWarnings==1&&warningAt(nearest);
+ if(!validAt(nearest)&&!warning){
   bool line=hatch==1&&(nearest.x+nearest.y)%8<2;
-  color=vec4(line?vec3(70.,82.,99.)/255.:vec3(39.,49.,64.)/255.,1.);return;
+  color=vec4(line?vec3(70.,82.,99.)/255.:(subtle==1?vec3(7.,11.,18.):vec3(39.,49.,64.))/255.,1.);return;
  }
  float value=valueAt(nearest);
  if(smoothView==1){
@@ -34,7 +37,7 @@ void main(){
   for(int y=0;y<2;y++)for(int x=0;x<2;x++){
    ivec2 p=base+ivec2(x,y);
    float w=(x==0?1.-fraction.x:fraction.x)*(y==0?1.-fraction.y:fraction.y);
-   if(validAt(p)){total+=valueAt(p)*w;weight+=w;}
+   if(validAt(p)||(warning&&warningAt(p))){total+=valueAt(p)*w;weight+=w;}
   }
   value=total/max(weight,1e-8);
  }
@@ -152,7 +155,8 @@ export class DisplayRenderer {
     if(this.uploaded===raster)return;
     const gl=this.gl!;gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
     this.bindTexture(0);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.width,raster.height,0,gl.RED,gl.FLOAT,raster.values);
-    this.bindTexture(1);gl.texImage2D(gl.TEXTURE_2D,0,gl.R8UI,raster.width,raster.height,0,gl.RED_INTEGER,gl.UNSIGNED_BYTE,raster.valid);
+    const quality=raster.warning?raster.valid.map((valid,i)=>valid===1?1:raster.warning![i]===1?2:0):raster.valid;
+    this.bindTexture(1);gl.texImage2D(gl.TEXTURE_2D,0,gl.R8UI,raster.width,raster.height,0,gl.RED_INTEGER,gl.UNSIGNED_BYTE,quality);
     if(this.floatTargets){this.bindTexture(2);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.width,raster.height,0,gl.RED,gl.FLOAT,null);}
     this.uploaded=raster;this.processedKey='';
   }
@@ -189,6 +193,8 @@ export class DisplayRenderer {
       gl.uniform1i(uniform('smoothView'),options.sampling==='smooth'?1:0);
       gl.uniform1i(uniform('useAsinh'),options.curve==='asinh'?1:0);
       gl.uniform1i(uniform('hatch'),options.mask==='hatch'?1:0);
+      gl.uniform1i(uniform('subtle'),options.mask==='subtle'?1:0);
+      gl.uniform1i(uniform('includeWarnings'),options.includeWarnings?1:0);
       gl.uniform1f(uniform('a'),options.a);gl.uniform1f(uniform('gammaValue'),options.gamma);
       gl.drawArrays(gl.TRIANGLES,0,3);
       if(gl.getError()!==gl.NO_ERROR)throw Error('WebGL display unavailable');

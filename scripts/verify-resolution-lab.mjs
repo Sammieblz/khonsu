@@ -121,7 +121,7 @@ for (const engine of [chromium, firefox]) {
     const difference = await page.evaluate(async ({ moduleUrl, base64, fixture }) => {
       const { decodeRaster, renderPixels } = await import(moduleUrl);
       const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-      const raster = decodeRaster(bytes.buffer, fixture.grid.width_px, fixture.grid.height_px);
+      const raster = decodeRaster(bytes.buffer, fixture.grid.width_px, fixture.grid.height_px, fixture.frames[0].raster.encoding);
       const expected = renderPixels(raster, { low: fixture.display.vmin, high: fixture.display.vmax, a: .3, gamma: 1, curve: 'asinh', mask: 'quiet', sampling: 'smooth', detail: 0 }, { width: 768, height: 768 });
       const canvas = document.createElement('canvas'); canvas.width = canvas.height = 768;
       const image = document.querySelector('img[aria-hidden="false"]');

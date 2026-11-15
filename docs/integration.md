@@ -106,7 +106,7 @@ A search link and an evidence file do different jobs. The link repeats a search,
 | `notice`, `sharing` | The candidate disclaimer, and how this file differs from a search link |
 | `contains_synthetic_input` | `true` when any candidate was marked on a synthetic fixture |
 | `candidates[]` | ID, `origin: "human"`, `review_status: "unreviewed candidate"`, note, created and edited UTC times, `sequence_id`, `marked_frame` and `comparison.a` / `comparison.b` (frame ID, observation ID, real start time) |
-| `candidates[].position` | `grid_pixel` (zero-based, top-left, integer centers), `sky` (ICRS degrees and conversion method, or `null` with `sky_unavailable_reason`), `pixel_has_data` |
+| `candidates[].position` | `grid_pixel` (zero-based, top-left, integer centers), `sky` (ICRS degrees and conversion method, or `null` with `sky_unavailable_reason`), `pixel_has_data`, and additive `pixel_quality` (strict-valid, warning-only, unavailable or unknown) |
 | `sequences[]` | The sequence snapshot recorded with the candidates (see [candidate marks](#candidate-marks)), plus `synthetic_input` and `query` (the reproducible search link and what it reproduces, or `null` for synthetic fixtures) |
 
 Observation values are copied from the manifest that was on screen when the mark was made. None are re-derived at export time.

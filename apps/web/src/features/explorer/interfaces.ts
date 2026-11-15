@@ -18,6 +18,8 @@ export interface ImageSelection {
   comparison: { aFrameId: string; bFrameId: string } | null;
   /** Whether the frame has valid data at this pixel; null when only a PNG is available. */
   pixelHasData: boolean | null;
+  /** Optional for older saved notes; warning samples never count as strict-valid. */
+  pixelQuality?: 'strict-valid' | 'warning-only' | 'unavailable' | 'unknown';
 }
 
 export interface SkyPosition {
@@ -52,6 +54,7 @@ export interface FrameSummary {
   wavelength_um: number | null;
   bandwidth_um: number | null;
   masked_fraction: number;
+  warning_fraction?: number;
   source_fits_url: string | null;
   warnings: { code: string; message: string }[];
 }

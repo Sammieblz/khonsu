@@ -32,6 +32,9 @@ BAD_FLAG_NAMES = frozenset({
     "HALO", "SATELLITE_HALO", "OUTLIER", "PHANMISS",
 })
 INFORMATIONAL_FLAG_NAMES = frozenset({"SOURCE", "FULLSAMPLE"})
+# IRSA mosaic policy propagates these flags rather than discarding the values.
+# They remain excluded from Khonsu's strict measurements and shared stretch.
+DISPLAY_WARNING_NAMES = frozenset({"OUTLIER", "OVERFLOW"})
 
 # Fallback only when a product omits the self-describing FLAGS cards.
 # https://irsa.ipac.caltech.edu/onlinehelp/spherex/spherex/sp.html
@@ -65,6 +68,17 @@ class LoadedObservation(ObservationMetadata):
     science: np.ndarray
     variance: np.ndarray
     valid: np.ndarray
+    warning: np.ndarray | None = None
+
+
+def classify_pixels(science, variance, flags, definitions):
+    """0 unavailable, 1 strict-valid, 2 warning-only; unknown flags stay bad."""
+    allowed = sum(1 << bit for bit, name in definitions.items() if name in INFORMATIONAL_FLAG_NAMES)
+    warning_bits = sum(1 << bit for bit, name in definitions.items() if name in DISPLAY_WARNING_NAMES)
+    finite = np.isfinite(science) & np.isfinite(variance) & (variance > 0)
+    strict = finite & ((flags & np.uint32((~allowed) & 0xFFFFFFFF)) == 0)
+    displayable = finite & ((flags & np.uint32((~(allowed | warning_bits)) & 0xFFFFFFFF)) == 0)
+    return np.where(strict, 1, np.where(displayable, 2, 0)).astype(np.uint8)
 
 
 def _image_hdu(hdulist):
@@ -164,15 +178,17 @@ def read_observation(
                 raise ProcessingError("INVALID_FITS", "IMAGE, FLAGS and VARIANCE must have matching dimensions.")
             flags = raw_flags.astype(np.uint32, copy=True)
         known_mask = 0
-        rejection_mask = 0
-        for bit, name in metadata.flag_definitions.items():
+        for bit in metadata.flag_definitions:
             known_mask |= 1 << bit
-            if name in BAD_FLAG_NAMES or name not in INFORMATIONAL_FLAG_NAMES:
-                rejection_mask |= 1 << bit
         unknown = flags & np.uint32((~known_mask) & 0xFFFFFFFF)
-        rejected = (flags & np.uint32(rejection_mask)) != 0
-        valid = np.isfinite(science) & np.isfinite(variance) & (variance > 0) & ~rejected & (unknown == 0)
+        quality = classify_pixels(science, variance, flags, metadata.flag_definitions)
+        valid, warning = quality == 1, quality == 2
         warnings = list(metadata.warnings)
+        if np.any(warning):
+            warnings.append(QualityWarning(
+                code="WARNING_ONLY_PIXELS",
+                message="Finite OUTLIER/OVERFLOW-only samples are available for optional display; they remain excluded from strict measurements and stretch limits.",
+            ))
         if np.any(unknown):
             warnings.append(QualityWarning(
                 code="UNKNOWN_FLAGS_MASKED",
@@ -191,7 +207,7 @@ def read_observation(
             metadata.observation, metadata.spatial_wcs, metadata.target_x,
             metadata.target_y, metadata.image_shape, metadata.wavelength_um,
             metadata.bandwidth_um, metadata.flux_scale, metadata.flag_definitions,
-            metadata.processing_version, warnings, science, variance, valid,
+            metadata.processing_version, warnings, science, variance, valid, warning,
         )
     except ProcessingError:
         raise

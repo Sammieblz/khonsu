@@ -16,9 +16,9 @@ from astropy.wcs import WCS
 from PIL import Image
 
 from app.interfaces import ObservationInput, ProcessingOptions
-from app.processing.alignment import auto_grid_size, output_wcs, reproject_observation, shared_limits, write_png
+from app.processing.alignment import auto_grid_size, output_wcs, reproject_observation, reproject_quality, shared_limits, write_png, write_prepared_raster
 from app.processing.errors import ProcessingCancelled, ProcessingError
-from app.processing.fits_reader import BAD_FLAG_NAMES, read_observation
+from app.processing.fits_reader import BAD_FLAG_NAMES, read_observation, classify_pixels
 from app.processing.service import AstronomyProcessor
 from app.processing.spectral import select_compatible_frames
 
@@ -27,6 +27,35 @@ SIZE = 33
 RA = 120.0
 DEC = 20.0
 SCALE_DEG = 6.0 / 3600.0
+
+
+def test_warning_policy_never_accepts_bad_unknown_or_nonfinite_samples():
+    flags = np.array([0, 1 << 19, 1 << 1, (1 << 19) | (1 << 10), 1 << 31, 1 << 21, 1 << 19, 0], dtype=np.uint32)
+    values = np.ones(8); values[6] = np.nan
+    variance = np.ones(8); variance[7] = 0
+    definitions = {bit: name for name, bit in FLAG_BITS.items()}
+    assert classify_pixels(values, variance, flags, definitions).tolist() == [1, 2, 2, 0, 0, 1, 0, 0]
+
+
+def test_quality_reprojection_preserves_strict_values_and_transport_states(tmp_path):
+    source = make_observation(tmp_path, 0)
+    with fits.open(source.fits_path, mode='update') as h:
+        h['FLAGS'].data[10, 10] = 1 << FLAG_BITS['OUTLIER']
+        h['IMAGE'].data[10, 10] = 1e6
+        h['FLAGS'].data[20, 20] = 1 << FLAG_BITS['HOT']
+    loaded = read_observation(source, RA, DEC)
+    grid = output_wcs(options(), SIZE)
+    strict, valid = reproject_observation(loaded, grid, SIZE)
+    image, quality = reproject_quality(loaded, grid, SIZE)
+    assert np.array_equal(quality == 1, valid)
+    assert np.array_equal(image[valid], strict[valid])
+    assert quality[10, 10] == 2 and quality[20, 20] == 0
+    result = write_prepared_raster(tmp_path/'quality.bin', image, valid, quality=quality)
+    raw = (tmp_path/'quality.bin').read_bytes()
+    assert result['encoding'] == 'float32-le-quality8-v2'
+    assert len(raw) == SIZE*SIZE*5
+    restored = np.flipud(np.frombuffer(raw, np.uint8, offset=SIZE*SIZE*4).reshape(SIZE, SIZE))
+    assert np.array_equal(restored, quality)
 
 # Verified bit positions from the public IRSA Spectrophotometry Tool guide.
 # SOURCE and FULLSAMPLE describe pixels; they do not mean bad science pixels.

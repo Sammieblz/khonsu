@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./resolutionLab.module.css";
+import { QualityStudy } from './QualityStudy';
 
 type Mode = "current" | "native" | "stack" | "truth" | "coverage";
 type Assets = { standard: string; shoulder: string };
@@ -86,7 +87,7 @@ export function ResolutionLab() {
   return <main className={styles.lab}>
     <a className="skip-link" href="#comparison">Skip to image comparison</a>
     <header className={styles.header}><a href="/" className={styles.brand}><img src="/khonsu-mark.svg" alt="" width={38} height={38} />KHONSU</a><a href="/">BACK TO OBSERVATORY ↗</a></header>
-    <div className={styles.intro}><div><p className={styles.eyebrow}>RESOLUTION LAB / EXPERIMENT 02</p><h1>A CLOSER LOOK.</h1></div><p>Start with the same sky.<br />See what processing changes.</p></div>
+    <div className={styles.intro}><div><p className={styles.eyebrow}>RESOLUTION LAB / EXPERIMENT 02</p><h1>A CLOSER LOOK.</h1></div><p>Start with the same sky.<br />See what processing changes.<br/><a href="#quality-study">Compare masks and background</a></p></div>
     {error ? <div role="alert" className={styles.message}><p>{error}</p><button onClick={() => setAttempt(a => a+1)}>RETRY COMPARISON</button></div> : !field ? <p role="status">Loading the comparison...</p> : <>
       <div className={styles.workspace}>
         <section id="comparison" className={styles.console} aria-label="Resolution comparison">
@@ -144,5 +145,6 @@ export function ResolutionLab() {
       </div>
       <footer className={styles.footer}><p>FIND WHAT TIME REVEALS.</p><span>Research preview. Original observations and saved candidate notes remain in the observatory.</span><a href="/">RETURN TO THE SKY ↗</a></footer>
     </>}
+    <QualityStudy />
   </main>;
 }

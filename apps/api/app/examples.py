@@ -55,19 +55,23 @@ def validate_bundle(directory: Path) -> SequenceManifest:
             raise CachedExampleError("Cached lineage needs a dated acquisition reference.")
         if acquired != datetime.fromisoformat(acquisition['processing_timestamp_utc'].replace('Z', '+00:00')):
             raise CachedExampleError("The acquisition timestamp and recorded probe disagree.")
-        if lineage.get('source_observations') != [frame.model_dump(mode='json', exclude={'image_url', 'raster'}) for frame in manifest.frames]:
+        source_observations = [{"warning_fraction": 0.0, **entry} for entry in lineage.get('source_observations', [])]
+        if source_observations != [frame.model_dump(mode='json', exclude={'image_url', 'raster'}) for frame in manifest.frames]:
             raise CachedExampleError("The lineage and observation metadata disagree.")
         if source.target != manifest.target or source.grid != manifest.grid or source.display != manifest.display:
             raise CachedExampleError("The cached grid, target or stretch differs from its source.")
         if source.requested_fov_arcmin != manifest.requested_fov_arcmin or source.warnings != manifest.warnings:
             raise CachedExampleError("The cached field or quality warnings differ from their source.")
-        if [frame.model_dump(exclude={'image_url', 'raster'}) for frame in source.frames] != [frame.model_dump(exclude={'image_url', 'raster'}) for frame in manifest.frames]:
+        # Warning-only display provenance can be added to a reviewed v1 bundle.
+        # Its original strict PNG, frame facts and source manifest stay intact.
+        compared = {'image_url', 'raster', 'warning_fraction'}
+        if [frame.model_dump(exclude=compared) for frame in source.frames] != [frame.model_dump(exclude=compared) for frame in manifest.frames]:
             raise CachedExampleError("The cached observations differ from their source.")
         if any(manifest.processing.get(key) != value for key, value in source.processing.items()):
             raise CachedExampleError("The cached processing record differs from its source.")
         expected = {'manifest.json', 'source-manifest.json', 'acquisition-record.json'}
         images = {}
-        for frame in manifest.frames:
+        for frame, source_frame in zip(manifest.frames, source.frames):
             validate_irsa_url(str(frame.source_fits_url))
             matches = [entry for entry in acquisition['downloaded_sources']
                        if entry['source_fits_url'] == str(frame.source_fits_url)
@@ -83,6 +87,15 @@ def validate_bundle(directory: Path) -> SequenceManifest:
             images[name] = frame
             expected.add(name)
             if frame.raster:
+                if frame.raster.encoding == 'float32-le-quality8-v2':
+                    revision = lineage.get('quality_revision', {}).get(frame.frame_id)
+                    if source_frame.raster is None or source_frame.raster.encoding != 'float32-le-quality8-v2':
+                        if (not isinstance(revision, dict)
+                                or revision.get('source_fits_url') != str(frame.source_fits_url)
+                                or revision.get('verified_strict_samples_unchanged') is not True
+                                or revision.get('warning_fraction') != frame.warning_fraction
+                                or not re.fullmatch(r'[a-f0-9]{64}', revision.get('raw_sha256', ''))):
+                            raise CachedExampleError("A quality upgrade needs its raw-source and strict-sample audit.")
                 raster_name = frame.frame_id + '.bin'
                 if frame.raster.url != f'/v1/examples/{manifest.sequence_id}/frames/{raster_name}':
                     raise CachedExampleError("A prepared raster must identify its bundled local asset.")
@@ -94,8 +107,11 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                 count = manifest.grid.width_px * manifest.grid.height_px
                 values = np.frombuffer(raw[:count * 4], dtype='<f4')
                 valid = np.frombuffer(raw[count * 4:], dtype=np.uint8)
-                if not np.isfinite(values).all() or not np.isin(valid, [0, 1]).all():
+                states = [0, 1, 2] if frame.raster.encoding == 'float32-le-quality8-v2' else [0, 1]
+                if not np.isfinite(values).all() or not np.isin(valid, states).all():
                     raise CachedExampleError("Prepared values or mask disagree with the image grid.")
+                if abs(float(np.mean(valid == 2)) - frame.warning_fraction) > 1e-12:
+                    raise CachedExampleError("Prepared warning fraction disagrees with the manifest.")
         entries = lineage.get('files')
         if not isinstance(entries, dict) or set(entries) != expected:
             raise CachedExampleError("The cached file inventory is incomplete.")
@@ -126,7 +142,7 @@ def validate_bundle(directory: Path) -> SequenceManifest:
                             if images[name].raster:
                                 count = image.width * image.height
                                 raw = read_bounded(directory / (images[name].frame_id + '.bin'), MAX_RASTER_BYTES)
-                                if not np.array_equal(np.frombuffer(raw[count * 4:], dtype=np.uint8) > 0, np.asarray(image.getchannel('A')).ravel() > 0):
+                                if not np.array_equal(np.frombuffer(raw[count * 4:], dtype=np.uint8) == 1, np.asarray(image.getchannel('A')).ravel() > 0):
                                     raise CachedExampleError("Prepared raster and PNG validity disagree.")
                 except (Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
                     raise CachedExampleError("A cached PNG has unsafe dimensions.") from exc

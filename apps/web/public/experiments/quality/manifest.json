@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-11-15T18:38:43.663224+00:00",
+  "fields": [
+    {
+      "id": "real-wise-0855",
+      "title": "WISE 0855 field (primary)",
+      "source": {
+        "observation_id": "2025W45_2A_0292_2",
+        "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+        "observed_end_utc": "2025-11-07T20:33:22.377600Z",
+        "release": "DR1",
+        "detector": 2,
+        "wavelength_um": 1.413164368794356,
+        "bandwidth_um": 0.03425144409136026,
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.5000000000"
+      },
+      "raw_sha256": "d108c3ec7dba8fa795430cd9895ed6d3126c2d19f19fe31917a6a9888a98a093",
+      "raw_cache": ".cache/resolution/overview-real-wise-0855.fits",
+      "assets": {
+        "original": "/experiments/quality/real-wise-0855-original.png",
+        "warnings": "/experiments/quality/real-wise-0855-warnings.png",
+        "zodi": "/experiments/quality/real-wise-0855-zodi.png",
+        "zodi_warnings": "/experiments/quality/real-wise-0855-zodi-warnings.png"
+      },
+      "grid_wcs": {
+        "WCSAXES": 2,
+        "CRPIX1": 196.5,
+        "CRPIX2": 196.5,
+        "CDELT1": -0.00085034013605442,
+        "CDELT2": 0.00085034013605442,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 133.76012139141,
+        "CRVAL2": -7.2421279412123,
+        "LONPOLE": 180.0,
+        "LATPOLE": -7.2421279412123,
+        "MJDREF": 0.0,
+        "RADESYS": "ICRS"
+      },
+      "grid_size": 392,
+      "fov_arcmin": 20,
+      "limits_mjy_sr": [
+        -0.18293858727216716,
+        11.264379431903361
+      ],
+      "asinh_a": 0.1,
+      "unavailable_fraction": 0.01639941690962099,
+      "warning_fraction": 0.014479643898375676,
+      "strict_fraction": 0.9691209391920034,
+      "sky_sigma_original": 0.008677543140947819,
+      "sky_sigma_zodi": 0.008707504719495773,
+      "median_model_subtracted_mjy_sr": 0.24927230179309845
+    },
+    {
+      "id": "real-epsilon-indi-b",
+      "title": "Epsilon Indi B field (backup)",
+      "source": {
+        "observation_id": "2025W19_1B_0344_3",
+        "observed_start_utc": "2025-05-07T05:14:15.590400Z",
+        "observed_end_utc": "2025-05-07T05:16:10.761600Z",
+        "release": "DR1",
+        "detector": 3,
+        "wavelength_um": 1.6850815019655676,
+        "bandwidth_um": 0.04013507966355219,
+        "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W19_1B/l2b-v27-2026-197/3/level2_2025W19_1B_0344_3D3_spx_l2b-v27-2026-197.fits?center=331.0986113345%2C-56.8008041403&size=0.5000000000"
+      },
+      "raw_sha256": "499483bd8f9adf67992c8fa9e74947369b04ee1c164e7ea0ff96c6d2c4f936ac",
+      "raw_cache": ".cache/resolution/overview-real-epsilon-indi-b.fits",
+      "assets": {
+        "original": "/experiments/quality/real-epsilon-indi-b-original.png",
+        "warnings": "/experiments/quality/real-epsilon-indi-b-warnings.png",
+        "zodi": "/experiments/quality/real-epsilon-indi-b-zodi.png",
+        "zodi_warnings": "/experiments/quality/real-epsilon-indi-b-zodi-warnings.png"
+      },
+      "grid_wcs": {
+        "WCSAXES": 2,
+        "CRPIX1": 196.0,
+        "CRPIX2": 196.0,
+        "CDELT1": -0.00085251491901108,
+        "CDELT2": 0.00085251491901108,
+        "CUNIT1": "deg",
+        "CUNIT2": "deg",
+        "CTYPE1": "RA---TAN",
+        "CTYPE2": "DEC--TAN",
+        "CRVAL1": 331.09861133448,
+        "CRVAL2": -56.800804140278,
+        "LONPOLE": 180.0,
+        "LATPOLE": -56.800804140278,
+        "MJDREF": 0.0,
+        "RADESYS": "ICRS"
+      },
+      "grid_size": 391,
+      "fov_arcmin": 20,
+      "limits_mjy_sr": [
+        -0.12135748576521871,
+        11.54499340057373
+      ],
+      "asinh_a": 0.1,
+      "unavailable_fraction": 0.05470921828088513,
+      "warning_fraction": 0.00862762540799707,
+      "strict_fraction": 0.9366631563111179,
+      "sky_sigma_original": 0.013921675272285938,
+      "sky_sigma_zodi": 0.013409679755568504,
+      "median_model_subtracted_mjy_sr": 0.1396566927433014
+    }
+  ],
+  "audit": [
+    {
+      "id": "real-wise-0855",
+      "inspected": 12,
+      "failed_inputs": 0,
+      "pairs_checked": 66,
+      "rejections": {
+        "Target wavelength mismatch": 66
+      },
+      "products": [],
+      "status": "insufficient_compatible_coverage"
+    },
+    {
+      "id": "real-epsilon-indi-b",
+      "inspected": 12,
+      "failed_inputs": 0,
+      "pairs_checked": 66,
+      "rejections": {
+        "Target wavelength mismatch": 66
+      },
+      "products": [],
+      "status": "insufficient_compatible_coverage"
+    },
+    {
+      "id": "north-ecliptic-pole",
+      "inspected": 12,
+      "failed_inputs": 0,
+      "pairs_checked": 66,
+      "rejections": {
+        "Target wavelength mismatch": 66
+      },
+      "products": [],
+      "status": "insufficient_compatible_coverage"
+    },
+    {
+      "id": "north-pole-deep",
+      "inspected": 7,
+      "failed_inputs": 5,
+      "pairs_checked": 21,
+      "rejections": {
+        "Target wavelength mismatch": 21
+      },
+      "products": [],
+      "status": "insufficient_compatible_coverage"
+    }
+  ],
+  "acquisition_sha256": "8bab5ac3cb4c83379046273ed334d5070ce59909a25d74f6ffce05d9d80fb8f0",
+  "source_hashes": {
+    "scripts/experiment-quality.py": "ce87e1c817010a2cdd7a661063a9901476fe665b51f765589ac3562e5b729947",
+    "apps/api/app/processing/composites.py": "65db4e2d3d008f17ff351239dde688a5c26862a37bbe7b1aac94d925d998bf89",
+    "apps/api/app/processing/fits_reader.py": "6b37f8c65d52d6e6036acb5a09f6b51c08452bb76b65e6d57ed69c2f23229cd7",
+    "apps/api/app/processing/alignment.py": "589a9713d894c94bc0b445b6bff8553bcb3488b3d4a078c919c56f2d1ef93e0b"
+  },
+  "method": "IMAGE versus IMAGE-ZODI; identical common WCS and absolute stretch within each field; warning-only variants separate from strict quality",
+  "limits": [
+    "No finer optical resolution. ZODI removes a supplied smooth foreground model, not detector noise or all backgrounds.",
+    "OUTLIER/OVERFLOW values are optional warning display, never trusted photometry.",
+    "Coadd audit uses at most 16 inputs per target within 24 hours, same detector/release and wavelength spread <= 0.1 bandwidth at target and each pixel.",
+    "This bounded sample cannot establish that compatible archive data does not exist elsewhere.",
+    "PSF-matched differences are not enabled: no accepted short-epoch coadd pair in this sample, no validated full-field PSF matching or residual significance."
+  ]
+}

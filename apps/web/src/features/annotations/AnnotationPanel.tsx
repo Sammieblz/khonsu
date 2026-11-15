@@ -18,7 +18,7 @@ function SelectionSummary({ selection, sequence }: { selection: ImageSelection; 
   return <div className={styles.selection} aria-live="polite">
     <p>Grid pixel X {selection.x}, Y {selection.y} on observation {index + 1}, {observationLabel(frame?.observed_start_utc)}{frame?.observation_id ? ` (${frame.observation_id})` : ""}.</p>
     <p className={styles.sky}>{sky.ok ? `${formatSky(sky.ra_deg, sky.dec_deg)}, from the sequence's common grid.` : `Sky coordinates unavailable: ${sky.reason} The mark will keep its pixel position only.`}</p>
-    {selection.pixelHasData === false && <p className={styles.warning}>No valid data at this pixel in this observation: it is masked or outside coverage. A mark here records a gap or artifact, not a measured source.</p>}
+    {selection.pixelHasData === false && <p className={styles.warning}>{selection.pixelQuality==='warning-only'?'Warning-only sample: OUTLIER/OVERFLOW flags exclude this value from trusted measurements.':'No valid data at this pixel in this observation: it is masked or outside coverage.'} A mark here records a quality concern, not a measured source.</p>}
     {selection.pixelHasData === null && <p>This frame has no intensity data in the browser, so data validity at this pixel is unknown.</p>}
   </div>;
 }
@@ -74,6 +74,7 @@ export function AnnotationPanel({
       frame_id: frame.frame_id, observation_id: frame.observation_id ?? null, observed_start_utc: frame.observed_start_utc ?? null,
       observed_end_utc: frame.observed_end_utc ?? null, release: frame.release ?? null, detector: frame.detector ?? null,
       wavelength_um: frame.wavelength_um ?? null, bandwidth_um: frame.bandwidth_um ?? null, masked_fraction: frame.masked_fraction ?? 0,
+      warning_fraction: frame.warning_fraction ?? 0,
       source_fits_url: frame.source_fits_url ?? null, warnings: [],
     }));
     return contexts[item.selection.sequenceId]?.frames ?? null;

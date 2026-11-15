@@ -56,11 +56,12 @@
       "masked_fraction": 0.031923442179852435,
       "warnings": [],
       "raster": {
-        "encoding": "float32-le-mask8-v1",
+        "encoding": "float32-le-quality8-v2",
         "size_bytes": 68445,
         "sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001.bin"
-      }
+      },
+      "warning_fraction": 0.0
     },
     {
       "frame_id": "frame-0002",
@@ -77,11 +78,12 @@
       "masked_fraction": 0.028782233910438992,
       "warnings": [],
       "raster": {
-        "encoding": "float32-le-mask8-v1",
+        "encoding": "float32-le-quality8-v2",
         "size_bytes": 68445,
         "sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002.bin"
-      }
+      },
+      "warning_fraction": 0.0
     }
   ],
   "warnings": [
@@ -136,6 +138,7 @@
     "cache_acquired_at_utc": "2026-11-14T20:37:09.240354+00:00",
     "cache_acquisition_reference": "docs/target-coverage.json target epsilon-indi-b; fresh bounded five-target probe",
     "cache_role": "backup",
-    "browser_raster_encoding": "float32-le-mask8-v1"
+    "browser_raster_encoding": "float32-le-quality8-v2",
+    "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged."
   }
 }

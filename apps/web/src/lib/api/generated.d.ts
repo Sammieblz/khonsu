@@ -4,10 +4,10 @@ export interface components {
   schemas: {
     "ApiError": { "code": string; "details"?: (string)[]; "message": string; };
     "DisplaySettings": { "stretch"?: "linear" | "asinh"; "vmax": number; "vmin": number; };
-    "Frame": { "bandwidth_um"?: number | null; "detector"?: number | null; "frame_id": string; "image_url": string; "label": string; "masked_fraction"?: number; "observation_id"?: string | null; "observed_end_utc"?: string | null; "observed_start_utc"?: string | null; "raster"?: components["schemas"]["PreparedRaster"] | null; "release"?: "DR1" | "QR3" | null; "source_fits_url"?: string | null; "warnings"?: (components["schemas"]["QualityWarning"])[]; "wavelength_um"?: number | null; };
+    "Frame": { "bandwidth_um"?: number | null; "detector"?: number | null; "frame_id": string; "image_url": string; "label": string; "masked_fraction"?: number; "observation_id"?: string | null; "observed_end_utc"?: string | null; "observed_start_utc"?: string | null; "raster"?: components["schemas"]["PreparedRaster"] | null; "release"?: "DR1" | "QR3" | null; "source_fits_url"?: string | null; "warning_fraction"?: number; "warnings"?: (components["schemas"]["QualityWarning"])[]; "wavelength_um"?: number | null; };
     "HealthResponse": { "live_processing_available"?: boolean; "service"?: "khonsu-api"; "status"?: "ok"; "version": string; };
     "ImageGrid": { "height_px": number; "orientation"?: "north-up-east-left"; "pixel_center_convention"?: "zero-based-integer-centers"; "pixel_origin"?: "top-left"; "raster_to_wcs"?: "identity" | "flip-y" | null; "wcs_header"?: { [key: string]: string | number | number; } | null; "width_px": number; };
-    "PreparedRaster": { "encoding"?: "float32-le-mask8-v1"; "sha256": string; "size_bytes": number; "url": string; };
+    "PreparedRaster": { "encoding"?: "float32-le-mask8-v1" | "float32-le-quality8-v2"; "sha256": string; "size_bytes": number; "url": string; };
     "PresetTarget": { "coordinate_frame"?: "ICRS"; "coordinate_note": string; "dec_deg"?: number | null; "label": string; "object_type": string; "preset_id": string; "ra_deg"?: number | null; };
     "QualityWarning": { "code": string; "message": string; };
     "SequenceJob": { "error"?: components["schemas"]["ApiError"] | null; "manifest_url"?: string | null; "message"?: string | null; "progress"?: number; "sequence_id": string; "status": "queued" | "retrieving" | "processing" | "ready" | "failed" | "cancelled" | "expired"; };

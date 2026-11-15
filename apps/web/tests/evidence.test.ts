@@ -60,6 +60,15 @@ test("the evidence file parses and identifies the exact observations and positio
   assert.equal(first.comparison.b.observed_start_utc, cached.frames[2]!.observed_start_utc);
 });
 
+test('warning-only marks retain their exclusion and quality state in evidence',()=>{
+  const context=sequenceContext(cached,null,BASE,CREATED);
+  const point={...mark(cached,4,0,false),pixelQuality:'warning-only' as const};
+  const candidate=createCandidate(point,'Quality control, not a detection.',context,'warning-control',CREATED);
+  const exported=buildEvidence([candidate],{[cached.sequence_id]:context},EXPORTED);
+  assert.equal(exported.candidates[0]!.position.pixel_has_data,false);
+  assert.equal(exported.candidates[0]!.position.pixel_quality,'warning-only');
+});
+
 test("observation values come from the displayed manifest, not the export time", () => {
   const { candidates, contexts } = exampleEvidence();
   const [sequence] = JSON.parse(evidenceJson(buildEvidence(candidates, contexts, EXPORTED))).sequences;

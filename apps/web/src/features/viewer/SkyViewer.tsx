@@ -10,7 +10,7 @@ import { boundedView, centerField, clientPointToRaster, FIT, nativeSampling, vis
 import { DisplayRenderer } from './displayRenderer';
 import { ObservationDetails } from '@/features/annotations/ObservationDetails';
 import { usePreparedFrames } from './usePreparedFrames';
-import { displaySize, type DisplayOptions } from './display';
+import { displaySize, measuredResolution, HD_DISPLAY_SIDE, MAX_DISPLAY_SIDE, type AutoResolution, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
 const EMPTY_FRAMES: ObservationFrame[] = [];
 
@@ -22,10 +22,13 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const [tool, setTool] = useState<ViewerTool>('time');
   const [view, setView] = useState(FIT), [expanded, setExpanded] = useState(false);
   const [speed, setSpeed] = useState(700), [blink, setBlink] = useState(false);
-  const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'quiet',sampling:'smooth',detail:0};
+  const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'subtle',sampling:'smooth',detail:0,includeWarnings:false};
   const [display,setDisplay]=useState<DisplayOptions>({...original,a:.3});
   const [originalHeld,setOriginalHeld]=useState(false),[outputSize,setOutputSize]=useState({width:1,height:1});
   const [viewportSize,setViewportSize]=useState({width:1,height:1});
+  const [resolution,setResolution]=useState<'auto'|'hd'|'4k'>('auto'),[autoResolution,setAutoResolution]=useState<AutoResolution>('checking');
+  const [renderMs,setRenderMs]=useState<number|null>(null);
+  const maxSide=resolution==='4k'||(resolution==='auto'&&autoResolution==='4k')?MAX_DISPLAY_SIDE:HD_DISPLAY_SIDE;
   const effectiveDisplay=useMemo(()=>({...display,detail:originalHeld||tool==='mark'?0:display.detail}),[display,originalHeld,tool]);
   const [forceCpu,setForceCpu]=useState(false),[rendererMode,setRendererMode]=useState('Preparing display'),[rendering,setRendering]=useState(false);
   const [adapter,setAdapter]=useState('');
@@ -44,6 +47,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const {rasters,failed:rasterFailed}=usePreparedFrames(frames,sequence?.grid.width_px??0,sequence?.grid.height_px??0,index,[a,b]);
   const raster=active?rasters.get(active.frame_id):undefined;
   const displayAvailable=!!raster&&!rendererMode.startsWith('Original PNG');
+  const warningsShown=displayAvailable&&!!raster?.warning&&!!display.includeWarnings;
   const preparedFailed=!!active&&rasterFailed.includes(active.frame_id);
   const frameReady=(frame:ObservationFrame|undefined)=>!!frame&&images.has(frame.frame_id)&&(!frame.raster||rasters.has(frame.frame_id)||rasterFailed.includes(frame.frame_id));
   const ready=frameReady(active),comparisonReady=a!==b&&frameReady(frames[a])&&frameReady(frames[b]);
@@ -68,12 +72,13 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     const resize=()=>{
       setView(current=>boundedView(current,element.clientWidth,element.clientHeight));
       setViewportSize({width:element.clientWidth,height:element.clientHeight});
-      const size=displaySize(Math.max(1,element.clientWidth*window.devicePixelRatio*view.zoom),Math.max(1,element.clientHeight*window.devicePixelRatio*view.zoom));
+      const scale=resolution==='4k'?MAX_DISPLAY_SIDE/Math.max(1,element.clientWidth,element.clientHeight):window.devicePixelRatio*view.zoom;
+      const size=displaySize(Math.max(1,element.clientWidth*scale),Math.max(1,element.clientHeight*scale),maxSide);
       setOutputSize(old=>old.width===size.width&&old.height===size.height?old:size);
     };
     const observer=new ResizeObserver(resize);resize();observer.observe(element);window.addEventListener('resize',resize);
     return()=>{observer.disconnect();window.removeEventListener('resize',resize);};
-  },[view.zoom]);
+  },[view.zoom,maxSide,resolution]);
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
     const wheel=(event:WheelEvent)=>{if(tool!=='pan'||!sequence)return;event.preventDefault();const rect=element.getBoundingClientRect();setView(current=>zoomAt(current,Math.exp(-event.deltaY*.002),event.clientX-rect.left-rect.width/2,event.clientY-rect.top-rect.height/2,rect.width,rect.height));};
@@ -87,11 +92,12 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     const token=++revision.current,image=images.get(active.frame_id);if(!image||!ready)return;
     setRendering(true);
     latestDraw.current=async()=>{
+      const started=performance.now();
       let rendered:HTMLCanvasElement|ImageBitmap|ImageData|HTMLImageElement=image;
       try{
         if(raster&&renderer.current)rendered=await renderer.current.render(raster,effectiveDisplay,outputSize);
         if(token!==revision.current)return;
-        context.fillStyle='#273140';context.fillRect(0,0,width,height);context.imageSmoothingEnabled=false;
+        context.fillStyle=effectiveDisplay.mask==='subtle'?'#070b12':'#273140';context.fillRect(0,0,width,height);context.imageSmoothingEnabled=false;
         if(rendered instanceof ImageData){const temporary=document.createElement('canvas');temporary.width=rendered.width;temporary.height=rendered.height;temporary.getContext('2d')!.putImageData(rendered,0,0);context.drawImage(temporary,0,0,width,height);}
         else context.drawImage(rendered,0,0,width,height);
         context.strokeStyle='#f3bc60';context.lineWidth=Math.max(2,width/400);
@@ -104,8 +110,14 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
           context.setLineDash([]);context.font=`${Math.max(14,Math.round(width/36))}px monospace`;context.fillText(String(number+1).padStart(2,'0'),x+radius*.75,y-radius*.75);context.restore();
         });
         if(tool==='mark'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scaleX,cursor.y*scaleY,scaleX,scaleY);}
-        setRendererMode(raster?(renderer.current?.mode??'CPU canvas'):'Original PNG');setAdapter(raster?(renderer.current?.adapter??''):'');setRendering(false);
-      }catch{if(token===revision.current){context.fillStyle='#273140';context.fillRect(0,0,width,height);context.drawImage(image,0,0,width,height);setRendererMode('Original PNG: display renderer unavailable');setRendering(false);}}
+        const mode=raster?(renderer.current?.mode??'CPU canvas'):'Original PNG';
+        // Include the next presentation opportunity, not just GPU submission.
+        await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
+        if(token!==revision.current)return;
+        const elapsed=performance.now()-started;setRenderMs(elapsed);
+        setAutoResolution(current=>measuredResolution(current,mode,elapsed));
+        setRendererMode(mode);setAdapter(raster?(renderer.current?.adapter??''):'');setRendering(false);
+      }catch{if(token===revision.current){context.fillStyle='#070b12';context.fillRect(0,0,width,height);context.drawImage(image,0,0,width,height);setRendererMode('Original PNG: display renderer unavailable');setAutoResolution('hd');setRendering(false);}}
       finally{if(rendered instanceof ImageBitmap)rendered.close();}
     };
     if(!drawing.current){drawing.current=true;void(async()=>{while(latestDraw.current){const job=latestDraw.current;latestDraw.current=null;await job();}drawing.current=false;})();}
@@ -114,8 +126,9 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     if(!sequence||!active||!ready)return;
     // Validity comes from the verified raster mask; a PNG-only frame cannot say.
     const pixelHasData=raster?raster.valid[y*raster.width+x]===1:null;
+    const pixelQuality=raster?(pixelHasData?'strict-valid':raster.warning?.[y*raster.width+x]===1?'warning-only':'unavailable'):'unknown';
     const comparison=a!==b&&frames[a]&&frames[b]?{aFrameId:frames[a].frame_id,bFrameId:frames[b].frame_id}:null;
-    onSelect({sequenceId:sequence.sequence_id,frameId:active.frame_id,x,y,coordinateSpace:'natural-raster',pixelOrigin:'top-left',comparison,pixelHasData});
+    onSelect({sequenceId:sequence.sequence_id,frameId:active.frame_id,x,y,coordinateSpace:'natural-raster',pixelOrigin:'top-left',comparison,pixelHasData,pixelQuality});
   }
   function pointerDown(event:PointerEvent<HTMLDivElement>){
     if(!active)return;stop();event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.focus();
@@ -169,6 +182,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       {nativeAcross===null?'Native sampling unavailable':`About ${Math.round(nativeAcross)} native samples across the full field`} · {sequence.grid.width_px} × {sequence.grid.height_px} prepared pixels · {outputSize.width} × {outputSize.height} display pixels.
       {nativeAcross!==null&&<> Enlarging the view does not add measured detail.</>}
     </p>}
+    {active&&<p className={styles.hint} data-quality={warningsShown?'warnings':'strict'}>{warningsShown?'WARNING SAMPLES VISIBLE. These are excluded from trusted measurements.':'STRICT SAMPLES. Warning-only and unavailable pixels remain masked.'} {active.raster?.encoding==='float32-le-quality8-v2'?`${((active.warning_fraction??0)*100).toFixed(1)}% warning-only; ${(Math.max(0,(active.masked_fraction??0)-(active.warning_fraction??0))*100).toFixed(1)}% unavailable.`:'This older mask does not distinguish warning-only samples.'} Dark navy marks excluded samples; it is not measured darkness.</p>}
     {active&&<div className={styles.imageModes}>
       <div role="group" aria-label="Image sampling">
         <button disabled={!displayAvailable} aria-pressed={displayAvailable&&display.sampling==='smooth'} onClick={()=>setDisplay(old=>({...old,sampling:'smooth'}))}>SMOOTH</button>
@@ -202,11 +216,14 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
         <label>Stretch<select aria-label="Display stretch" value={display.curve} onChange={event=>setDisplay(old=>({...old,curve:event.target.value as DisplayOptions['curve']}))}><option value="asinh">Asinh</option><option value="linear">Linear</option></select></label>
         <label>Asinh softness<input aria-label="Asinh softness" type="range" min="0.05" max="1" step=".01" value={display.a} disabled={display.curve!=='asinh'} onChange={event=>setDisplay(old=>({...old,a:Number(event.target.value)}))}/></label>
         <label>Gamma<input aria-label="Gamma" type="range" min=".5" max="2" step=".05" value={display.gamma} onChange={event=>setDisplay(old=>({...old,gamma:Number(event.target.value)}))}/></label>
-        <label>No-data style<select aria-label="No-data style" value={display.mask} onChange={event=>setDisplay(old=>({...old,mask:event.target.value as DisplayOptions['mask']}))}><option value="quiet">Quiet slate</option><option value="hatch">Detailed hatch</option></select></label>
+        <label>No-data style<select aria-label="No-data style" value={display.mask} onChange={event=>setDisplay(old=>({...old,mask:event.target.value as DisplayOptions['mask']}))}><option value="subtle">Subdued gaps</option><option value="quiet">Inspect slate</option><option value="hatch">Detailed hatch</option></select></label>
+        <label>Quality policy<select aria-label="Quality policy" value={display.includeWarnings?'warnings':'strict'} disabled={!raster?.warning} onChange={event=>setDisplay(old=>({...old,includeWarnings:event.target.value==='warnings'}))}><option value="strict">Strict samples</option><option value="warnings">Include warning-only samples</option></select></label>
         <label>Detail amount (experimental)<input aria-label="Detail amount" type="range" min="0" max=".5" step=".05" value={display.detail??0} disabled={tool==='mark'} onChange={event=>setDisplay(old=>({...old,detail:Number(event.target.value)}))}/></label>
         <button onClick={()=>setDisplay({...original,a:.3})}>QUIET PRESET</button><button onClick={()=>setDisplay(original)}>ORIGINAL / RESET</button>
       </fieldset>
-      <label className={styles.rendererChoice}>Rendering <select aria-label="Rendering mode" value={forceCpu?'cpu':'auto'} onChange={event=>setForceCpu(event.target.value==='cpu')}><option value="auto">Automatic GPU / CPU</option><option value="cpu">CPU</option></select></label>
+      <label className={styles.rendererChoice}>Rendering <select aria-label="Rendering mode" value={forceCpu?'cpu':'auto'} onChange={event=>{setAutoResolution('checking');setForceCpu(event.target.value==='cpu');}}><option value="auto">Automatic GPU / CPU</option><option value="cpu">CPU</option></select></label>
+      <label className={styles.rendererChoice}>Display resolution <select aria-label="Display resolution" value={resolution} onChange={event=>{setResolution(event.target.value as typeof resolution);setAutoResolution('checking');}}><option value="auto">Adaptive</option><option value="hd">HD budget</option><option value="4k">4K budget</option></select></label>
+      <p className={styles.hint} data-resolution={resolution==='auto'?autoResolution:resolution}>Aspect ratio preserved; 4K uses at most 8.3 million pixels (2880 square). {renderMs!==null&&`Last render and presentation interval: ${Math.round(renderMs)} ms.`} Adaptive uses HD on CPU or after a slow frame.</p>
       <p className={styles.hint} data-adapter={adapter}>{rendererMode==='WebGL2'?`Graphics adapter: ${adapter}`:rendererMode.startsWith('CPU')?'CPU display active. GPU availability depends on this browser and device.':''}</p>
       <p className={styles.hint}>One display setting across all epochs. Black {display.low.toPrecision(4)} / white {display.high.toPrecision(4)} MJy/sr | {display.curve} {display.a.toFixed(2)} | gamma {display.gamma.toFixed(2)}. Display changes do not add measured detail.</p>
     </details>}

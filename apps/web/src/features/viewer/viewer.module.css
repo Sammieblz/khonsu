@@ -18,7 +18,7 @@
 .emptyState span,.emptyState small { font: 10px var(--font-data); letter-spacing: .12em; }
 .emptyState p { font-size: 13px; }
 .orientation { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; color: var(--silver); font: 10px var(--font-data); }
-.orientation i { display: inline-block; width: 10px; height: 10px; background: #273140; border: 1px solid #556071; }
+.orientation i { display: inline-block; width: 10px; height: 10px; background: #070b12; border: 1px solid #556071; }
 .hint { font-size: 11px; color: var(--silver); line-height: 1.65; }
 .samplingReadout { font: 10px/1.7 var(--font-data); color: var(--silver); }
 .instrument .overview { position: absolute; z-index: 2; right: 10px; bottom: 10px; width: clamp(72px,18%,140px); padding: 0; overflow: hidden; background: #273140; cursor: crosshair; }

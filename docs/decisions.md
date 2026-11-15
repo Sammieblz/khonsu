@@ -101,9 +101,20 @@ render before starting its viewing interval. Arc pointer gestures also share a
 single coordinate calculation. Python FOV and observation-count bounds are
 centralized across validation, retrieval and processing without changing values.
 
-Current guides use the 2160-pixel display bound and large-raster cache policy.
+At this integration, guides used the 2160-pixel display bound and large-raster cache policy.
 The probe report generator reads current limits from Python constants. Historical
 acquisition reports keep their original numbers and identify them as historical.
 Research artifacts and CPU/GPU fallback implementations retain their distinct
 purposes. Merge only after the final regression suite and CI pass; hosting,
 submission and the final human release walkthrough are still separate gates.
+
+## November 15: quality masks and bounded 4K, #64 / BYT-49
+
+Samuel authorized the follow-up [image-quality pass](image-quality.md): separate
+warning-only display values from strict measurements, quieter gap styling,
+adaptive/manual 4K, and reproducible ZODI/coadd comparisons. The total 4K budget
+is 8,294,400 pixels with aspect ratio preserved. Python retains science and
+quality decisions; the browser displays prepared arrays. No model-based gap
+inpainting or new optical resolution is claimed. The 219-pair real audit found
+no compatible short-epoch coadd pair, so real stacks and PSF-matched differences
+remain unavailable. Frontend design tickets #61-63 remain planning only.

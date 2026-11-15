@@ -52,7 +52,7 @@ export function ObservationDetails({ sequence, activeFrameId, comparison }: Obse
             <span>{frame.release ?? "release unknown"}</span><span>detector {frame.detector ?? "unknown"}</span></span>
           <span className={styles.obsLine}>
             <span>{frame.wavelength_um != null ? `${frame.wavelength_um.toFixed(4)} µm` : "wavelength unknown"}{frame.bandwidth_um != null ? `, band ${frame.bandwidth_um.toFixed(4)} µm` : ""}</span>
-            <span>{((frame.masked_fraction ?? 0) * 100).toFixed(1)}% no data</span>
+            <span>{((frame.masked_fraction ?? 0) * 100).toFixed(1)}% excluded from strict samples; {((frame.warning_fraction ?? 0)*100).toFixed(1)}% warning-only</span>
           </span>
         </li>;
       })}</ol>

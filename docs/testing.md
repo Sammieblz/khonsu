@@ -89,5 +89,12 @@ exercise the overview's anonymous-CORS cache behavior through eviction/reload.
 
 ## Release rehearsal
 
+The [#64 image-quality pass](image-quality.md) adds
+`node scripts/verify-quality-display.mjs`. It checks real warning pixels,
+strict candidate exclusion, GPU/CPU parity, manual 4K and adaptive CPU fallback,
+plus the background study. `python scripts/experiment-quality.py` reproduces
+the offline flag/ZODI and short-epoch coadd audit. Synthetic controls live in
+`test_composites.py`; they do not establish real-source recovery.
+
 Use a fresh checkout, the production static build and the actual backend image. Verify CORS and HTTPS on the chosen public origin, a cold start, a completed real query, and the cached-real fallback. Record the short demonstration and preserve evidence of the result. Confirm the submission portal's timezone and upload requirements. Freeze feature work before the final buffer.
 

@@ -4,7 +4,9 @@ Scope: [GitHub #60](https://github.com/Sammieblz/khonsu/issues/60) /
 [BYT-45](https://linear.app/byteboyz/issue/BYT-45), consolidated in
 [PR #54](https://github.com/Sammieblz/khonsu/pull/54). Samuel authorized the final
 cleanup and main integration on November 15, lifting the earlier testing hold.
-The dedicated console design remains a separate planned phase.
+The dedicated console design remains a separate planned phase. The subsequent
+[#64 quality pass](image-quality.md) adds an optional 4K display budget; the
+2160-pixel results below describe the original #60 acceptance.
 
 ## What changed
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {decodeRaster,renderPixels,detailValues,displaySize,MAX_DISPLAY_SIDE} from '../src/features/viewer/display.ts';
+import {decodeRaster,renderPixels,detailValues,displaySize,measuredResolution,HD_DISPLAY_SIDE,MAX_DISPLAY_SIDE,MAX_DISPLAY_PIXELS} from '../src/features/viewer/display.ts';
 const options={low:0,high:10,a:.3,gamma:1,curve:'linear' as const,mask:'quiet' as const};
 test('display retains unclipped signed intensities, with explicit mask colors',()=>{
  const buffer=new ArrayBuffer(20),view=new DataView(buffer);
@@ -48,10 +48,34 @@ test('detail leaves a constant field unchanged and cannot exceed its correction 
 });
 test('display work is bounded independently of zoom or device pixel ratio',()=>{
  const result=displaySize(8000,4000);
- assert.deepEqual(result,{width:MAX_DISPLAY_SIDE,height:MAX_DISPLAY_SIDE/2});
+ assert.deepEqual(result,{width:HD_DISPLAY_SIDE,height:HD_DISPLAY_SIDE/2});
  assert.deepEqual(displaySize(440,220),{width:440,height:220});
  assert.throws(()=>displaySize(Infinity,100));
  const raster={width:1,height:1,values:new Float32Array([1]),valid:new Uint8Array([1])};
  for(const detail of [-1,.51,NaN])assert.throws(()=>renderPixels(raster,{...options,detail}));
  assert.throws(()=>renderPixels(raster,options,{width:10000,height:10000}));
+});
+test('quality v2 never lets warning samples contaminate strict pixels',()=>{
+ const buffer=new ArrayBuffer(15);[5,10,1e6].forEach((v,i)=>new DataView(buffer).setFloat32(i*4,v,true));new Uint8Array(buffer,12).set([1,2,0]);
+ assert.throws(()=>decodeRaster(buffer,3,1));
+ const raster=decodeRaster(buffer,3,1,'float32-le-quality8-v2');
+ assert.deepEqual([...raster.valid],[1,0,0]);assert.deepEqual([...raster.warning!],[0,1,0]);
+ const strict=renderPixels(raster,{...options,mask:'subtle',sampling:'smooth'},{width:6,height:1});
+ const shown=renderPixels(raster,{...options,mask:'subtle',sampling:'smooth',includeWarnings:true},{width:6,height:1});
+ assert.deepEqual(shown.slice(0,8),strict.slice(0,8));
+ assert.notDeepEqual(shown.slice(8,16),strict.slice(8,16));
+ assert.deepEqual([...shown.slice(16)],[7,11,18,255,7,11,18,255]);
+ assert.deepEqual([...raster.valid],[1,0,0]);
+});
+test('4K preserves aspect and bounds memory; adaptive never oscillates after a slow frame',()=>{
+ assert.deepEqual(displaySize(7680,4320,MAX_DISPLAY_SIDE),{width:3840,height:2160});
+ assert.deepEqual(displaySize(8000,8000,MAX_DISPLAY_SIDE),{width:2880,height:2880});
+ for(const [w,h] of [[4000,3000],[3000,7000],[10000,1]]){
+  const size=displaySize(w!,h!,MAX_DISPLAY_SIDE);assert(size.width*size.height<=MAX_DISPLAY_PIXELS);
+  assert(Math.abs(size.width/size.height-w!/h!)<Math.max(1,w!/h!));
+ }
+ assert.equal(measuredResolution('checking','WebGL2',20),'4k');
+ assert.equal(measuredResolution('4k','WebGL2',150),'hd');
+ assert.equal(measuredResolution('hd','WebGL2',10),'hd');
+ assert.equal(measuredResolution('4k','CPU worker',10),'hd');
 });

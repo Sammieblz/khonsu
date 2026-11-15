@@ -145,7 +145,7 @@ for (const engine of [chromium, firefox]) {
           for (const frame of example.frames) {
             const bytes = await (await fetch(`${api}${frame.raster.url}`)).arrayBuffer();
             const before = Array.from(new Uint8Array(bytes));
-            const raster = decodeRaster(bytes, example.grid.width_px, example.grid.height_px);
+            const raster = decodeRaster(bytes, example.grid.width_px, example.grid.height_px, frame.raster.encoding);
             const options = { low: example.display.vmin, high: example.display.vmax, a: .3, gamma: 1, curve: 'asinh', mask: 'quiet' };
             if (!firstRaster) { firstRaster = raster; firstOptions = options; }
             for (const sampling of ['smooth', 'pixels']) for (const detail of [0, .35, .5]) {
