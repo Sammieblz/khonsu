@@ -10,9 +10,10 @@ photometry or a discovery.
 ## Prepared assets
 
 Optional `Frame.raster` describes an allowlisted binary asset with encoding
-`float32-le-mask8-v1`, SHA-256 and exact byte count. The manifest grid supplies
+`float32-le-mask8-v1` or `float32-le-quality8-v2`, SHA-256 and exact byte count. The manifest grid supplies
 width and height. The file contains width * height little-endian Float32 values,
-then that many Uint8 validity values (0 invalid, 1 valid). Both planes use
+then that many Uint8 quality values (0 unavailable, 1 strict-valid; v2 also has
+2 warning-only). Both planes use
 top-left row-major order, matching the PNG. Invalid intensities are transported
 as zero with validity 0; valid negative and bright values remain unclipped.
 Values retain MJy/sr units but lack propagated resampling uncertainties.
@@ -24,7 +25,8 @@ supported. Cached bundles retain their original source manifest, acquisition
 record, PNG and source observations; derived rasters add their own inventory and
 the SHA-256 of the preserved aligned FITS used to produce them.
 
-Regenerate the reviewed derived assets using:
+The original v1 derivation used the following command. Do not run it over the
+upgraded examples; use the [quality upgrade](image-quality.md) for current bundles:
 
 ```sh
 python scripts/prepare-browser-examples.py --aligned-root .cache/pass-targets
@@ -66,7 +68,10 @@ WebGL2/CPU benchmarks establish a useful benefit on these small fields.
 WebGL2 uploads Float32 intensities and integer validity textures. The display
 shader explicitly performs nearest or validity-weighted bilinear sampling, then
 maps shared black/white, asinh/linear, gamma and no-data style to colors. It writes
-at viewport times device-pixel-ratio times zoom, bounded to 2160 pixels per side.
+at viewport times device-pixel-ratio times zoom. Adaptive starts at 2160 pixels
+on the longest side and permits a 4K budget after a fast WebGL measurement.
+Manual 4K is bounded by 3840 per side and 8,294,400 total pixels, preserving aspect
+ratio (2880 square). [Quality and 4K](image-quality.md) defines fallback thresholds.
 An optional native-grid float pass adds a thresholded, capped detail residual;
 it skips any two-pixel neighborhood touching an invalid sample. Detail is off by
 default and paused in Mark mode. Scientific registration and validity decisions

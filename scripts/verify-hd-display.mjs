@@ -97,7 +97,7 @@ for (const engine of inspect ? [chromium] : [chromium, firefox]) {
       const rgba = c.getContext('2d').getImageData(0, 0, c.width, c.height).data, values = [];
       for (let y = 11; y < c.height; y += 37) for (let x = 13; x < c.width; x += 31) {
         const i = (y * c.width + x) * 4;
-        values.push({ source: Math.floor((y + .5) * 2048 / c.height) * 2048 + Math.floor((x + .5) * 2048 / c.width), masked: rgba[i] === 39 && rgba[i+1] === 49 && rgba[i+2] === 64 });
+        values.push({ source: Math.floor((y + .5) * 2048 / c.height) * 2048 + Math.floor((x + .5) * 2048 / c.width), masked: rgba[i] === 7 && rgba[i+1] === 11 && rgba[i+2] === 18 });
       }
       return values;
     });

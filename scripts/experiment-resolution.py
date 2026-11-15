@@ -151,7 +151,7 @@ def real_field(name, audit, overview=None):
         if hashlib.sha256(raw).hexdigest() != frame['raster']['sha256']:
             raise ValueError('Cached original raster checksum mismatch')
         current = np.flipud(np.frombuffer(raw, dtype='<f4', count=size*size).reshape(size, size)).copy()
-        current_mask = np.flipud(np.frombuffer(raw, dtype=np.uint8, offset=4*size*size).reshape(size, size)).astype(bool)
+        current_mask = np.flipud(np.frombuffer(raw, dtype=np.uint8, offset=4*size*size).reshape(size, size)) == 1
         grid_wcs = WCS(manifest['grid']['wcs_header'])
     display_wcs = output_wcs(options, DISPLAY_SIZE)
     baseline, baseline_valid = on_grid(current, current_mask, grid_wcs, display_wcs, DISPLAY_SIZE)

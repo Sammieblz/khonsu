@@ -18,7 +18,8 @@
       "observation_id": "2025W45_2A_0292_2",
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
       "masked_fraction": 0.03167193335248497,
-      "warnings": []
+      "warnings": [],
+      "warning_fraction": 0.015943694340706693
     },
     {
       "frame_id": "frame-0002",
@@ -32,7 +33,8 @@
       "observation_id": "2025W50_2A_0479_1",
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0479_1D2_spx_l2b-v27-2026-210.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
       "masked_fraction": 0.030163746049985618,
-      "warnings": []
+      "warnings": [],
+      "warning_fraction": 0.013932777937374317
     },
     {
       "frame_id": "frame-0003",
@@ -46,7 +48,8 @@
       "observation_id": "2026W18_2A_0663_1",
       "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W18_2A/l2b-v27-2026-244/2/level2_2026W18_2A_0663_1D2_spx_l2b-v27-2026-244.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
       "masked_fraction": 0.024705544383797795,
-      "warnings": []
+      "warnings": [],
+      "warning_fraction": 0.0154409652398736
     }
   ],
   "files": {
@@ -67,8 +70,8 @@
       "sha256": "d23fb384a7c8736d49c6f0564a7abf9ad68e13e76d1edacb9f1f7726a5a0ef28"
     },
     "manifest.json": {
-      "size_bytes": 7225,
-      "sha256": "63543c2f51485d0c2e9b6e2a25a5b84847d1e04f92efb3c8a9a2588db084aa96"
+      "size_bytes": 7520,
+      "sha256": "481c5d950c5dcba0538bbc5603d280af083dfaab09a5ebbfb269dde16867e210"
     },
     "source-manifest.json": {
       "size_bytes": 6149,
@@ -76,15 +79,15 @@
     },
     "frame-0001.bin": {
       "size_bytes": 69620,
-      "sha256": "8760435e7798fd45287440ac3919f51d2e117c4270873a3effa167df039b6dc9"
+      "sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58"
     },
     "frame-0002.bin": {
       "size_bytes": 69620,
-      "sha256": "7ff801cd09d313a8d9d0ce31f97a73cabb3b56beaf0856bb0f7bf6546c94f69f"
+      "sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45"
     },
     "frame-0003.bin": {
       "size_bytes": 69620,
-      "sha256": "4d6db76161b0455e6727ed3dda7ac5caf9512ba468c22237d6c3e5b1523be684"
+      "sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d"
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
@@ -104,5 +107,35 @@
       "aligned_fits_sha256": "d61d935cc79af389cb15d84f352979a45ea6035bdf946f0a602fd851c590776c",
       "transform": "flip-y; float32 little endian; invalid zero plus separate mask"
     }
-  }
+  },
+  "quality_revision": {
+    "frame-0001": {
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "raw_sha256": "307eb03fde7cce141a5875f235ec296dbd14dad08cadf9b6cf879f49bc5e5888",
+      "raw_bytes": 4069440,
+      "raw_cache": ".cache/enhancement/real-wise-0855-raw.fits",
+      "verified_strict_samples_unchanged": true,
+      "warning_fraction": 0.015943694340706693,
+      "method": "IRSA OUTLIER/OVERFLOW-only finite samples; separate weighted reprojection; strict values unchanged"
+    },
+    "frame-0002": {
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0479_1D2_spx_l2b-v27-2026-210.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "raw_sha256": "469424b24b6fe7b1836dc2eb007e6e2dfd70bf0c3b892f6cc604164693d7b64a",
+      "raw_bytes": 4069440,
+      "raw_cache": ".cache/quality/real-wise-0855-2.fits",
+      "verified_strict_samples_unchanged": true,
+      "warning_fraction": 0.013932777937374317,
+      "method": "IRSA OUTLIER/OVERFLOW-only finite samples; separate weighted reprojection; strict values unchanged"
+    },
+    "frame-0003": {
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W18_2A/l2b-v27-2026-244/2/level2_2026W18_2A_0663_1D2_spx_l2b-v27-2026-244.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "raw_sha256": "c259b82aefe9d4ea7af0400d9753ee0ee5037e6172b8779fed15930837c0b1d7",
+      "raw_bytes": 4069440,
+      "raw_cache": ".cache/quality/real-wise-0855-3.fits",
+      "verified_strict_samples_unchanged": true,
+      "warning_fraction": 0.0154409652398736,
+      "method": "IRSA OUTLIER/OVERFLOW-only finite samples; separate weighted reprojection; strict values unchanged"
+    }
+  },
+  "quality_updated_at_utc": "2026-11-15T18:25:02.798136+00:00"
 }

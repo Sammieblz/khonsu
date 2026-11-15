@@ -135,6 +135,37 @@ def test_cached_assets_remain_separate_from_synthetic_development_fixture():
     assert client.get('/v1/examples/real-wise-0855/frames/frame-01.svg').status_code == 404
 
 
+def test_legacy_binary_masks_remain_readable_and_warning_counts_fail_closed(copied_bundles):
+    import numpy as np
+    from app.examples import validate_bundle, CachedExampleError
+    bundle = copied_bundles/'real'/'real-wise-0855'
+    payload = json.loads((bundle/'manifest.json').read_text())
+    lineage = json.loads((bundle/'lineage.json').read_text())
+    frame = payload['frames'][0]
+    filename = frame['frame_id']+'.bin'
+    raw = bytearray((bundle/filename).read_bytes()); count = len(raw)//5
+    values = np.frombuffer(raw, '<f4', count=count)
+    quality = np.frombuffer(raw, np.uint8, offset=count*4)
+    values[quality == 2] = 0; quality[quality == 2] = 0
+    (bundle/filename).write_bytes(raw)
+    frame['raster']['encoding'] = 'float32-le-mask8-v1'
+    frame['raster']['sha256'] = hashlib.sha256(raw).hexdigest()
+    frame['warning_fraction'] = 0
+    lineage['source_observations'][0]['warning_fraction'] = 0
+    (bundle/'manifest.json').write_text(json.dumps(payload))
+    (bundle/'lineage.json').write_text(json.dumps(lineage))
+    rewrite_inventory(bundle,filename);rewrite_inventory(bundle,'manifest.json')
+    assert validate_bundle(bundle).frames[0].raster.encoding == 'float32-le-mask8-v1'
+    payload['frames'][1]['warning_fraction'] = 0
+    lineage = json.loads((bundle/'lineage.json').read_text())
+    lineage['source_observations'][1]['warning_fraction'] = 0
+    lineage['quality_revision'][payload['frames'][1]['frame_id']]['warning_fraction'] = 0
+    (bundle/'manifest.json').write_text(json.dumps(payload));(bundle/'lineage.json').write_text(json.dumps(lineage))
+    rewrite_inventory(bundle,'manifest.json')
+    with pytest.raises(CachedExampleError, match='warning fraction'):
+        validate_bundle(bundle)
+
+
 @pytest.mark.parametrize('damage', [None, 'invented_acquisition_time', 'corrupt_source_png'])
 def test_packaging_preserves_real_bytes_and_publishes_only_valid_bundles(tmp_path, damage):
     specification = importlib.util.spec_from_file_location('package_example', REPOSITORY / 'scripts' / 'package-real-example.py')

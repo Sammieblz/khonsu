@@ -47,5 +47,18 @@
 .footer p { font: 24px var(--font-display); margin: 0; }
 .footer span { font-size: 11px; color: var(--silver); flex: 1 1 300px; line-height: 1.8; }
 .message { padding: 36px 0; color: var(--danger); }
+.qualityStudy { border-top: 1px solid var(--line); padding: 32px 0 48px; font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
+.qualityStudy h2 { font: 36px/1 var(--font-display); }
+.qualityStudy a { color: var(--amber); }
+.qualityStudy select { display: block; max-width: 100%; margin: 12px 0; }
+.qualityStudy summary { min-height: 44px; padding-top: 10px; cursor: pointer; }
+.studyImages { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.studyImages figure { margin: 16px 0; min-width: 0; }
+.studyImages figcaption { min-height: 38px; font: 10px/1.8 var(--font-data); letter-spacing: .08em; }
+.studyPlane { position: relative; background: #070b12; aspect-ratio: 1; }
+.studyPlane[data-gaps="inspect"] { background: #273140; }
+.studyPlane img { display: block; width: 100%; height: auto; }
+.studyPlane p { position: absolute; inset: 20px; color: var(--amber); }
+@media (max-width: 650px) { .studyImages { grid-template-columns: minmax(0,1fr); } }
 @media (max-width: 900px) { .lab { padding: 0 20px; } .workspace { grid-template-columns: minmax(0, 1fr); gap: 28px; } .context { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 24px; } .intro > p { max-width: 220px; font-size: 13px; } }
 @media (max-width: 520px) { .lab { padding: 0 14px; } .header { height: 76px; gap: 12px; } .header .brand { font-size: 21px; gap: 10px; letter-spacing: .2em; } .header a:last-child { font-size: 9px; max-width: 120px; text-align: right; line-height: 1.7; } .intro { display: block; padding: 28px 0 24px; } .intro > p { margin-top: 20px; } .controls button { flex: 1 1 auto; } .readout { font-size: 9px; } .scale { font-size: 9px; } }

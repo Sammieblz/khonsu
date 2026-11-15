@@ -59,7 +59,7 @@ def output_wcs(options: ProcessingOptions, size: int | None = None) -> WCS:
     return wcs
 
 
-def reproject_observation(loaded, wcs: WCS, size: int):
+def reproject_observation(loaded, wcs: WCS, size: int, *, validity=None):
     """Resample valid pixels only, so a masked pixel never grows a hole.
 
     Bilinear interpolation over an array holding NaN turns every output pixel
@@ -71,8 +71,9 @@ def reproject_observation(loaded, wcs: WCS, size: int):
     keep their true size and position and no value is invented for them.
     """
     shape = (size, size)
-    weights = loaded.valid.astype(np.float32)
-    source = np.where(loaded.valid, loaded.science, 0.0).astype(np.float32)
+    validity = loaded.valid if validity is None else validity
+    weights = validity.astype(np.float32)
+    source = np.where(validity, loaded.science, 0.0).astype(np.float32)
     total, footprint = reproject_interp(
         (source, loaded.spatial_wcs), wcs, shape_out=shape, order="bilinear", parallel=False,
     )
@@ -91,6 +92,18 @@ def reproject_observation(loaded, wcs: WCS, size: int):
     if np.count_nonzero(valid) < max(4, int(size * size * 0.01)):
         raise ProcessingError("NO_USABLE_COVERAGE", "Less than one percent of the output field has valid coverage.")
     return image, valid
+
+
+def reproject_quality(loaded, wcs: WCS, size: int):
+    """Keep strict samples unchanged; optional warnings never bleed into them."""
+    image, valid = reproject_observation(loaded, wcs, size)
+    quality = valid.astype(np.uint8)
+    if loaded.warning is not None and np.any(loaded.warning):
+        expanded, displayable = reproject_observation(loaded, wcs, size, validity=loaded.valid | loaded.warning)
+        warning = displayable & ~valid
+        image[warning] = expanded[warning]
+        quality[warning] = 2
+    return image, quality
 
 
 def shared_limits(projected) -> tuple[float, float]:
@@ -141,22 +154,24 @@ def write_calibrated_grid(path, image, valid, wcs: WCS):
     header["BUNIT"] = "MJy/sr"
     header["HISTORY"] = "Khonsu display grid; validity-weighted bilinear reprojection; no PSF/background matching"
     fits.HDUList([
-        fits.PrimaryHDU(), fits.ImageHDU(image, header=header, name="IMAGE"),
+        fits.PrimaryHDU(), fits.ImageHDU(np.where(valid, image, np.nan), header=header, name="IMAGE"),
         fits.ImageHDU(valid.astype(np.uint8), name="VALID"),
     ]).writeto(path, overwrite=True)
 
 
-def write_prepared_raster(path, image, valid):
-    """Top-left row-major float32 LE intensities followed by one validity byte.
+def write_prepared_raster(path, image, valid, *, quality=None):
+    """Top-left float32 LE intensities then one v1 validity or v2 quality byte.
 
-    Invalid samples are zero-filled only for transport; their mask stays zero.
-    Valid negative and above-display-limit intensities are preserved.
+    Unavailable samples are zero-filled only for transport. V2 state 2 contains
+    optional warning values; it never changes strict validity. Signed and bright
+    intensities are preserved without display clipping.
     """
-    values = np.flipud(np.where(valid, image, 0)).astype("<f4")
-    mask = np.flipud(valid).astype(np.uint8)
+    state = valid.astype(np.uint8) if quality is None else quality
+    values = np.flipud(np.where(state > 0, image, 0)).astype("<f4")
+    mask = np.flipud(state).astype(np.uint8)
     data = values.tobytes(order="C") + mask.tobytes(order="C")
     temporary = path.with_suffix(".bin.tmp")
     temporary.write_bytes(data)
     temporary.replace(path)
-    return {"encoding": "float32-le-mask8-v1", "size_bytes": len(data),
+    return {"encoding": "float32-le-mask8-v1" if quality is None else "float32-le-quality8-v2", "size_bytes": len(data),
             "sha256": hashlib.sha256(data).hexdigest()}

@@ -50,7 +50,8 @@
           "method": "ICRS from the sequence's common TAN grid WCS (FITS WCS Paper II)"
         },
         "sky_unavailable_reason": null,
-        "pixel_has_data": true
+        "pixel_has_data": true,
+        "pixel_quality": "strict-valid"
       }
     },
     {
@@ -96,7 +97,8 @@
           "method": "ICRS from the sequence's common TAN grid WCS (FITS WCS Paper II)"
         },
         "sky_unavailable_reason": null,
-        "pixel_has_data": false
+        "pixel_has_data": false,
+        "pixel_quality": "unknown"
       }
     }
   ],
@@ -176,7 +178,8 @@
         "cache_acquired_at_utc": "2026-11-14T20:37:40.137173+00:00",
         "cache_acquisition_reference": "docs/target-coverage.json target wise-0855; fresh bounded five-target probe",
         "cache_role": "primary",
-        "browser_raster_encoding": "float32-le-mask8-v1"
+        "browser_raster_encoding": "float32-le-quality8-v2",
+        "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged."
       },
       "warnings": [
         {
@@ -207,6 +210,7 @@
           "wavelength_um": 1.413164368794356,
           "bandwidth_um": 0.03425144409136026,
           "masked_fraction": 0.03167193335248497,
+          "warning_fraction": 0.015943694340706693,
           "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
           "warnings": []
         },
@@ -220,6 +224,7 @@
           "wavelength_um": 1.4130097019790342,
           "bandwidth_um": 0.03424349735056228,
           "masked_fraction": 0.030163746049985618,
+          "warning_fraction": 0.013932777937374317,
           "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0479_1D2_spx_l2b-v27-2026-210.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
           "warnings": []
         },
@@ -233,6 +238,7 @@
           "wavelength_um": 1.404985374104534,
           "bandwidth_um": 0.03406050443996628,
           "masked_fraction": 0.024705544383797795,
+          "warning_fraction": 0.0154409652398736,
           "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W18_2A/l2b-v27-2026-244/2/level2_2026W18_2A_0663_1D2_spx_l2b-v27-2026-244.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
           "warnings": []
         }

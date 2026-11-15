@@ -50,6 +50,18 @@ test("the query is labelled by data mode, and synthetic fixtures have none", () 
   assert.equal(sequenceContext(synthetic, null, BASE, NOW).query, null);
 });
 
+test('warning-only selection survives storage and cannot claim trusted data',()=>{
+  const context=sequenceContext(cached,null,BASE,NOW);
+  const point={...selection(cached),pixelHasData:false,pixelQuality:'warning-only' as const};
+  const store=addCandidate(emptyStore(),createCandidate(point,'Quality control',context,'warning-control',NOW),context);
+  const encoded=serializeStore(store),loaded=loadStore(encoded,null);
+  assert.equal(loaded.ok,true);
+  if(loaded.ok)assert.equal(loaded.store.candidates[0]!.selection.pixelQuality,'warning-only');
+  const forged=JSON.parse(encoded);forged.candidates[0].selection.pixelHasData=true;
+  const rejected=loadStore(JSON.stringify(forged),null);
+  if(rejected.ok)assert.equal(rejected.store.candidates.length,0);
+});
+
 test("a grid without a WCS keeps a labelled pixel-only mark", () => {
   const noWcs: SequenceManifest = { ...live, grid: { ...live.grid, wcs_header: null, raster_to_wcs: null } };
   const candidate = createCandidate(selection(noWcs), "note", sequenceContext(noWcs, null, BASE, NOW), "c-2", NOW);

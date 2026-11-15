@@ -33,6 +33,7 @@ function frameSummary(frame: SequenceManifest["frames"][number]): FrameSummary {
     wavelength_um: frame.wavelength_um ?? null,
     bandwidth_um: frame.bandwidth_um ?? null,
     masked_fraction: frame.masked_fraction ?? 0,
+    warning_fraction: frame.warning_fraction ?? 0,
     source_fits_url: frame.source_fits_url ?? null,
     warnings: (frame.warnings ?? []).map(({ code, message }) => ({ code, message })),
   };

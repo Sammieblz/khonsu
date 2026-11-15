@@ -28,7 +28,8 @@ state and resets it when sequence identity changes.
   slow CPU. Timers stop on blur and sequence replacement.
 - Image sampling: Smooth interpolates display intensities; Pixels shows nearest
   prepared samples. Both retain masks and natural-raster coordinates. The canvas
-  follows viewport size, device pixel ratio and zoom with a 2160-pixel bound.
+  follows viewport size, device pixel ratio and zoom. Adaptive/HD use a 2160-pixel
+  side budget; [bounded 4K](image-quality.md) permits up to 8.3 million pixels.
 - Detail experiment: optional capped visual emphasis, off initially. Hold
   Original compares the same frame with detail off and unchanged stretch/sampling.
   Pointer release/cancel, key release and blur restore the prior display. Mark

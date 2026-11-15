@@ -19,7 +19,7 @@ from ..limits import MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OBSERVAT
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
-PIPELINE_VERSION = "khonsu-display-0.4.0"
+PIPELINE_VERSION = "khonsu-display-0.5.0"
 
 
 def _check_cancelled(cancelled):
@@ -71,7 +71,7 @@ class AstronomyProcessor:
             from .alignment import (
                 ASINH_A, GRID_OVERSAMPLE, MIN_GRID_PX, STRETCH_HIGH_PERCENTILE, STRETCH_MIN_SPAN_SIGMA,
                 STRETCH_SKY_SIGMA_BELOW, auto_grid_size, native_pixel_scale_arcsec, output_wcs,
-                reproject_observation, shared_limits, write_calibrated_grid, write_png, write_prepared_raster,
+                reproject_quality, shared_limits, write_calibrated_grid, write_png, write_prepared_raster,
             )
             from .fits_reader import inspect_observation, read_observation
             from .spectral import MAX_CENTER_SPREAD_IN_BANDWIDTHS, select_compatible_frames
@@ -111,6 +111,7 @@ class AstronomyProcessor:
             size = MIN_GRID_PX  # No usable input; the epoch check below reports why.
         wcs = output_wcs(options, size)
         projected = []
+        qualities = {}
         while candidates:
             selected = select_compatible_frames(candidates)
             if len({item.observation.observed_start_utc for item in selected}) < 2:
@@ -123,7 +124,9 @@ class AstronomyProcessor:
                 _check_cancelled(cancelled)
                 try:
                     loaded = read_observation(item.observation, options.ra_deg, options.dec_deg)
-                    image, valid = reproject_observation(loaded, wcs, size)
+                    image, quality = reproject_quality(loaded, wcs, size)
+                    valid = quality == 1
+                    qualities[item.observation.observation_id] = quality
                     item.warnings = list(loaded.warnings)
                     projected.append((item, image, valid))
                     del loaded
@@ -161,6 +164,7 @@ class AstronomyProcessor:
             "grid_scale_arcsec": options.fov_arcmin * 60.0 / size,
             "grid_oversample_target": GRID_OVERSAMPLE,
             "flags_policy": "IRSA SDT bad flags plus OUTLIER/PHANMISS; SOURCE/FULLSAMPLE retained; unknown excluded",
+            "display_warning_policy": "OUTLIER/OVERFLOW-only finite samples optional; quality 0 unavailable, 1 strict-valid, 2 warning-only; strict samples never include warning neighbors",
             "wavelength_policy": "same detector; target center spread <= 0.25 * smallest bandwidth",
             "wavelength_lookup": "WCS-WAVE alternate WCS W; display approximation, not calibrated spectroscopy",
             "target_wavelength_min_um": min(wavelengths),
@@ -190,7 +194,8 @@ class AstronomyProcessor:
             stem = f"frame-{index:04d}"
             write_png(output_dir / f"{stem}.png", image, valid, low, high)
             write_calibrated_grid(output_dir / f"{stem}.fits", image, valid, wcs)
-            raster = write_prepared_raster(output_dir / f"{stem}.bin", image, valid)
+            quality = qualities[item.observation.observation_id]
+            raster = write_prepared_raster(output_dir / f"{stem}.bin", image, valid, quality=quality)
             source = item.observation
             frame_models.append(Frame(
                 frame_id=stem,
@@ -206,6 +211,7 @@ class AstronomyProcessor:
                 observation_id=source.observation_id,
                 source_fits_url=source.source_fits_url,
                 masked_fraction=float(1.0 - valid.mean()),
+                warning_fraction=float((quality == 2).mean()),
                 warnings=item.warnings,
             ))
         warnings = [

@@ -1,27 +1,37 @@
 import { MAX_RASTER_BYTES } from '../../lib/api/generated-limits.ts';
 export { MAX_RASTER_BYTES } from '../../lib/api/generated-limits.ts';
-export interface DisplayOptions { low:number; high:number; a:number; gamma:number; curve:'asinh'|'linear'; mask:'quiet'|'hatch'; sampling?:'smooth'|'pixels'; detail?:number; }
+export interface DisplayOptions { low:number; high:number; a:number; gamma:number; curve:'asinh'|'linear'; mask:'subtle'|'quiet'|'hatch'; sampling?:'smooth'|'pixels'; detail?:number; includeWarnings?:boolean; }
 export interface DisplaySize { width:number; height:number; }
-export interface Raster { width:number; height:number; values:Float32Array; valid:Uint8Array; }
+export interface Raster { width:number; height:number; values:Float32Array; valid:Uint8Array; warning?:Uint8Array; }
 export const MAX_RASTER_SIDE=Math.floor(Math.sqrt(MAX_RASTER_BYTES/5));
-export const MAX_DISPLAY_SIDE=2160;
-export function displaySize(width:number,height:number):DisplaySize {
+export const HD_DISPLAY_SIDE=2160;
+export const MAX_DISPLAY_SIDE=3840;
+export const MAX_DISPLAY_PIXELS=3840*2160;
+export function displaySize(width:number,height:number,maxSide=HD_DISPLAY_SIDE):DisplaySize {
   if(!Number.isFinite(width)||!Number.isFinite(height)||width<1||height<1)throw Error('Display dimensions are invalid.');
-  const factor=Math.min(1,MAX_DISPLAY_SIDE/Math.max(width,height));
-  return {width:Math.max(1,Math.round(width*factor)),height:Math.max(1,Math.round(height*factor))};
+  const factor=Math.min(1,Math.min(MAX_DISPLAY_SIDE,maxSide)/Math.max(width,height),Math.sqrt(MAX_DISPLAY_PIXELS/(width*height)));
+  return {width:Math.max(1,Math.floor(width*factor)),height:Math.max(1,Math.floor(height*factor))};
 }
-export function decodeRaster(buffer:ArrayBuffer,width:number,height:number):Raster {
+export type AutoResolution='checking'|'4k'|'hd';
+export function measuredResolution(current:AutoResolution,mode:string,milliseconds:number):AutoResolution {
+  if(!mode.startsWith('WebGL')||milliseconds>100)return 'hd';
+  if(current==='checking')return milliseconds<=32?'4k':'hd';
+  return current;
+}
+export function decodeRaster(buffer:ArrayBuffer,width:number,height:number,encoding='float32-le-mask8-v1'):Raster {
   const count=width*height;
   if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>MAX_RASTER_SIDE||height>MAX_RASTER_SIDE||buffer.byteLength!==count*5||buffer.byteLength>MAX_RASTER_BYTES)throw Error('Prepared raster dimensions or byte count are invalid.');
   const littleEndian=new Uint8Array(new Uint32Array([1]).buffer)[0]===1;
-  const values=littleEndian?new Float32Array(buffer,0,count):new Float32Array(count),valid=new Uint8Array(buffer,count*4),view=new DataView(buffer);
-  for(let i=0;i<count;i++){if(!littleEndian)values[i]=view.getFloat32(i*4,true);if(!Number.isFinite(values[i])||(valid[i]!==0&&valid[i]!==1))throw Error('Prepared raster contains invalid values or masks.');}
-  return {width,height,values,valid};
+  if(!['float32-le-mask8-v1','float32-le-quality8-v2'].includes(encoding))throw Error('Unknown prepared encoding.');
+  const values=littleEndian?new Float32Array(buffer,0,count):new Float32Array(count),quality=new Uint8Array(buffer,count*4),view=new DataView(buffer);
+  const v2=encoding==='float32-le-quality8-v2',valid=v2?new Uint8Array(count):quality,warning=v2?new Uint8Array(count):undefined;
+  for(let i=0;i<count;i++){if(!littleEndian)values[i]=view.getFloat32(i*4,true);if(!Number.isFinite(values[i])||quality[i]!>(v2?2:1))throw Error('Prepared raster contains invalid values or masks.');if(v2){valid[i]=quality[i]===1?1:0;warning![i]=quality[i]===2?1:0;}}
+  return {width,height,values,valid,warning};
 }
 export function validateDisplay(options:DisplayOptions,size:DisplaySize){
   if(![options.low,options.high,options.a,options.gamma].every(Number.isFinite)||options.high<=options.low||options.a<=0||options.gamma<=0)throw Error('Display limits are invalid.');
   if(!Number.isFinite(options.detail??0)||(options.detail??0)<0||(options.detail??0)>.5)throw Error('Detail amount is outside the experiment limit.');
-  if(!Number.isInteger(size.width)||!Number.isInteger(size.height)||size.width<1||size.height<1||size.width>MAX_DISPLAY_SIDE||size.height>MAX_DISPLAY_SIDE)throw Error('Display dimensions exceed the bound.');
+  if(!Number.isInteger(size.width)||!Number.isInteger(size.height)||size.width<1||size.height<1||size.width>MAX_DISPLAY_SIDE||size.height>MAX_DISPLAY_SIDE||size.width*size.height>MAX_DISPLAY_PIXELS)throw Error('Display dimensions exceed the bound.');
 }
 
 // Visual high-frequency emphasis only. Never overwrite prepared intensities.
@@ -55,14 +65,15 @@ export function renderPixels(raster:Raster,options:DisplayOptions,size:DisplaySi
   for(let y=0;y<size.height;y++)for(let x=0;x<size.width;x++){
     const sx=(x+.5)*raster.width/size.width-.5,sy=(y+.5)*raster.height/size.height-.5;
     const nx=Math.floor((2*x+1)*raster.width/(2*size.width)),ny=Math.floor((2*y+1)*raster.height/(2*size.height)),index=at(nx,ny),offset=(y*size.width+x)*4;
-    if(!raster.valid[index]){const hatch=mask==='hatch'&&(nx+ny)%8<2;pixels[offset]=hatch?70:39;pixels[offset+1]=hatch?82:49;pixels[offset+2]=hatch?99:64;}
+    const warning=!!options.includeWarnings&&raster.warning?.[index]===1;
+    if(!raster.valid[index]&&!warning){const hatch=mask==='hatch'&&(nx+ny)%8<2;pixels[offset]=hatch?70:mask==='subtle'?7:39;pixels[offset+1]=hatch?82:mask==='subtle'?11:49;pixels[offset+2]=hatch?99:mask==='subtle'?18:64;}
     else {
       let intensity=values[index]!;
       if(options.sampling==='smooth'){
         const x0=Math.floor(sx),y0=Math.floor(sy),fx=sx-x0,fy=sy-y0;
         let total=0,weight=0;
         for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){
-          const i=at(x0+dx,y0+dy),w=(dx?fx:1-fx)*(dy?fy:1-fy)*raster.valid[i]!;
+          const i=at(x0+dx,y0+dy),usable=raster.valid[i]===1||(warning&&raster.warning?.[i]===1),w=(dx?fx:1-fx)*(dy?fy:1-fy)*(usable?1:0);
           total+=w*values[i]!;weight+=w;
         }
         if(weight>0)intensity=total/weight;

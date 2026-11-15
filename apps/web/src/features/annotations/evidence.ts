@@ -38,6 +38,7 @@ export interface EvidenceCandidate {
     sky: { ra_deg: number; dec_deg: number; frame: "ICRS"; unit: "deg"; method: string } | null;
     sky_unavailable_reason: string | null;
     pixel_has_data: boolean | null;
+    pixel_quality: 'strict-valid' | 'warning-only' | 'unavailable' | 'unknown';
   };
 }
 
@@ -99,6 +100,7 @@ export function buildEvidence(
           sky: item.sky ? { ...item.sky } : null,
           sky_unavailable_reason: item.skyUnavailableReason,
           pixel_has_data: selection.pixelHasData,
+          pixel_quality: selection.pixelQuality ?? (selection.pixelHasData===true?'strict-valid':'unknown'),
         },
       };
     }),

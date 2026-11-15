@@ -84,6 +84,9 @@ for (const engine of [chromium, firefox]) {
       };
     });
     await page.goto(base, { waitUntil: 'domcontentloaded' }); await load(page);
+    await page.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
+    await page.getByLabel('Display resolution', { exact: true }).selectOption('hd'); await ready(page);
+    await page.locator('summary').filter({ hasText: 'IMAGE DISPLAY' }).click();
     await button(page, 'DETAIL EXPERIMENT').click();
     await page.getByLabel('Comparison A', { exact: true }).selectOption('1');
     await button(page, 'PAN').click();

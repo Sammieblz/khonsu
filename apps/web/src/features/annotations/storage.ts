@@ -35,7 +35,11 @@ function isSelection(value: unknown, legacy: boolean): value is ImageSelection {
   if (!base || legacy) return base;
   const comparison = value.comparison;
   const comparisonOk = comparison === null || (isRecord(comparison) && isId(comparison.aFrameId) && isId(comparison.bFrameId));
-  return comparisonOk && (value.pixelHasData === null || typeof value.pixelHasData === "boolean");
+  const quality=value.pixelQuality;
+  const qualityOk=quality===undefined || (quality==='unknown'&&value.pixelHasData===null)
+    || (quality==='strict-valid'&&value.pixelHasData===true)
+    || ((quality==='warning-only'||quality==='unavailable')&&value.pixelHasData===false);
+  return comparisonOk && qualityOk && (value.pixelHasData === null || typeof value.pixelHasData === "boolean");
 }
 
 function isCandidate(value: unknown): value is CandidateAnnotation {
