@@ -93,6 +93,30 @@ Records live in browser storage under `khonsu.candidates.v2` as `{ "schema": "kh
 - Unreadable or incompatible data is left untouched. The panel offers to download it or to replace it with the current page's candidates.
 - If storage is unavailable or a save fails, candidates keep working for the visit, and the panel says they will not survive a reload.
 
+## Evidence export
+
+A search link and an evidence file do different jobs. The link repeats a search, and it never carries notes. The evidence file is the only way notes leave the browser where they were made. **Export** on a candidate, or **Export all saved candidates**, downloads a JSON file in the browser. There is no upload, no account and no server route. Exports work from the candidates in memory, so damaged or blocked browser storage never prevents one. The panel can also preview the file.
+
+![Two candidates on the cached real WISE 0855 sequence, each with Show, Edit, Export and Delete actions, followed by Export all saved candidates, the confirmation of the downloaded file, an explanation of what an evidence file holds, and the open preview of the JSON](images/evidence-export.png)
+
+`buildEvidence` in `apps/web/src/features/annotations/evidence.ts` writes format `khonsu-evidence`, `schema_version` `1.0`:
+
+| Field | Contents |
+| --- | --- |
+| `notice`, `sharing` | The candidate disclaimer, and how this file differs from a search link |
+| `contains_synthetic_input` | `true` when any candidate was marked on a synthetic fixture |
+| `candidates[]` | ID, `origin: "human"`, `review_status: "unreviewed candidate"`, note, created and edited UTC times, `sequence_id`, `marked_frame` and `comparison.a` / `comparison.b` (frame ID, observation ID, real start time) |
+| `candidates[].position` | `grid_pixel` (zero-based, top-left, integer centers), `sky` (ICRS degrees and conversion method, or `null` with `sky_unavailable_reason`), `pixel_has_data` |
+| `sequences[]` | The sequence snapshot recorded with the candidates (see [candidate marks](#candidate-marks)), plus `synthetic_input` and `query` (the reproducible search link and what it reproduces, or `null` for synthetic fixtures) |
+
+Observation values are copied from the manifest that was on screen when the mark was made. None are re-derived at export time.
+
+A candidate whose snapshot is missing (a migrated version 1 note) exports with `sequence_snapshot_available: false` and frame references without observation details.
+
+File names are `khonsu-evidence-<sequence>-<candidate id prefix>.json` for one candidate and `khonsu-evidence-<count>-candidates-<UTC time>.json` for a set.
+
+[`examples/evidence-example.json`](examples/evidence-example.json) is a labelled documentation example. It is built from the committed cached real WISE 0855 sequence, with two marks made only to illustrate the format; its link uses the reserved `khonsu.example` host. `apps/web/tests/evidence.test.ts` fails when the example no longer matches the code. Regenerate it with `UPDATE_EVIDENCE_EXAMPLE=1 npm --prefix apps/web run test`, and review the diff.
+
 ## Error and data modes
 
 The UI distinguishes live data, previously acquired real data, and synthetic development fixtures. Labels persist through exported evidence. Show actionable states for missing coverage, too few comparable epochs, incompatible wavelengths, masked targets, timeouts, download bounds, processing failure, job expiry, failed frame loads and unavailable backend. Do not switch silently to synthetic data.
