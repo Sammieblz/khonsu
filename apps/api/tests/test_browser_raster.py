@@ -39,4 +39,14 @@ def test_cached_browser_assets_are_bounded_and_allowlisted():
                 quality = np.frombuffer(result.content, np.uint8, offset=count*4)
                 mask = np.frombuffer(estimates.content, np.uint8, offset=count*4)
                 assert not ((quality == 1) & (mask == 1)).any()
+            if frame['refinement']:
+                meta = frame['refinement']['raster']
+                refined = client.get(meta['url'])
+                assert refined.status_code == 200
+                assert len(refined.content) == count * 5
+                assert hashlib.sha256(refined.content).hexdigest() == meta['sha256']
+                quality = np.frombuffer(result.content, np.uint8, offset=count*4)
+                mask = np.frombuffer(refined.content, np.uint8, offset=count*4)
+                assert np.array_equal(mask, quality == 1)
+                assert frame['refinement']['input_raster_sha256'] == raster['sha256']
     assert client.get('/v1/examples/real-wise-0855/frames/unknown.bin').status_code == 404

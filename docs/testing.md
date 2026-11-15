@@ -89,6 +89,12 @@ exercise the overview's anonymous-CORS cache behavior through eviction/reload.
 
 ## Release rehearsal
 
+The [astro refinement pass](astro-refinement.md) adds
+`python scripts/validate-refinement.py` and `node scripts/verify-refinement.mjs`.
+They check real native derivatives, synthetic faint-peak attenuation, unchanged
+measurement footprints, original/hold comparison, CPU/GPU agreement, cached and
+live asset handling, independent optional-asset failures and legacy sequences.
+
 The [Clean View pass](clean-view.md) adds `node scripts/verify-clean-view.mjs` for
 real-image before/after differences, untouched measured pixels, original comparison,
 estimated-area overlays, CPU/GPU parity, preference, candidate and fallback checks.

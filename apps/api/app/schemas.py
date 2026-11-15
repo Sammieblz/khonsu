@@ -126,9 +126,27 @@ class DisplaySettings(ApiModel):
 
 class PreparedRaster(ApiModel):
     url: str = Field(min_length=1, max_length=2048)
-    encoding: Literal["float32-le-mask8-v1", "float32-le-quality8-v2", "float32-le-estimate8-v1"] = "float32-le-mask8-v1"
+    encoding: Literal["float32-le-mask8-v1", "float32-le-quality8-v2", "float32-le-estimate8-v1", "float32-le-refined8-v1"] = "float32-le-mask8-v1"
     size_bytes: int = Field(gt=0, le=MAX_RASTER_BYTES)
     sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+class DisplayRefinement(ApiModel):
+    raster: PreparedRaster
+    method: Literal['native-mask-normalized-local-wiener']
+    strength: float = Field(gt=0, le=.5)
+    noise_sigma_mjy_sr: float = Field(gt=0)
+    robust_haar_sigma_mjy_sr: float = Field(gt=0)
+    archive_sky_sigma_mjy_sr: float = Field(gt=0)
+    input_raster_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+
+    @model_validator(mode='after')
+    def validate_method(self) -> 'DisplayRefinement':
+        if self.raster.encoding != 'float32-le-refined8-v1':
+            raise ValueError('Refinement requires a separate display encoding')
+        if self.noise_sigma_mjy_sr != min(self.robust_haar_sigma_mjy_sr, self.archive_sky_sigma_mjy_sr):
+            raise ValueError('Refinement noise must respect the empirical and archive bounds')
+        return self
 
 
 class Frame(ApiModel):
@@ -137,6 +155,7 @@ class Frame(ApiModel):
     image_url: str = Field(min_length=1, max_length=2048)
     raster: PreparedRaster | None = None
     gap_fill: PreparedRaster | None = None
+    refinement: DisplayRefinement | None = None
     estimated_fraction: float = Field(default=0.0, ge=0, le=0.1)
     observed_start_utc: datetime | None = None
     observed_end_utc: datetime | None = None
@@ -152,8 +171,10 @@ class Frame(ApiModel):
 
     @model_validator(mode="after")
     def validate_exposure(self) -> "Frame":
-        if self.raster and self.raster.encoding == "float32-le-estimate8-v1":
+        if self.raster and self.raster.encoding not in {"float32-le-mask8-v1", "float32-le-quality8-v2"}:
             raise ValueError("Display estimates cannot be an observation raster")
+        if self.refinement and (not self.raster or self.refinement.input_raster_sha256 != self.raster.sha256):
+            raise ValueError('Refinement must identify its unchanged original raster')
         if self.estimated_fraction > self.masked_fraction + 1e-7:
             raise ValueError("Estimates must be within the original masked fraction")
         if self.gap_fill:
@@ -201,6 +222,8 @@ class SequenceManifest(ApiModel):
                 raise ValueError("Prepared raster size must match the common grid")
             if frame.gap_fill and frame.gap_fill.size_bytes != self.grid.width_px * self.grid.height_px * 5:
                 raise ValueError("Gap-fill raster size must match the common grid")
+            if frame.refinement and frame.refinement.raster.size_bytes != self.grid.width_px * self.grid.height_px * 5:
+                raise ValueError('Refinement raster size must match the common grid')
         if len({frame.frame_id for frame in self.frames}) != len(self.frames):
             raise ValueError("Frame IDs must be unique within a sequence")
         if self.data_mode != "synthetic":

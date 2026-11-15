@@ -19,7 +19,7 @@ from ..limits import MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OBSERVAT
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
-PIPELINE_VERSION = "khonsu-display-0.6.0"
+PIPELINE_VERSION = "khonsu-display-0.7.0"
 
 
 def _check_cancelled(cancelled):
@@ -75,6 +75,7 @@ class AstronomyProcessor:
             )
             from .fits_reader import inspect_observation, read_observation
             from .gap_fill import POLICY as GAP_FILL_POLICY, write_gap_fill
+            from .refinement import POLICY as REFINEMENT_POLICY, prepare_refinement, write_refinement
             from .spectral import MAX_CENTER_SPREAD_IN_BANDWIDTHS, select_compatible_frames
         except ModuleNotFoundError as exc:
             raise ProcessingError("SCIENCE_DEPENDENCIES_MISSING", "Install requirements-science.txt to process FITS observations.") from exc
@@ -113,6 +114,7 @@ class AstronomyProcessor:
         wcs = output_wcs(options, size)
         projected = []
         qualities = {}
+        refinements = {}
         while candidates:
             selected = select_compatible_frames(candidates)
             if len({item.observation.observed_start_utc for item in selected}) < 2:
@@ -120,6 +122,7 @@ class AstronomyProcessor:
             if len(selected) * size ** 2 > MAX_OUTPUT_PIXELS_TOTAL:
                 raise ProcessingError("RESOURCE_LIMIT", "The requested image sequence exceeds the output pixel budget. Request fewer frames or a smaller field.")
             projected = []
+            refinements.clear()
             failed = set()
             for item in selected:
                 _check_cancelled(cancelled)
@@ -128,6 +131,7 @@ class AstronomyProcessor:
                     image, quality = reproject_quality(loaded, wcs, size)
                     valid = quality == 1
                     qualities[item.observation.observation_id] = quality
+                    refinements[item.observation.observation_id] = prepare_refinement(loaded, wcs, size, valid)
                     item.warnings = list(loaded.warnings)
                     projected.append((item, image, valid))
                     del loaded
@@ -191,6 +195,7 @@ class AstronomyProcessor:
             except package_metadata.PackageNotFoundError:
                 pass
         policies.update(GAP_FILL_POLICY)
+        policies.update(REFINEMENT_POLICY)
         for index, (item, image, valid) in enumerate(projected, start=1):
             _check_cancelled(cancelled)
             stem = f"frame-{index:04d}"
@@ -198,6 +203,9 @@ class AstronomyProcessor:
             write_calibrated_grid(output_dir / f"{stem}.fits", image, valid, wcs)
             quality = qualities[item.observation.observation_id]
             raster = write_prepared_raster(output_dir / f"{stem}.bin", image, valid, quality=quality)
+            refinement = write_refinement(output_dir / f"{stem}-refined.bin", refinements.pop(item.observation.observation_id), valid, raster['sha256'])
+            if refinement:
+                refinement['raster']['url'] = f'/v1/sequences/{options.sequence_id}/frames/{stem}-refined.bin'
             fill, estimated_fraction = write_gap_fill(
                 output_dir / f"{stem}-fill.bin", image, valid,
                 native_scale / (options.fov_arcmin * 60.0 / size),
@@ -209,6 +217,7 @@ class AstronomyProcessor:
                 image_url=f"/v1/sequences/{options.sequence_id}/frames/{stem}.png",
                 raster={**raster, "url": f"/v1/sequences/{options.sequence_id}/frames/{stem}.bin"},
                 gap_fill={**fill, "url": f"/v1/sequences/{options.sequence_id}/frames/{stem}-fill.bin"} if fill else None,
+                refinement=refinement,
                 estimated_fraction=estimated_fraction,
                 observed_start_utc=source.observed_start_utc,
                 observed_end_utc=source.observed_end_utc,

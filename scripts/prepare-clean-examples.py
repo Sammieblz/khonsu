@@ -46,7 +46,7 @@ def prepare():
                 lineage.get('gap_fill_revision', {}).pop(frame['frame_id'], None)
             print(name, frame['frame_id'], f'{fraction:.2%} estimated; {frame["masked_fraction"]:.2%} originally masked')
         (bundle / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
-        lineage['source_observations'] = [{k: v for k, v in f.items() if k not in {'image_url', 'raster', 'gap_fill'}} for f in manifest['frames']]
+        lineage['source_observations'] = [{k: v for k, v in f.items() if k not in {'image_url', 'raster', 'gap_fill', 'refinement'}} for f in manifest['frames']]
         data = (bundle / 'manifest.json').read_bytes()
         lineage['files']['manifest.json'] = {'sha256': hashlib.sha256(data).hexdigest(), 'size_bytes': len(data)}
         (bundle / 'lineage.json').write_text(json.dumps(lineage, indent=2) + '\n', encoding='utf-8')

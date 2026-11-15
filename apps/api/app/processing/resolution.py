@@ -1,4 +1,4 @@
-"""Experimental resolution-lab primitives, not used by the production processor.
+"""Resolution-lab primitives; native grain reduction is also a display derivative.
 
 Arrays contain surface brightness, never display RGB. Drizzle uses polygon
 overlap and inverse variance; its diagonal variance omits inter-pixel covariance.

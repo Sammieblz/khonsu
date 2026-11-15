@@ -27,6 +27,56 @@
         "title": "ApiError",
         "type": "object"
       },
+      "DisplayRefinement": {
+        "additionalProperties": false,
+        "properties": {
+          "archive_sky_sigma_mjy_sr": {
+            "exclusiveMinimum": 0.0,
+            "title": "Archive Sky Sigma Mjy Sr",
+            "type": "number"
+          },
+          "input_raster_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Input Raster Sha256",
+            "type": "string"
+          },
+          "method": {
+            "const": "native-mask-normalized-local-wiener",
+            "title": "Method",
+            "type": "string"
+          },
+          "noise_sigma_mjy_sr": {
+            "exclusiveMinimum": 0.0,
+            "title": "Noise Sigma Mjy Sr",
+            "type": "number"
+          },
+          "raster": {
+            "$ref": "#/components/schemas/PreparedRaster"
+          },
+          "robust_haar_sigma_mjy_sr": {
+            "exclusiveMinimum": 0.0,
+            "title": "Robust Haar Sigma Mjy Sr",
+            "type": "number"
+          },
+          "strength": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 0.5,
+            "title": "Strength",
+            "type": "number"
+          }
+        },
+        "required": [
+          "raster",
+          "method",
+          "strength",
+          "noise_sigma_mjy_sr",
+          "robust_haar_sigma_mjy_sr",
+          "archive_sky_sigma_mjy_sr",
+          "input_raster_sha256"
+        ],
+        "title": "DisplayRefinement",
+        "type": "object"
+      },
       "DisplaySettings": {
         "additionalProperties": false,
         "properties": {
@@ -164,6 +214,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/PreparedRaster"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refinement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DisplayRefinement"
               },
               {
                 "type": "null"
@@ -354,7 +414,8 @@
             "enum": [
               "float32-le-mask8-v1",
               "float32-le-quality8-v2",
-              "float32-le-estimate8-v1"
+              "float32-le-estimate8-v1",
+              "float32-le-refined8-v1"
             ],
             "title": "Encoding",
             "type": "string"

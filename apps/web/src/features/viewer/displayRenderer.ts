@@ -8,6 +8,8 @@ precision highp int;
 uniform sampler2D intensity;
 uniform highp usampler2D validity;
 uniform sampler2D estimates;
+uniform sampler2D refinedIntensity;
+uniform int useRefined;
 uniform ivec2 sourceSize;
 uniform float low; uniform float high;
 ivec2 bounded(ivec2 p){return clamp(p,ivec2(0),sourceSize-1);}
@@ -15,7 +17,7 @@ bool validAt(ivec2 p){return texelFetch(validity,bounded(p),0).r==uint(1);}
 bool warningAt(ivec2 p){uint q=texelFetch(validity,bounded(p),0).r;return q==uint(2)||q==uint(4);}
 bool estimatedAt(ivec2 p){uint q=texelFetch(validity,bounded(p),0).r;return q==uint(3)||q==uint(4);}
 float estimateAt(ivec2 p){return texelFetch(estimates,bounded(p),0).r;}
-float valueAt(ivec2 p){return texelFetch(intensity,bounded(p),0).r;}
+float valueAt(ivec2 p){return useRefined==1?texelFetch(refinedIntensity,bounded(p),0).r:texelFetch(intensity,bounded(p),0).r;}
 `;
 const displayFragment = `#version 300 es
 ${common}
@@ -24,6 +26,7 @@ uniform float a; uniform float gammaValue;
 uniform int useAsinh; uniform int hatch; uniform int smoothView;
 uniform int subtle; uniform int includeWarnings;
 uniform int cleanView; uniform int showEstimates;
+uniform int softHighlights;
 out vec4 color;
 float inverseSinh(float x){return log(x+sqrt(x*x+1.));}
 void main(){
@@ -47,8 +50,11 @@ void main(){
   }
   value=total/max(weight,1e-8);
  }
- value=clamp((value-low)/(high-low),0.,1.);
+ value=max(0.,(value-low)/(high-low));
+ if(softHighlights==0)value=min(1.,value);
  if(useAsinh==1)value=inverseSinh(value/a)/inverseSinh(1./a);
+ if(softHighlights==1&&value>.65)value=.65+.35*(1.-exp(-(value-.65)/.35));
+ value=min(1.,value);
  value=floor(pow(value,1./gammaValue)*255.+.5)/255.;color=vec4(vec3(value),1.);
  if(estimated&&showEstimates==1&&(nearest.x+nearest.y)%4<2)color=vec4(243./255.,188./255.,96./255.,1.);
 }`;
@@ -120,7 +126,7 @@ export class DisplayRenderer {
         this.gl=gl;this.displayProgram=program(gl,displayFragment);
         this.floatTargets=!!gl.getExtension('EXT_color_buffer_float');
         if(this.floatTargets){this.detailProgram=program(gl,detailFragment);this.framebuffer=gl.createFramebuffer();}
-        for(let i=0;i<4;i++){const texture=gl.createTexture();if(!texture)throw Error('Display texture unavailable');this.textures.push(texture);}
+        for(let i=0;i<5;i++){const texture=gl.createTexture();if(!texture)throw Error('Display texture unavailable');this.textures.push(texture);}
         const debug=gl.getExtension('WEBGL_debug_renderer_info');
         this.adapter=debug?String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)):'Adapter information unavailable';
         this.mode='WebGL2';
@@ -166,13 +172,15 @@ export class DisplayRenderer {
     this.bindTexture(1);gl.texImage2D(gl.TEXTURE_2D,0,gl.R8UI,raster.width,raster.height,0,gl.RED_INTEGER,gl.UNSIGNED_BYTE,quality);
     if(this.floatTargets){this.bindTexture(2);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.width,raster.height,0,gl.RED,gl.FLOAT,null);}
     this.bindTexture(3);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.estimates?raster.width:1,raster.estimates?raster.height:1,0,gl.RED,gl.FLOAT,raster.estimates??null);
+    this.bindTexture(4);gl.texImage2D(gl.TEXTURE_2D,0,gl.R32F,raster.refinedValues?raster.width:1,raster.refinedValues?raster.height:1,0,gl.RED,gl.FLOAT,raster.refinedValues??null);
     this.uploaded=raster;this.processedKey='';
   }
 
-  private shared(program:WebGLProgram,raster:Raster,options:DisplayOptions){
+  private shared(program:WebGLProgram,raster:Raster,options:DisplayOptions,useRefined=!!options.reduceGrain&&!!raster.refinedValues){
     const gl=this.gl!,uniform=(name:string)=>gl.getUniformLocation(program,name);
     gl.uniform1i(uniform('intensity'),0);gl.uniform1i(uniform('validity'),1);
     gl.uniform1i(uniform('estimates'),3);
+    gl.uniform1i(uniform('refinedIntensity'),4);gl.uniform1i(uniform('useRefined'),useRefined?1:0);
     gl.uniform2i(uniform('sourceSize'),raster.width,raster.height);
     gl.uniform1f(uniform('low'),options.low);gl.uniform1f(uniform('high'),options.high);
   }
@@ -184,19 +192,19 @@ export class DisplayRenderer {
       if(this.canvas.width!==size.width)this.canvas.width=size.width;
       if(this.canvas.height!==size.height)this.canvas.height=size.height;
       this.upload(raster);
-      const key=`${options.low},${options.high},${amount}`;
+      const key=`${options.low},${options.high},${amount},${options.reduceGrain}`;
       if(amount>0&&key!==this.processedKey){
         const detail=this.detailProgram!;
         gl.bindFramebuffer(gl.FRAMEBUFFER,this.framebuffer);
         gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,this.textures[2]!,0);
         if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('Float target unavailable');
         gl.viewport(0,0,raster.width,raster.height);gl.useProgram(detail);
-        this.bindTexture(0,0);this.bindTexture(1,1);this.shared(detail,raster,options);
+        this.bindTexture(0,0);this.bindTexture(1,1);this.bindTexture(4,4);this.shared(detail,raster,options);
         gl.uniform1f(gl.getUniformLocation(detail,'amount'),amount);gl.drawArrays(gl.TRIANGLES,0,3);
         this.processedKey=key;
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,size.width,size.height);gl.useProgram(display);
-      this.bindTexture(amount>0?2:0,0);this.bindTexture(1,1);this.bindTexture(3,3);this.shared(display,raster,options);
+      this.bindTexture(amount>0?2:0,0);this.bindTexture(1,1);this.bindTexture(3,3);this.bindTexture(4,4);this.shared(display,raster,options,amount===0&&!!options.reduceGrain&&!!raster.refinedValues);
       const uniform=(name:string)=>gl.getUniformLocation(display,name);
       gl.uniform2i(uniform('outputSize'),size.width,size.height);
       gl.uniform1i(uniform('smoothView'),options.sampling==='smooth'?1:0);
@@ -206,6 +214,7 @@ export class DisplayRenderer {
       gl.uniform1i(uniform('includeWarnings'),options.includeWarnings?1:0);
       gl.uniform1i(uniform('cleanView'),options.cleanView?1:0);
       gl.uniform1i(uniform('showEstimates'),options.showEstimates?1:0);
+      gl.uniform1i(uniform('softHighlights'),options.softHighlights?1:0);
       gl.uniform1f(uniform('a'),options.a);gl.uniform1f(uniform('gammaValue'),options.gamma);
       gl.drawArrays(gl.TRIANGLES,0,3);
       if(gl.getError()!==gl.NO_ERROR)throw Error('WebGL display unavailable');

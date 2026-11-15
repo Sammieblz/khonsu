@@ -1,0 +1,108 @@
+{
+  "testedAt": "2026-11-15T22:54:00.142Z",
+  "baseCommit": "95243c208b956d4a5c16ba8376738d823e44a1cd",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "151.0.7922.34",
+      "currentDisplayMaxByteDifference": 0,
+      "grainToggleAndExactMasks": [
+        {
+          "field": "real-wise-0855-overview",
+          "differingMasks": 0,
+          "alteredValid": 372392,
+          "gaps": 21312
+        },
+        {
+          "field": "real-epsilon-indi-b-overview",
+          "differingMasks": 0,
+          "alteredValid": 282971,
+          "gaps": 41561
+        },
+        {
+          "field": "real-wise-0855",
+          "differingMasks": 0,
+          "alteredValid": 378099,
+          "gaps": 22064
+        },
+        {
+          "field": "real-epsilon-indi-b",
+          "differingMasks": 0,
+          "alteredValid": 328375,
+          "gaps": 20889
+        },
+        {
+          "field": "synthetic",
+          "differingMasks": 0,
+          "alteredValid": 430342,
+          "gaps": 39600
+        }
+      ],
+      "gapStylingPreservesFullyMeasuredRegions": {
+        "validChecked": 60016,
+        "validChanged": 0,
+        "gapsChanged": 760
+      },
+      "realAndSyntheticLabels": true,
+      "originalHoldCancelBlur": true,
+      "zoomPanReset": true,
+      "coverageAndTruth": true,
+      "narrowLayoutAnd44pxButtons": true,
+      "reportRetryAndImageFailure": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "currentDisplayMaxByteDifference": 0,
+      "grainToggleAndExactMasks": [
+        {
+          "field": "real-wise-0855-overview",
+          "differingMasks": 0,
+          "alteredValid": 372392,
+          "gaps": 21312
+        },
+        {
+          "field": "real-epsilon-indi-b-overview",
+          "differingMasks": 0,
+          "alteredValid": 282971,
+          "gaps": 41561
+        },
+        {
+          "field": "real-wise-0855",
+          "differingMasks": 0,
+          "alteredValid": 378099,
+          "gaps": 22064
+        },
+        {
+          "field": "real-epsilon-indi-b",
+          "differingMasks": 0,
+          "alteredValid": 328375,
+          "gaps": 20889
+        },
+        {
+          "field": "synthetic",
+          "differingMasks": 0,
+          "alteredValid": 430342,
+          "gaps": 39600
+        }
+      ],
+      "gapStylingPreservesFullyMeasuredRegions": {
+        "validChecked": 60016,
+        "validChanged": 0,
+        "gapsChanged": 760
+      },
+      "realAndSyntheticLabels": true,
+      "originalHoldCancelBlur": true,
+      "zoomPanReset": true,
+      "coverageAndTruth": true,
+      "narrowLayoutAnd44pxButtons": true,
+      "reportRetryAndImageFailure": true
+    }
+  ],
+  "sourceHashes": {
+    "apps/web/src/features/viewer/ResolutionLab.tsx": "f1546232f3414b18c9bbbd702a03bbea5ee658b165cd61b3a56b0def5e72c953",
+    "apps/web/src/features/viewer/resolutionLab.module.css": "ca9b9acfa13313879396a0d739a3b02a5b2d053b0ec653c1422ec0715e7f47d1",
+    "apps/web/public/experiments/resolution/manifest.json": "1d1e79a98985c51d68f5563e8b258ea6f0f596367a24dae77aec330f34dccb8c",
+    "scripts/verify-resolution-lab.mjs": "4d372fd39158f43585249df8a962e197533bfd500db8d1dd241c65383e2eb517"
+  }
+}

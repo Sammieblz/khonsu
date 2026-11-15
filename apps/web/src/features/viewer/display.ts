@@ -1,8 +1,8 @@
 import { MAX_RASTER_BYTES } from '../../lib/api/generated-limits.ts';
 export { MAX_RASTER_BYTES } from '../../lib/api/generated-limits.ts';
-export interface DisplayOptions { low:number; high:number; a:number; gamma:number; curve:'asinh'|'linear'; mask:'subtle'|'quiet'|'hatch'; sampling?:'smooth'|'pixels'; detail?:number; includeWarnings?:boolean; cleanView?:boolean; showEstimates?:boolean; }
+export interface DisplayOptions { low:number; high:number; a:number; gamma:number; curve:'asinh'|'linear'; mask:'subtle'|'quiet'|'hatch'; sampling?:'smooth'|'pixels'; detail?:number; includeWarnings?:boolean; cleanView?:boolean; showEstimates?:boolean; reduceGrain?:boolean; softHighlights?:boolean; }
 export interface DisplaySize { width:number; height:number; }
-export interface Raster { width:number; height:number; values:Float32Array; valid:Uint8Array; warning?:Uint8Array; estimated?:Uint8Array; estimates?:Float32Array; gapFillFailed?:boolean; }
+export interface Raster { width:number; height:number; values:Float32Array; valid:Uint8Array; warning?:Uint8Array; estimated?:Uint8Array; estimates?:Float32Array; gapFillFailed?:boolean; refinedMask?:Uint8Array; refinedValues?:Float32Array; refinementFailed?:boolean; }
 export const MAX_RASTER_SIDE=Math.floor(Math.sqrt(MAX_RASTER_BYTES/5));
 export const HD_DISPLAY_SIDE=2160;
 export const MAX_DISPLAY_SIDE=3840;
@@ -22,11 +22,12 @@ export function decodeRaster(buffer:ArrayBuffer,width:number,height:number,encod
   const count=width*height;
   if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>MAX_RASTER_SIDE||height>MAX_RASTER_SIDE||buffer.byteLength!==count*5||buffer.byteLength>MAX_RASTER_BYTES)throw Error('Prepared raster dimensions or byte count are invalid.');
   const littleEndian=new Uint8Array(new Uint32Array([1]).buffer)[0]===1;
-  if(!['float32-le-mask8-v1','float32-le-quality8-v2','float32-le-estimate8-v1'].includes(encoding))throw Error('Unknown prepared encoding.');
+  if(!['float32-le-mask8-v1','float32-le-quality8-v2','float32-le-estimate8-v1','float32-le-refined8-v1'].includes(encoding))throw Error('Unknown prepared encoding.');
   const values=littleEndian?new Float32Array(buffer,0,count):new Float32Array(count),quality=new Uint8Array(buffer,count*4),view=new DataView(buffer);
   const v2=encoding==='float32-le-quality8-v2',valid=v2?new Uint8Array(count):quality,warning=v2?new Uint8Array(count):undefined;
   for(let i=0;i<count;i++){if(!littleEndian)values[i]=view.getFloat32(i*4,true);if(!Number.isFinite(values[i])||quality[i]!>(v2?2:1))throw Error('Prepared raster contains invalid values or masks.');if(v2){valid[i]=quality[i]===1?1:0;warning![i]=quality[i]===2?1:0;}}
   if(encoding==='float32-le-estimate8-v1')return {width,height,values,valid:new Uint8Array(count),estimated:quality};
+  if(encoding==='float32-le-refined8-v1')return {width,height,values,valid:new Uint8Array(count),refinedMask:quality};
   return {width,height,values,valid,warning};
 }
 export function attachGapFill(original:Raster,fill:Raster,fraction:number):Raster {
@@ -39,6 +40,14 @@ export function attachGapFill(original:Raster,fill:Raster,fraction:number):Raste
   if(!Number.isFinite(fraction)||fraction<=0||fraction>.1||Math.abs(count/original.valid.length-fraction)>1e-12)throw Error('Estimated fraction is invalid.');
   return {...original,estimated:fill.estimated,estimates:fill.values};
 }
+export function attachRefinement(original:Raster,refined:Raster):Raster {
+  if(original.width!==refined.width||original.height!==refined.height||!refined.refinedMask)throw Error('Refinement grid is invalid.');
+  for(let i=0;i<original.valid.length;i++)if(refined.refinedMask[i]!==original.valid[i]||(!original.valid[i]&&refined.values[i]!==0))throw Error('Refinement changes original validity.');
+  // Warning values stay original. The derivative never supplies trusted samples.
+  const values=new Float32Array(refined.values);
+  for(let i=0;i<values.length;i++)if(!original.valid[i])values[i]=original.values[i]!;
+  return {...original,refinedValues:values};
+}
 export function validateDisplay(options:DisplayOptions,size:DisplaySize){
   if(![options.low,options.high,options.a,options.gamma].every(Number.isFinite)||options.high<=options.low||options.a<=0||options.gamma<=0)throw Error('Display limits are invalid.');
   if(!Number.isFinite(options.detail??0)||(options.detail??0)<0||(options.detail??0)>.5)throw Error('Detail amount is outside the experiment limit.');
@@ -49,9 +58,10 @@ export function validateDisplay(options:DisplayOptions,size:DisplaySize){
 // The 5x5 binomial blur, soft threshold and cap are identical to the GPU pass.
 export function detailValues(raster:Raster,options:DisplayOptions):Float32Array {
   const amount=options.detail??0;
-  if(amount===0)return raster.values;
-  const result=new Float32Array(raster.values),weights=[1,4,6,4,1];
-  const {width,height,values,valid}=raster,span=options.high-options.low;
+  const values=options.reduceGrain&&raster.refinedValues?raster.refinedValues:raster.values;
+  if(amount===0)return values;
+  const result=new Float32Array(values),weights=[1,4,6,4,1];
+  const {width,height,valid}=raster,span=options.high-options.low;
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     const index=y*width+x;if(!valid[index])continue;
     let smooth=0,safe=true;
@@ -90,7 +100,9 @@ export function renderPixels(raster:Raster,options:DisplayOptions,size:DisplaySi
         }
         if(weight>0)intensity=total/weight;
       }
-      let value=Math.max(0,Math.min(1,(intensity-low)/(high-low)));if(curve==='asinh')value=Math.asinh(value/a)/denominator;
+      let value=Math.max(0,(intensity-low)/(high-low));if(!options.softHighlights)value=Math.min(1,value);if(curve==='asinh')value=Math.asinh(value/a)/denominator;
+      if(options.softHighlights&&value>.65)value=.65+.35*(-Math.expm1(-(value-.65)/.35));
+      value=Math.min(1,value);
       const gray=Math.round(255*Math.pow(value,1/gamma));pixels[offset]=gray;pixels[offset+1]=gray;pixels[offset+2]=gray;
       if(estimated&&options.showEstimates&&(nx+ny)%4<2){pixels[offset]=243;pixels[offset+1]=188;pixels[offset+2]=96;}
     }

@@ -1,0 +1,209 @@
+{
+  "tested_at_utc": "2026-11-15T22:46:03.369506+00:00",
+  "strength": 0.5,
+  "real_frames": [
+    {
+      "sequence": "real-wise-0855",
+      "observation_id": "2025W45_2A_0292_2",
+      "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+      "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+      "native_fits_sha256": "307eb03fde7cce141a5875f235ec296dbd14dad08cadf9b6cf879f49bc5e5888",
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.018004795645808404,
+        "robust_haar_sigma_mjy_sr": 0.021228270766139028,
+        "archive_sky_sigma_mjy_sr": 0.018004795645808404,
+        "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58"
+      },
+      "preparation_ms": 74.97067599615548,
+      "fixed_sky_mad_ratio": 0.8202827160337267,
+      "reference_peaks": 20,
+      "max_centroid_change_grid_px": 0.019908985859853418,
+      "bright_aperture_ratio_min": 0.9990634918212891,
+      "bright_aperture_ratio_max": 1.0057132244110107,
+      "near_white_fraction_standard": 0.004375880738708002,
+      "near_white_fraction_soft_highlights": 0.0,
+      "original_and_validity_unchanged": true
+    },
+    {
+      "sequence": "real-wise-0855",
+      "observation_id": "2025W50_2A_0479_1",
+      "observed_start_utc": "2025-12-13T05:32:45.657600Z",
+      "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+      "native_fits_sha256": "469424b24b6fe7b1836dc2eb007e6e2dfd70bf0c3b892f6cc604164693d7b64a",
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01612354172242384,
+        "robust_haar_sigma_mjy_sr": 0.01994341186210513,
+        "archive_sky_sigma_mjy_sr": 0.01612354172242384,
+        "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45"
+      },
+      "preparation_ms": 56.497618003049865,
+      "fixed_sky_mad_ratio": 0.8212159830017585,
+      "reference_peaks": 23,
+      "max_centroid_change_grid_px": 0.022341101246255646,
+      "bright_aperture_ratio_min": 0.9999532699584961,
+      "bright_aperture_ratio_max": 1.009088158607483,
+      "near_white_fraction_standard": 0.005109597156398104,
+      "near_white_fraction_soft_highlights": 0.0,
+      "original_and_validity_unchanged": true
+    },
+    {
+      "sequence": "real-wise-0855",
+      "observation_id": "2026W18_2A_0663_1",
+      "observed_start_utc": "2026-05-03T05:10:37.948800Z",
+      "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+      "native_fits_sha256": "c259b82aefe9d4ea7af0400d9753ee0ee5037e6172b8779fed15930837c0b1d7",
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01659866089988934,
+        "robust_haar_sigma_mjy_sr": 0.02111986858025193,
+        "archive_sky_sigma_mjy_sr": 0.01659866089988934,
+        "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d"
+      },
+      "preparation_ms": 60.59500799165107,
+      "fixed_sky_mad_ratio": 0.821921031135182,
+      "reference_peaks": 26,
+      "max_centroid_change_grid_px": 0.01653842544102089,
+      "bright_aperture_ratio_min": 0.9966101050376892,
+      "bright_aperture_ratio_max": 1.0063806772232056,
+      "near_white_fraction_standard": 0.005596465390279823,
+      "near_white_fraction_soft_highlights": 0.0,
+      "original_and_validity_unchanged": true
+    },
+    {
+      "sequence": "real-epsilon-indi-b",
+      "observation_id": "2025W19_1B_0344_3",
+      "observed_start_utc": "2025-05-07T05:14:15.590400Z",
+      "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+      "native_fits_sha256": "41b1e38bcfede38700bb8fd719301a4f51df92cbc7252459562657b9e114d8a1",
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01603916853889646,
+        "robust_haar_sigma_mjy_sr": 0.023219641068577764,
+        "archive_sky_sigma_mjy_sr": 0.01603916853889646,
+        "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91"
+      },
+      "preparation_ms": 94.34608199808281,
+      "fixed_sky_mad_ratio": 0.9493426635043656,
+      "reference_peaks": 19,
+      "max_centroid_change_grid_px": 0.014336606622916782,
+      "bright_aperture_ratio_min": 0.9972750544548035,
+      "bright_aperture_ratio_max": 1.00229811668396,
+      "near_white_fraction_standard": 0.0033202535466344703,
+      "near_white_fraction_soft_highlights": 0.0,
+      "original_and_validity_unchanged": true
+    },
+    {
+      "sequence": "real-epsilon-indi-b",
+      "observation_id": "2026W39_2A_0581_1",
+      "observed_start_utc": "2026-09-27T05:58:12.172800Z",
+      "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+      "native_fits_sha256": "2c662f342e690c3b2d982e1eadd4d04c58a49cea1a87c69bdc1742b65cff6fe0",
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.015836161493804464,
+        "robust_haar_sigma_mjy_sr": 0.021108507531881333,
+        "archive_sky_sigma_mjy_sr": 0.015836161493804464,
+        "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de"
+      },
+      "preparation_ms": 94.38482999394182,
+      "fixed_sky_mad_ratio": 0.9169526313446094,
+      "reference_peaks": 20,
+      "max_centroid_change_grid_px": 0.0255278350618111,
+      "bright_aperture_ratio_min": 0.9972606301307678,
+      "bright_aperture_ratio_max": 1.0113104581832886,
+      "near_white_fraction_standard": 0.0027830011282437006,
+      "near_white_fraction_soft_highlights": 0.0,
+      "original_and_validity_unchanged": true
+    }
+  ],
+  "synthetic_controls": [
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 3.0,
+      "gaussian_width_native_px": 0.7,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 0.9826089331864107,
+      "aperture_flux_ratio_max": 1.0457836639521405,
+      "peak_ratio_min": 0.7603526471983852,
+      "max_centroid_change_native_px": 0.109966070071787
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 5.0,
+      "gaussian_width_native_px": 0.7,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 1.0130906724224844,
+      "aperture_flux_ratio_max": 1.0621183091645372,
+      "peak_ratio_min": 0.8379635549319016,
+      "max_centroid_change_native_px": 0.10090186334164568
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 10.0,
+      "gaussian_width_native_px": 0.7,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 1.0228992637600502,
+      "aperture_flux_ratio_max": 1.0545622677003337,
+      "peak_ratio_min": 0.918501329310047,
+      "max_centroid_change_native_px": 0.07780212816940725
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 50.0,
+      "gaussian_width_native_px": 0.7,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 1.0052990887031361,
+      "aperture_flux_ratio_max": 1.0172650638701013,
+      "peak_ratio_min": 0.9878287295383753,
+      "max_centroid_change_native_px": 0.016419159343476545
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 3.0,
+      "gaussian_width_native_px": 1.2,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 0.9862256019633288,
+      "aperture_flux_ratio_max": 1.0252835208902986,
+      "peak_ratio_min": 0.8718795504924124,
+      "max_centroid_change_native_px": 0.03317027611198144
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 5.0,
+      "gaussian_width_native_px": 1.2,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 1.0073945481278526,
+      "aperture_flux_ratio_max": 1.033531455836388,
+      "peak_ratio_min": 0.880698888558746,
+      "max_centroid_change_native_px": 0.02959753890296698
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 10.0,
+      "gaussian_width_native_px": 1.2,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 1.0113510550440847,
+      "aperture_flux_ratio_max": 1.0304513830352238,
+      "peak_ratio_min": 0.9341950420966347,
+      "max_centroid_change_native_px": 0.020715786310004373
+    },
+    {
+      "kind": "synthetic injections, not real detections",
+      "peak_to_noise_sigma": 50.0,
+      "gaussian_width_native_px": 1.2,
+      "noise_realizations": 16,
+      "aperture_flux_ratio_min": 1.0053506064861522,
+      "aperture_flux_ratio_max": 1.0102179104565636,
+      "peak_ratio_min": 0.9892671675085924,
+      "max_centroid_change_native_px": 0.009403717832841578
+    }
+  ],
+  "limits": "Display diagnostics only. Fixed sky scatter includes structure and correlated resampling, not isolated detector noise. Synthetic injections quantify attenuation, not completeness. No stacking, PSF recovery or new resolution is claimed."
+}

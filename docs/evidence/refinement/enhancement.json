@@ -1,0 +1,742 @@
+{
+  "testedAt": "2026-11-15T22:49:10.596Z",
+  "baseCommit": "95243c208b956d4a5c16ba8376738d823e44a1cd",
+  "workingTree": "M apps/api/app/examples.py\n M apps/api/app/jobs.py\n M apps/api/app/main.py\n M apps/api/app/processing/resolution.py\n M apps/api/app/processing/service.py\n M apps/api/app/schemas.py\n M apps/api/tests/test_browser_raster.py\n M apps/api/tests/test_cached_examples.py\n M apps/web/next-env.d.ts\n M apps/web/src/features/viewer/SkyViewer.tsx\n M apps/web/src/features/viewer/display.ts\n M apps/web/src/features/viewer/displayRenderer.ts\n M apps/web/src/features/viewer/time.ts\n M apps/web/src/features/viewer/usePreparedFrames.ts\n M apps/web/src/lib/api/generated.d.ts\n M apps/web/tests/display.test.ts\n M apps/web/tests/hd-view.test.ts\n M contracts/openapi.json\n M docs/examples/evidence-example.json\n M fixtures/real/real-epsilon-indi-b/lineage.json\n M fixtures/real/real-epsilon-indi-b/manifest.json\n M fixtures/real/real-wise-0855/lineage.json\n M fixtures/real/real-wise-0855/manifest.json\n M scripts/package-real-example.py\n M scripts/prepare-clean-examples.py\n M scripts/prepare-quality-examples.py\n?? apps/api/app/processing/refinement.py\n?? apps/api/tests/test_refinement.py\n?? docs/evidence/refinement/\n?? fixtures/real/real-epsilon-indi-b/frame-0001-refined.bin\n?? fixtures/real/real-epsilon-indi-b/frame-0002-refined.bin\n?? fixtures/real/real-wise-0855/frame-0001-refined.bin\n?? fixtures/real/real-wise-0855/frame-0002-refined.bin\n?? fixtures/real/real-wise-0855/frame-0003-refined.bin\n?? scripts/prepare-refined-examples.py\n?? scripts/validate-refinement.py\n?? scripts/verify-refinement.mjs",
+  "timingScope": "12 warm render + 2D copy + synchronous readback samples after 2 warmups; excludes download and FITS processing. Headless browser on this machine, not a general performance guarantee.",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "151.0.7922.34",
+      "viewport": {
+        "width": 1964,
+        "height": 1964,
+        "cssWidth": 982,
+        "dpr": 2
+      },
+      "sameFrameOriginalHoldCancelBlurAndMark": true,
+      "sharedSettingsAndReset": true,
+      "productionCpuWorker": true,
+      "mobileWidth": 390,
+      "renderers": {
+        "adapter": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "checks": [
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          }
+        ],
+        "timings": [
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 10.899999976158142,
+            "p95Ms": 13.100000023841858
+          },
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 13.049999982118607,
+            "p95Ms": 13.699999988079071
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 43.55000001192093,
+            "p95Ms": 45.80000001192093
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 45.599999994039536,
+            "p95Ms": 53
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 27.349999994039536,
+            "p95Ms": 42.59999996423721
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 27.649999976158142,
+            "p95Ms": 32.19999998807907
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 101.2000000178814,
+            "p95Ms": 196.30000001192093
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 107.15000003576279,
+            "p95Ms": 121.69999998807907
+          }
+        ],
+        "signedRectangularRamp": true,
+        "workerMode": "CPU worker",
+        "originalBuffersPreserved": true
+      },
+      "missingFloatTargetFallback": true,
+      "noGpuNoWorkerDetail": true,
+      "slowCpuBlink": {
+        "workerDelayMs": 1200,
+        "selectedIntervalMs": 350,
+        "displayedComparisonB": true
+      }
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "viewport": {
+        "width": 1964,
+        "height": 1964,
+        "cssWidth": 982,
+        "dpr": 2
+      },
+      "sameFrameOriginalHoldCancelBlurAndMark": true,
+      "sharedSettingsAndReset": true,
+      "productionCpuWorker": true,
+      "mobileWidth": 390,
+      "renderers": {
+        "adapter": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+        "checks": [
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W45_2A_0292_2",
+            "utc": "2025-11-07T20:31:27.206400Z",
+            "rasterSha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W50_2A_0479_1",
+            "utc": "2025-12-13T05:32:45.657600Z",
+            "rasterSha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W18_2A_0663_1",
+            "utc": "2026-05-03T05:10:37.948800Z",
+            "rasterSha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2025W19_1B_0344_3",
+            "utc": "2025-05-07T05:14:15.590400Z",
+            "rasterSha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.35,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "smooth",
+            "detail": 0.5,
+            "maximum": 1
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.35,
+            "maximum": 0
+          },
+          {
+            "observation": "2026W39_2A_0581_1",
+            "utc": "2026-09-27T05:58:12.172800Z",
+            "rasterSha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+            "sampling": "pixels",
+            "detail": 0.5,
+            "maximum": 0
+          }
+        ],
+        "timings": [
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 3,
+            "p95Ms": 4
+          },
+          {
+            "mode": "WebGL2",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 4,
+            "p95Ms": 4
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 10,
+            "p95Ms": 12
+          },
+          {
+            "mode": "WebGL2",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 10,
+            "p95Ms": 12
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 32.5,
+            "p95Ms": 34
+          },
+          {
+            "mode": "CPU worker",
+            "side": 440,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 35,
+            "p95Ms": 43
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0,
+            "detailAmounts": [
+              0
+            ],
+            "samples": 12,
+            "medianMs": 121.5,
+            "p95Ms": 153
+          },
+          {
+            "mode": "CPU worker",
+            "side": 880,
+            "detail": 0.35,
+            "detailAmounts": [
+              0.35,
+              0.4
+            ],
+            "samples": 12,
+            "medianMs": 128.5,
+            "p95Ms": 138
+          }
+        ],
+        "signedRectangularRamp": true,
+        "workerMode": "CPU worker",
+        "originalBuffersPreserved": true
+      },
+      "missingFloatTargetFallback": true,
+      "noGpuNoWorkerDetail": true,
+      "slowCpuBlink": {
+        "workerDelayMs": 1200,
+        "selectedIntervalMs": 350,
+        "displayedComparisonB": true
+      }
+    }
+  ],
+  "sourceHashes": {
+    "apps/web/src/features/viewer/display.ts": "c0537abb3594cf969f82bfa653c4fcbea7cd93c58cd36aa2fe9902b7be37b5a6",
+    "apps/web/src/features/viewer/displayRenderer.ts": "51fa9740d00cf1dd1de410597d8d7e6f8c7882cfc90e0661787417079133985c",
+    "apps/web/src/features/viewer/display.worker.ts": "0e7d92b806b41e60ac3c41c75cc2046f86985bd335fb4ddf49b11dc772fd491b",
+    "apps/web/src/features/viewer/SkyViewer.tsx": "6ead6dcd50eeefc482000dad419e3a4a6904775c40588a2001e5c78d26c26246",
+    "apps/web/src/features/viewer/viewer.module.css": "fe6d5c2ba75a9522d23aadbdc246b126c2ea9a53beded5ae3aa71009075c58c6",
+    "scripts/verify-enhancement.mjs": "fddb05f433dcb2051af1d95128f77cc24611b8b1dc44fc62ab5d979bba439b55"
+  }
+}

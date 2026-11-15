@@ -186,7 +186,11 @@
         "gap_fill_bright_boundary_sigma": 5,
         "gap_fill_max_components": 2048,
         "gap_fill_max_pixels": 65536,
-        "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
+        "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
+        "refinement_method": "native-mask-normalized-local-wiener",
+        "refinement_strength": 0.5,
+        "refinement_scope": "optional display copy; native linear values before WCS resampling; no temporal averaging or measurement change",
+        "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery"
       },
       "warnings": [
         {

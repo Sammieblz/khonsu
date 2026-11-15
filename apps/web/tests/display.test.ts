@@ -1,7 +1,28 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {attachGapFill,decodeRaster,renderPixels,detailValues,displaySize,measuredResolution,HD_DISPLAY_SIDE,MAX_DISPLAY_SIDE,MAX_DISPLAY_PIXELS} from '../src/features/viewer/display.ts';
+import {attachGapFill,attachRefinement,decodeRaster,renderPixels,detailValues,displaySize,measuredResolution,HD_DISPLAY_SIDE,MAX_DISPLAY_SIDE,MAX_DISPLAY_PIXELS} from '../src/features/viewer/display.ts';
 const options={low:0,high:10,a:.3,gamma:1,curve:'linear' as const,mask:'quiet' as const};
+test('refinement remains a separate visual copy and cannot add validity or change warnings',()=>{
+ const original={width:4,height:1,values:new Float32Array([-3,2,9,0]),valid:new Uint8Array([1,1,0,0]),warning:new Uint8Array([0,0,1,0])};
+ const buffer=new ArrayBuffer(20);new Float32Array(buffer,0,4).set([-2,3,0,0]);new Uint8Array(buffer,16).set([1,1,0,0]);
+ const copy=decodeRaster(buffer,4,1,'float32-le-refined8-v1');assert.equal(copy.valid.some(Boolean),false);
+ const refined=attachRefinement(original,copy),before=new Float32Array(original.values);
+ assert.deepEqual(renderPixels(refined,options),renderPixels(original,options));
+ assert.deepEqual(refined.valid,original.valid);
+ const reduced=renderPixels(refined,{...options,low:-5,reduceGrain:true,includeWarnings:true});
+ const source=renderPixels(original,{...options,low:-5,includeWarnings:true});
+ assert.notEqual(reduced[0],source[0]);assert.equal(reduced[8],source[8]);
+ assert.deepEqual(original.values,before);
+ copy.refinedMask![2]=1;assert.throws(()=>attachRefinement(original,copy),/validity/);
+});
+test('soft highlights keep faint mapping and separate bright values above the white point',()=>{
+ const raster={width:7,height:1,values:new Float32Array([-2,0,.1,.4,10,20,40]),valid:new Uint8Array(7).fill(1)};
+ const regular=renderPixels(raster,{...options,curve:'asinh'}),soft=renderPixels(raster,{...options,curve:'asinh',softHighlights:true});
+ assert.deepEqual([...soft.slice(0,16)],[...regular.slice(0,16)]);
+ assert(soft[16]!<soft[20]!&&soft[20]!<soft[24]!&&soft[24]!<255);
+ assert.equal(regular[16],255);assert.equal(regular[24],255);
+ for(let i=4;i<7;i++){const mapped=Math.asinh(raster.values[i]!/10/.3)/Math.asinh(1/.3);assert.equal(soft[i*4],Math.round(255*(.65+.35*(-Math.expm1(-(mapped-.65)/.35)))));}
+});
 test('gap estimates never become validity, replace observations or affect original rendering',()=>{
  const original={width:20,height:1,values:new Float32Array(20).fill(5),valid:new Uint8Array(20).fill(1),warning:new Uint8Array(20)};
  original.valid[10]=0;original.warning[10]=1;original.values[10]=9;

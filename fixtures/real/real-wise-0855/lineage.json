@@ -73,8 +73,8 @@
       "sha256": "d23fb384a7c8736d49c6f0564a7abf9ad68e13e76d1edacb9f1f7726a5a0ef28"
     },
     "manifest.json": {
-      "sha256": "caafcfcbfdab14b80f766cd1d7b630b526a6e8b80b6d7c4dd5005ccfeb306a39",
-      "size_bytes": 8810
+      "sha256": "f56d98ee89ced663e4b53825f3973c173444105648267ed95ec3234bd31e8c92",
+      "size_bytes": 11117
     },
     "source-manifest.json": {
       "size_bytes": 6149,
@@ -103,6 +103,18 @@
     "frame-0003-fill.bin": {
       "sha256": "ae5dbaf13a22b31a1f4531886fcf2b940800bb000052c87f7289c360b2181b77",
       "size_bytes": 69620
+    },
+    "frame-0001-refined.bin": {
+      "size_bytes": 69620,
+      "sha256": "d42cc4cfa5dff8f1131df046b6074bbdbc71ddad0a05b26c61345646637d85f1"
+    },
+    "frame-0002-refined.bin": {
+      "size_bytes": 69620,
+      "sha256": "dcfd02670892e532f658f2179c66aa2e2eb5817d16d0327d30da19935567d9b3"
+    },
+    "frame-0003-refined.bin": {
+      "size_bytes": 69620,
+      "sha256": "ed701bceb0cbc0662e2a912b2ec9951f7c7080b53a28f955fa46426a57e46138"
     }
   },
   "data_use_terms": "https://irsa.ipac.caltech.edu/data_use_terms.html",
@@ -168,6 +180,41 @@
       "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
       "method": "small-gap-harmonic-v1",
       "estimated_fraction": 0.021401896006894572
+    }
+  },
+  "refinement_revision": {
+    "frame-0001": {
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.018004795645808404,
+        "robust_haar_sigma_mjy_sr": 0.021228270766139028,
+        "archive_sky_sigma_mjy_sr": 0.018004795645808404,
+        "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58"
+      },
+      "raw_sha256": "307eb03fde7cce141a5875f235ec296dbd14dad08cadf9b6cf879f49bc5e5888"
+    },
+    "frame-0002": {
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01612354172242384,
+        "robust_haar_sigma_mjy_sr": 0.01994341186210513,
+        "archive_sky_sigma_mjy_sr": 0.01612354172242384,
+        "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45"
+      },
+      "raw_sha256": "469424b24b6fe7b1836dc2eb007e6e2dfd70bf0c3b892f6cc604164693d7b64a"
+    },
+    "frame-0003": {
+      "settings": {
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.01659866089988934,
+        "robust_haar_sigma_mjy_sr": 0.02111986858025193,
+        "archive_sky_sigma_mjy_sr": 0.01659866089988934,
+        "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d"
+      },
+      "raw_sha256": "c259b82aefe9d4ea7af0400d9753ee0ee5037e6172b8779fed15930837c0b1d7"
     }
   }
 }
