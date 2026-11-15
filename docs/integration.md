@@ -27,7 +27,13 @@ The authoritative public models live in `apps/api/app/schemas.py`. Export them t
 | `GET /v1/demo/manifest` | Explicit synthetic development manifest |
 | `GET /v1/demo/frames/{filename}` | Allowlisted synthetic assets only |
 
-The checked-in OpenAPI file is the exact field and status-code contract. Real frame delivery uses API-controlled artifact routes. The browser client in `apps/web/src/lib/api/client.ts` implements this lifecycle: `runSequenceJob` creates the job, polls with capped backoff (1 s growing to 5 s, abandoned and cancelled after 10 minutes), maps HTTP 410 to a repeat-the-search state and fetches the manifest when ready. Avoid returning internal paths, upstream credentials, or unbounded archive response bodies in errors.
+The checked-in OpenAPI file is the exact field and status-code contract. Real frame delivery uses API-controlled artifact routes. The browser client in `apps/web/src/lib/api/client.ts` implements this lifecycle: `runSequenceJob` creates the job, polls with capped backoff (1 s growing to 5 s, abandoned and cancelled after 10 minutes), maps HTTP 410 to a repeat-the-search state and fetches the manifest when ready. It also:
+
+- Cancels the server job whenever the caller aborts, including during job creation. The create request is allowed to finish so its job identifier is known, then cancelled. No request follows the cancel.
+- Tolerates up to two consecutive unreachable polls, so a brief backend restart ends in the 410 expired state instead of a network error.
+- Returns a manifest only when its `sequence_id`, `data_mode: "live"` and target coordinates match the job and search that requested it.
+
+`SequenceSession` in `apps/web/src/lib/api/session.ts` keeps one live search per screen. A new search aborts the previous one and waits for that job's cancellation before creating its own, so a replaced search cannot deliver frames, report progress, keep polling or be merged with the new request by the server's duplicate-request reuse. Avoid returning internal paths, upstream credentials, or unbounded archive response bodies in errors.
 
 ## Scientific handoff
 
@@ -44,6 +50,25 @@ The browser reads `NEXT_PUBLIC_API_BASE_URL` at build time. Static Cloudflare Pa
 ## Error and data modes
 
 The UI distinguishes live data, previously acquired real data, and synthetic development fixtures. Labels persist through exported evidence. Show actionable states for missing coverage, too few comparable epochs, incompatible wavelengths, masked targets, timeouts, download bounds, processing failure, job expiry, failed frame loads and unavailable backend. Do not switch silently to synthetic data.
+
+`describeFailure(code)` in the API client maps every search error code to one of these states. The search panel shows the state's heading, the server's message and validation details, guidance, and only the actions that can help. The cached real example is offered only when the backend has bundled examples, and loading it is always a deliberate click that keeps the `CACHED REAL EXAMPLE` label.
+
+| State heading | Error codes | Actions offered |
+| --- | --- | --- |
+| CHECK THE SEARCH | `INVALID_REQUEST`, `invalid_target`, `INVALID_PROCESSING_OPTIONS` | Edit search |
+| NOT ENOUGH COMPARABLE OBSERVATIONS | `NO_USABLE_COVERAGE`, `INSUFFICIENT_EPOCHS`, `INSUFFICIENT_COMPARABLE_EPOCHS`, `INSUFFICIENT_SPECTRAL_OVERLAP` | Edit search, cached example |
+| SEARCH TOO LARGE | `too_many_observations`, `archive_size_limit`, `RESOURCE_LIMIT` | Edit search |
+| IRSA ARCHIVE UNAVAILABLE | `archive_busy`, `archive_unavailable`, `empty_archive_response`, `invalid_archive_response`, `invalid_fits`, `unsafe_source_url` | Retry, cached example |
+| OBSERVATION SERVICE BUSY | `QUEUE_FULL`, `CACHE_FULL`, `CACHE_UNAVAILABLE` | Retry, cached example |
+| SEARCH TOOK TOO LONG | `JOB_TIMEOUT`, `archive_timeout`, `POLL_TIMEOUT` | Retry, edit search, cached example |
+| ARCHIVE DATA COULD NOT BE USED | `INVALID_FITS`, `INVALID_WCS`, `INVALID_PROVENANCE`, `MISSING_QUALITY_DATA`, `MISSING_SPECTRAL_METADATA`, `UNSUPPORTED_RELEASE`, `UNSUPPORTED_FLUX_UNIT` | Edit search, cached example |
+| PROCESSING FAILED | `PROCESSING_FAILED`, `INVALID_RESPONSE` and any unrecognised code | Retry, edit search, cached example |
+| SEARCH EXPIRED | `JOB_EXPIRED` (also a backend restart), `ASSET_EXPIRED` | Retry |
+| OBSERVATION SERVICE UNREACHABLE | `BACKEND_UNAVAILABLE` | Retry |
+| LIVE SEARCH NOT AVAILABLE | `SCIENCE_UNAVAILABLE`, `SCIENCE_DEPENDENCIES_MISSING` | Cached example |
+| SEARCH CANCELLED | `CANCELLED` | Search again, edit search |
+
+The cached example is not offered when the backend is unreachable, because the same backend serves it. A web test scans the API source for raised error codes and fails when one has no explicit state, so add the mapping when you add a code.
 
 ## Change procedure
 
