@@ -21,3 +21,11 @@ test('cancelled, unavailable, failed and no-coverage states remain actionable',(
  const result=observationStatus({phase:'failed',request,guide,code:'NO_COVERAGE',message:'No coverage',details:[]},false,'',null,empty);
  assert.equal(result?.busy,false);assert.equal(result?.retry,guide.retry);assert.match(result?.detail??'',/No coverage/);
 });
+
+test('archive failure exposes explicit cached recovery and server diagnostics without claiming a sequence',()=>{
+ const guide=describeFailure('archive_unavailable'),details=['Archive stage: image search','Upstream HTTP status: 502'];
+ const result=observationStatus({phase:'failed',request,guide,code:'archive_unavailable',message:'IRSA service unavailable',details},false,'',null,empty);
+ assert.equal(result?.cachedExample,true);assert.equal(result?.retry,true);assert.equal(result?.busy,false);
+ assert.deepEqual(result?.diagnostics,details);
+ assert.equal(observationStatus({phase:'running',request,job:null},false,'',null,empty)?.cachedExample,undefined);
+});

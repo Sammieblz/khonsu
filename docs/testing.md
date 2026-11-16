@@ -43,6 +43,11 @@ Commit a five-target coverage report, including actual epoch coordinates, dates 
 
 ## Browser acceptance
 
+Run `node scripts/verify-archive-recovery.mjs` against a configured static preview
+for controlled archive failure, retry and explicit cached-real recovery at desktop
+and mobile sizes. The [outage investigation](archive-outage-recovery.md) records
+the real upstream failure separately from the controlled browser tests.
+
 Run `node scripts/verify-guided-notebook.mjs` for #77 / BYT-54. It checks the
 three-second entry, absence of the guardian during ordinary loading, note CRUD,
 JSON export, reload, offline retry, explicit tab conflicts, spring drag/release,

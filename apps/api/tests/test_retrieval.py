@@ -148,6 +148,23 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, "archive_busy")
         self.assertEqual(waits, [1.0, 2.0, 4.0, 8.0])
 
+    def test_persistent_metadata_502_preserves_sanitized_diagnostics(self):
+        retriever = IrsaRetriever()
+        retriever._deadline = time.monotonic() + 100
+        url = query_url(request())
+        error = HTTPError(url, 502, "Proxy Error with private upstream internals", {}, io.BytesIO(b"private response"))
+        with patch.object(retriever._opener, "open", side_effect=error) as opened, \
+                patch.object(retriever, "_pause") as pause, \
+                self.assertRaises(RetrievalError) as caught:
+            retriever._read(url, 1024)
+        self.assertEqual(opened.call_count, MAX_ATTEMPTS)
+        self.assertEqual(pause.call_count, MAX_ATTEMPTS - 1)
+        self.assertEqual(caught.exception.code, "archive_unavailable")
+        self.assertIn("image search", caught.exception.message)
+        self.assertIn("HTTP 502", caught.exception.message)
+        self.assertEqual(caught.exception.details, ["Archive stage: image search", "Attempts: 5 of 5", "Upstream HTTP status: 502"])
+        self.assertNotIn("private", str(caught.exception.details) + caught.exception.message)
+
     def test_retry_never_waits_past_the_retrieval_deadline(self):
         waits = []
         with self.assertRaises(RetrievalError) as caught:
