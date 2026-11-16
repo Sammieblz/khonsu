@@ -5,6 +5,7 @@ import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const require=createRequire(import.meta.url),{chromium,firefox}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const base=process.env.KHONSU_TEST_URL||'http://localhost:3004';
+const examples=await(await fetch((process.env.KHONSU_TEST_API||'http://localhost:8004')+'/v1/examples')).json();
 const output=resolve(process.env.KHONSU_TEST_OUTPUT||'.cache/console-design');await mkdir(output,{recursive:true});
 const ready=async p=>{await p.waitForFunction(()=>document.querySelector('canvas')?.style.visibility==='visible',null,{timeout:60000});await p.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));};
 const button=(p,name)=>p.getByRole('button',{name,exact:true});
@@ -27,7 +28,7 @@ for(const engine of [chromium,firefox]){
   const view=await canvas.getAttribute('style');
   await tab(p,'NOTES');await p.getByLabel('Observation note',{exact:true}).fill('Unsaved navigation acceptance note.');
   await p.getByRole('link',{name:'Khonsu home',exact:true}).click();
-  await p.getByRole('link',{name:'RETURN TO OBSERVATORY',exact:true}).click();await ready(p);
+  await p.locator('#explore-entry').getByRole('link',{name:'RETURN TO OBSERVATORY',exact:true}).click();await ready(p);
   assert.equal(await p.locator('#observation-index').getAttribute('aria-valuetext'),time);
   assert.equal(await p.getByLabel('Observation note',{exact:true}).inputValue(),'Unsaved navigation acceptance note.');
   assert.equal(await canvas.getAttribute('style'),view);
@@ -60,8 +61,16 @@ for(const engine of [chromium,firefox]){
   await p.goto(base+'/console/?example=not-an-example');await p.getByText(/selected cached example is no longer available/).first().waitFor();assert.equal(await canvas.count(),0);
   await p.route('**/v1/examples',route=>route.abort());await p.goto(base+'/console/?example=real-wise-0855');await p.getByRole('alert').first().waitFor();await p.unroute('**/v1/examples');
   await p.goto(base+'/console/?example=real-wise-0855');await ready(p);
+  await p.route('**/v1/examples/real-wise-0855/frames/frame-0001.png',r=>r.abort());
+  await p.reload();await button(p,'RETRY IMAGE').waitFor();await p.unroute('**/v1/examples/real-wise-0855/frames/frame-0001.png');await button(p,'RETRY IMAGE').click();await ready(p);
+  // One genuine frame is returned as an explicit transport control, not a coverage claim.
+  await p.route('**/v1/examples',r=>r.fulfill({json:examples.map(e=>({...e,frames:e.frames.slice(0,1)}))}));await p.reload();await ready(p);assert.equal(await button(p,'Play observations').isDisabled(),true);await p.unroute('**/v1/examples');
+  await p.goto(base+'/console/?ra_deg=12&dec_deg=-7&fov_arcmin=6');
+  await p.route('**/v1/sequences',r=>r.fulfill({json:{sequence_id:'no-coverage-control',status:'failed',progress:0,message:'Injected no-coverage response',error:{code:'NO_USABLE_COVERAGE',message:'Injected no-coverage response',details:[]}}}));
+  await button(p,'SEARCH THIS FIELD').click();await p.locator('[data-loading-stage="failed"]').waitFor();assert.equal(await canvas.count(),0);await p.unroute('**/v1/sequences');
+  await p.goto(base+'/console/?example=real-wise-0855');await ready(p);
   const axePath=process.env.AXE_SCRIPT;if(axePath){await p.addScriptTag({path:axePath});const audit=await p.evaluate(()=>axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));assert.deepEqual(audit.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);}
-  assert.deepEqual(errors,[]);report.browsers.push({browser:engine.name(),version:browser.version(),fit,fill,navigation:'frame, zoom and draft preserved',candidate:'original-grid record and export passed',responsive:'1366,1920,390 and 200% CSS viewport',failures:'missing example and offline service',errors});
+  assert.deepEqual(errors,[]);report.browsers.push({browser:engine.name(),version:browser.version(),fit,fill,navigation:'frame, zoom and draft preserved',candidate:'original-grid record and export passed',responsive:'1366,1920,390 and 200% CSS viewport',failures:'missing example, offline service, failed image retry, one epoch and no coverage',errors});
  }finally{await browser.close();}
 }
 await writeFile(resolve(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

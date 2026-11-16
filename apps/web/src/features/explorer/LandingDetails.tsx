@@ -27,6 +27,7 @@ export function LandingDetails(){const [missionOpen,setMissionOpen]=useState(fal
             <p>SPHEREx DR1 spectral images: <a href="https://doi.org/10.26131/IRSA678" target="_blank" rel="noreferrer">doi:10.26131/IRSA678</a>. Some observations are Quick Release (QR) images; IRSA states that <q>the DR1 spectral images are intended to be used together with the QR3 spectral images as a uniformly processed set.</q> See the <a href="https://irsa.ipac.caltech.edu/data/SPHEREx/docs/overview_dr1.html" target="_blank" rel="noreferrer">SPHEREx DR1 overview at IRSA</a>.</p>
             <p className={styles.notice}>NASA does not endorse any non-U.S. Government entity and is not responsible for information contained on non-U.S. Government websites. For non-U.S. Government websites, participants must comply with any data use parameters of that specific website.</p>
             <p>Khonsu is an independent NASA Space Apps Challenge 2026 participant project. It has not been reviewed or approved by NASA, JPL, Caltech or IPAC. The NASA Eyes view in The Mission is a NASA/JPL-Caltech simulation shown for context; its clock never changes observation dates.</p>
+            <p>The landing planet is original AI-assisted illustrative artwork created for Khonsu. The celestial guardian and motion graphics are original project-authored SVG. They are separate from telescope observations. The dated field previews retain their source pixels and NASA/IPAC provenance.</p>
           </div>
         </section>
 </>;}

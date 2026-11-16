@@ -28,7 +28,7 @@ Before adding a Blender or third-party satellite model, record the exact source,
 
 ## Console redesign assets, November 14, 2026
 
-`apps/web/public/observatory-sky.svg` is original project-authored vector art:
+The former `observatory-sky.svg`, retained in Git history, was project-authored vector art:
 deterministically positioned illustrative stars, shaded spherical limb and light
 rim. It is decorative, not a measured sky, a Planet X image or a reconstruction
 of ancient constellations. It uses the repository MIT license. No Marvel asset,
@@ -47,3 +47,15 @@ only when the user opens Mission. It retains NASA/JPL-Caltech attribution and a
 separate simulation-clock label, plus an external-link fallback. No extracted
 spacecraft model or Eyes source code is redistributed. The
 [SPHEREx site](https://spherex.caltech.edu/) also embeds NASA Eyes.
+
+## November 15 landing and motion assets
+
+The current [art direction and generation record](art-direction.md) identifies
+the generated planet backdrop, original SVG guardian and authentic preview
+sources. The hero is a 1672 x 941 WebP illustration, 110,966 bytes, generated with
+the built-in imagegen tool and encoded for web delivery without upscaling. The
+two dated SPHEREx previews are byte-for-byte copies of the reviewed cached PNGs.
+Their hashes, real UTC dates, releases and FITS links are recorded in
+`apps/web/src/features/explorer/landing-data.json` and checked by lineage tests.
+Run `node scripts/sync-landing-preview.mjs` after an intentional cached-fixture
+or target-report update. Do not substitute generated artwork for these previews.

@@ -1,0 +1,111 @@
+{
+  "checked_at_utc": "2026-11-14T20:36:07.993960+00:00",
+  "sequence_id": "real-wise-0855",
+  "frame_count": 3,
+  "grid": {
+    "width_px": 118,
+    "height_px": 118,
+    "pixel_origin": "top-left",
+    "orientation": "north-up-east-left",
+    "pixel_center_convention": "zero-based-integer-centers",
+    "wcs_header": {
+      "WCSAXES": 2,
+      "CRPIX1": 59.5,
+      "CRPIX2": 59.5,
+      "CDELT1": -0.00084745762711864,
+      "CDELT2": 0.00084745762711864,
+      "CUNIT1": "deg",
+      "CUNIT2": "deg",
+      "CTYPE1": "RA---TAN",
+      "CTYPE2": "DEC--TAN",
+      "CRVAL1": 133.76012139141,
+      "CRVAL2": -7.2421279412123,
+      "LONPOLE": 180,
+      "LATPOLE": -7.2421279412123,
+      "MJDREF": 0,
+      "RADESYS": "ICRS"
+    },
+    "raster_to_wcs": "flip-y"
+  },
+  "width": 118,
+  "height": 118,
+  "frames": [
+    {
+      "frame_id": "frame-0001",
+      "image_url": "/art/observations/frame-0001.png",
+      "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+      "observation_id": "2025W45_2A_0292_2",
+      "release": "DR1",
+      "wavelength_um": 1.413164368794356,
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W45_2A/l2b-v27-2026-247/2/level2_2025W45_2A_0292_2D2_spx_l2b-v27-2026-247.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "sha256": "163a8974eb2a45c03ac38c10888abf88712bc75d738817081986d5cee5fd4123"
+    },
+    {
+      "frame_id": "frame-0003",
+      "image_url": "/art/observations/frame-0003.png",
+      "observed_start_utc": "2026-05-03T05:10:37.948800Z",
+      "observation_id": "2026W18_2A_0663_1",
+      "release": "DR1",
+      "wavelength_um": 1.404985374104534,
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2026W18_2A/l2b-v27-2026-244/2/level2_2026W18_2A_0663_1D2_spx_l2b-v27-2026-244.fits?center=133.7601213914%2C-7.2421279412&size=0.1500000000",
+      "sha256": "d23fb384a7c8736d49c6f0564a7abf9ad68e13e76d1edacb9f1f7726a5a0ef28"
+    }
+  ],
+  "targets": [
+    {
+      "preset_id": "barnards-star",
+      "label": "Barnard's Star",
+      "object_type": "High proper-motion star",
+      "ra_deg": 269.44626850265985,
+      "dec_deg": 4.768204478798888,
+      "checked_at_utc": "2026-11-14T20:36:07.993987+00:00",
+      "status": "success",
+      "usable_frame_count": 3,
+      "science_note": "Large proper motion is useful context; a short SPHEREx baseline need not show a perceptible shift."
+    },
+    {
+      "preset_id": "epsilon-indi-b",
+      "label": "Epsilon Indi B",
+      "object_type": "Brown dwarf binary field",
+      "ra_deg": 331.0986113344776,
+      "dec_deg": -56.800804140277776,
+      "checked_at_utc": "2026-11-14T20:36:45.580741+00:00",
+      "status": "success",
+      "usable_frame_count": 2,
+      "science_note": "The Ba/Bb pair is not expected to be resolved by SPHEREx; binary orbital motion is omitted from this field centre."
+    },
+    {
+      "preset_id": "wise-0855",
+      "label": "WISE 0855",
+      "object_type": "Cold brown dwarf field",
+      "ra_deg": 133.7601213914074,
+      "dec_deg": -7.242127941212259,
+      "checked_at_utc": "2026-11-14T20:37:09.251313+00:00",
+      "status": "success",
+      "usable_frame_count": 3,
+      "science_note": "Very faint, red and blended at shorter wavelengths. Archive coverage does not establish a detection or measurable motion."
+    },
+    {
+      "preset_id": "r-draconis",
+      "label": "R Draconis",
+      "object_type": "Long-period variable star",
+      "ra_deg": 248.16723307280128,
+      "dec_deg": 66.75502382666444,
+      "checked_at_utc": "2026-11-14T20:37:40.148136+00:00",
+      "status": "failure",
+      "usable_frame_count": 0,
+      "science_note": "Brightness comparisons require matching wavelength, quality and calibration; an animation alone is not a light curve."
+    },
+    {
+      "preset_id": "rw-aurigae",
+      "label": "RW Aurigae",
+      "object_type": "Young variable star field",
+      "ra_deg": 76.95658657557826,
+      "dec_deg": 30.401291346111112,
+      "checked_at_utc": "2026-11-14T20:38:08.067190+00:00",
+      "status": "success",
+      "usable_frame_count": 2,
+      "science_note": "Complex young-star variability is a hypothesis for inspection, not an automated classification."
+    }
+  ]
+}

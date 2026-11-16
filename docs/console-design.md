@@ -97,3 +97,59 @@ the bounded result, marker alignment within 0.02 display pixels, successful WISE
 tile retrieval, independent injected catalog failure/retry and compact embeds.
 
 ![Original guardian loading feedback](images/console-loading.png)
+
+## Landing story, #63 / BYT-48
+
+The three chapters explain choosing coordinates, comparing actual dates and
+preserving evidence. [The storyboard and asset register](art-direction.md)
+record the original planet artwork, guardian and unmodified real previews.
+The five fields show dated results from the existing coverage report; R Draconis
+retains its timeout outcome. These are historical checks, not promises about a
+new query. Live preset coordinates are used when available, with the verified
+report as a static fallback.
+
+GSAP 3.15.1 with @gsap/react 2.1.2 owns only the landing scroll progression. At
+1100 CSS pixels wide and 700 high, with normal motion, native vertical scrolling
+translates the three chapters. The hero has restrained scroll-linked parallax.
+MatchMedia cleanup removes transforms and pins when the route or media condition
+changes. Mobile, reduced motion, short screens, Simple View and no-JavaScript
+keep all chapters in vertical document flow. No observation renderer runs on the
+landing page. The mission iframe still loads only when opened.
+
+`verify-landing-design.mjs` passed in Chromium 151 and Firefox 153: horizontal
+progression, fallback layouts, 200% CSS viewport, keyboard entry, preset links
+without automatic archive jobs, no page errors and zero landing axe WCAG 2.1 AA
+violations. The combined console and entry suites pass after GSAP integration.
+There are 100 passing frontend logic/lineage tests. Retired hero/workspace CSS,
+the old decorative sky asset and unused geometry helpers were removed.
+
+The extended console suite also passes in installed Chrome 157 and Firefox 153:
+failed image retry, a single real frame with playback disabled, an injected
+no-coverage response, missing cached example and offline service. These injected
+transport cases test recovery; they are not new archive coverage measurements.
+
+### Local performance record
+
+The [raw comparison](landing-performance.json) compares static baseline commit
+`4655868` with the landing redesign on this desktop, using the same real API
+metadata replay and local font fallback. External Google font requests were
+blocked for both. These are one sample per configuration, not a statistical
+benchmark or a phone/GPU capability claim.
+
+| Browser | Version | Local resources | Load event | Scroll interval p95 | Intervals over 50 ms |
+| --- | --- | --- | --- | --- | --- |
+| Chromium, 4x CPU | Before | 670,934 B | 1,499 ms | 16.8 ms | 0 |
+| Chromium, 4x CPU | After | 918,389 B | 1,546 ms | 16.7 ms | 0 |
+| Firefox | Before | 694,938 B | 481 ms | 16.7 ms | 1 |
+| Firefox | After | 911,316 B | 231 ms | 16.7 ms | 0 |
+
+The design adds about 247 KB of loaded local resources in the Chromium sample.
+Startup has more long tasks (five versus one at 4x CPU), while the sampled scroll
+has no intervals above 50 ms. The backdrop itself is about 111 KB. Do not infer
+that the new version is faster from the Firefox load sample. Headless WebGL checks
+use the browser's available adapter, which may be software rendering. Physical
+mobile performance and public-network deployment remain separate checks.
+
+![Cinematic landing](images/landing-desktop.png)
+
+![Mobile landing](images/landing-mobile.png)

@@ -41,6 +41,11 @@ See [the console design contract](console-design.md) for state, routing and
 responsive acceptance. `verify-clean-view.mjs` and `verify-context.mjs` also use
 the dedicated route. Other historical suites may need their page selectors
 updated; their isolated renderer checks remain useful independently.
+Run `node scripts/verify-sky-motion.mjs` for entry/loading stress and
+`node scripts/verify-landing-design.mjs` for scroll, no-JavaScript and accessible
+landing acceptance. `node scripts/profile-landing.mjs` compares two static
+origins specified by `KHONSU_BASELINE_URL` and `KHONSU_TEST_URL`; its metadata
+replay and limitations are recorded in the design report.
 
 The [sky-context pass](sky-context.md) adds `test_catalog_context.py`,
 `context.test.ts` and `node scripts/verify-context.mjs`. The browser suite needs
