@@ -7,7 +7,7 @@ def test_planar_background_is_recovered_without_changing_inputs():
     y, x = np.indices((64, 64))
     truth = (x + 2*y).astype(float)
     valid = np.ones(truth.shape, bool)
-    valid[25:29, 26:30] = False
+    valid[25:35, 26:33] = False  # The screenshot's 7 by 10 pixel shape.
     broken = np.where(valid, truth, np.nan)
     before = broken.copy()
     values, estimated = estimate_gaps(broken, valid)
@@ -17,18 +17,55 @@ def test_planar_background_is_recovered_without_changing_inputs():
     assert not values[valid].any()
 
 
-def test_edges_large_holes_diagonal_coverage_and_bright_cores_stay_unknown():
+def test_broad_holes_and_long_diagonal_coverage_stay_unknown():
     rng = np.random.default_rng(66)
     image = rng.normal(0, .1, (128, 128))
     valid = np.ones(image.shape, bool)
-    valid[0:3, 5:8] = False
+    valid[0:12, 5:25] = False
     valid[30:50, 30:50] = False
-    for i in range(10):
+    for i in range(20):
         valid[70+i, 70+i] = False
-    image[90:98, 90:98] = 20
-    valid[92:96, 92:96] = False
     _, estimated = estimate_gaps(image, valid)
     assert not estimated.any()
+
+
+def test_small_edge_notches_use_observed_neighbors_and_preserve_signed_values():
+    image = np.full((64, 64), -7.0)
+    valid = np.ones_like(image, bool)
+    valid[0:3, 0:3] = False
+    valid[20:28, 0:6] = False
+    valid[35:38, -2:] = False
+    before = valid.copy()
+    values, estimated = estimate_gaps(image, valid)
+    np.testing.assert_array_equal(estimated, ~valid)
+    np.testing.assert_array_equal(values[estimated], -7)
+    np.testing.assert_array_equal(valid, before)
+    np.testing.assert_array_equal(image, -7)
+
+
+def test_bright_boundary_can_fill_but_cannot_recover_a_hidden_peak():
+    from scipy.ndimage import binary_dilation
+    y, x = np.indices((64, 64))
+    truth = 100*np.exp(-((x-32)**2+(y-32)**2)/18)
+    valid = np.ones_like(truth, bool); valid[30:35, 30:35] = False
+    image = np.where(valid, truth, np.nan)
+    boundary = binary_dilation(~valid) & valid
+    values, estimated = estimate_gaps(image, valid)
+    np.testing.assert_array_equal(estimated, ~valid)
+    assert values[estimated].min() >= truth[boundary].min()-1e-5
+    assert values[estimated].max() <= truth[boundary].max()+1e-5
+    assert values[estimated].max() < truth[~valid].max()
+    np.testing.assert_array_equal(image[valid], truth[valid])
+
+
+def test_total_estimation_budget_is_still_ten_percent():
+    image = np.ones((64, 64))
+    valid = np.ones_like(image, bool); valid[2::3, 2::3] = False
+    values, estimated = estimate_gaps(image, valid)
+    assert 0 < estimated.sum() <= int(image.size*.1)
+    assert (~valid & ~estimated).any()
+    assert not (estimated & valid).any()
+    np.testing.assert_array_equal(values[estimated], 1)
 
 
 def test_estimates_are_bounded_by_neighbors_and_single_frame_deterministic():
@@ -50,7 +87,7 @@ def test_empty_missing_native_limits_and_resource_bounds():
     assert not estimate_gaps(image, np.zeros_like(image, bool))[1].any()
     assert not estimate_gaps(image, np.ones_like(image, bool))[1].any()
     valid = np.ones_like(image, bool)
-    valid[20:25, 20:25] = False
+    valid[20:29, 20:29] = False
     assert not estimate_gaps(image, valid, pixels_per_native=1)[1].any()
     with pytest.raises(ValueError):
         estimate_gaps(image, valid, pixels_per_native=0)

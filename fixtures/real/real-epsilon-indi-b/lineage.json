@@ -20,7 +20,7 @@
       "masked_fraction": 0.031923442179852435,
       "warnings": [],
       "warning_fraction": 0.0,
-      "estimated_fraction": 0.007816494995982175
+      "estimated_fraction": 0.031923442179852435
     },
     {
       "frame_id": "frame-0002",
@@ -36,7 +36,7 @@
       "masked_fraction": 0.028782233910438992,
       "warnings": [],
       "warning_fraction": 0.0,
-      "estimated_fraction": 0.011469062751114032
+      "estimated_fraction": 0.028782233910439037
     }
   ],
   "files": {
@@ -53,8 +53,8 @@
       "sha256": "893dc01d81e385c9bebb8f306f6f263c45de6ec3799a562296bf61f4e95e32e4"
     },
     "manifest.json": {
-      "sha256": "408e99be0e3c5a5f6932cbc33d901d3fb8b3992a24e5f3ff0b907d1360a45188",
-      "size_bytes": 9131
+      "sha256": "96acc8c40a3bc7fa1eb7e230d250a823e92830c183b924b3df79b554cc51ed73",
+      "size_bytes": 9297
     },
     "source-manifest.json": {
       "size_bytes": 5428,
@@ -69,11 +69,11 @@
       "sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de"
     },
     "frame-0001-fill.bin": {
-      "sha256": "234c6b3025dbed20682c77132bad0dd0b3cefd97491da52ba73243d6f3776c8e",
+      "sha256": "00a8e235e63a469258e67e9b432b77f80608e0764309270d6874164615bba676",
       "size_bytes": 68445
     },
     "frame-0002-fill.bin": {
-      "sha256": "a129985c57b15c95f37d4639479d9dce645e1f7d8a2a85de46f76f0f4ff310f9",
+      "sha256": "19955ba7a2bf733d9fdfdb5fdc4a0822acfa80731aca4d90b07dc7a37325b604",
       "size_bytes": 68445
     },
     "frame-0001-refined.bin": {
@@ -123,13 +123,13 @@
   "gap_fill_revision": {
     "frame-0001": {
       "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
-      "method": "small-gap-harmonic-v1",
-      "estimated_fraction": 0.007816494995982175
+      "method": "bounded-gap-harmonic-v2",
+      "estimated_fraction": 0.031923442179852435
     },
     "frame-0002": {
       "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
-      "method": "small-gap-harmonic-v1",
-      "estimated_fraction": 0.011469062751114032
+      "method": "bounded-gap-harmonic-v2",
+      "estimated_fraction": 0.028782233910439037
     }
   },
   "refinement_revision": {

@@ -24,6 +24,7 @@ def prepare():
         lineage = json.loads((bundle / 'lineage.json').read_text())
         width, height = manifest['grid']['width_px'], manifest['grid']['height_px']
         scale = manifest['processing']['native_pixel_scale_arcsec'] / (manifest['requested_fov_arcmin'] * 60 / width)
+        manifest['processing'] = {key: value for key, value in manifest['processing'].items() if not key.startswith('gap_fill_')}
         manifest['processing'].update(POLICY)
         for frame in manifest['frames']:
             raw = (bundle / (frame['frame_id'] + '.bin')).read_bytes()

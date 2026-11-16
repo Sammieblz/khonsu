@@ -65,10 +65,10 @@
       "gap_fill": {
         "encoding": "float32-le-estimate8-v1",
         "size_bytes": 68445,
-        "sha256": "234c6b3025dbed20682c77132bad0dd0b3cefd97491da52ba73243d6f3776c8e",
+        "sha256": "00a8e235e63a469258e67e9b432b77f80608e0764309270d6874164615bba676",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0001-fill.bin"
       },
-      "estimated_fraction": 0.007816494995982175,
+      "estimated_fraction": 0.031923442179852435,
       "refinement": {
         "method": "native-mask-normalized-local-wiener",
         "strength": 0.5,
@@ -108,10 +108,10 @@
       "gap_fill": {
         "encoding": "float32-le-estimate8-v1",
         "size_bytes": 68445,
-        "sha256": "a129985c57b15c95f37d4639479d9dce645e1f7d8a2a85de46f76f0f4ff310f9",
+        "sha256": "19955ba7a2bf733d9fdfdb5fdc4a0822acfa80731aca4d90b07dc7a37325b604",
         "url": "/v1/examples/real-epsilon-indi-b/frames/frame-0002-fill.bin"
       },
-      "estimated_fraction": 0.011469062751114032,
+      "estimated_fraction": 0.028782233910439037,
       "refinement": {
         "method": "native-mask-normalized-local-wiener",
         "strength": 0.5,
@@ -182,16 +182,17 @@
     "cache_role": "backup",
     "browser_raster_encoding": "float32-le-quality8-v2",
     "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged.",
-    "gap_fill_method": "small-gap-harmonic-v1",
-    "gap_fill_max_native_span": 4.0,
-    "gap_fill_max_native_area": 12.0,
-    "gap_fill_bright_boundary_sigma": 5.0,
-    "gap_fill_max_components": 2048,
-    "gap_fill_max_pixels": 65536,
-    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
     "refinement_method": "native-mask-normalized-local-wiener",
     "refinement_strength": 0.5,
     "refinement_scope": "optional display copy; native linear values before WCS resampling; no temporal averaging or measurement change",
-    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery"
+    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery",
+    "gap_fill_method": "bounded-gap-harmonic-v2",
+    "gap_fill_max_native_span": 8.0,
+    "gap_fill_max_native_area": 32.0,
+    "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
+    "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
+    "gap_fill_max_components": 2048,
+    "gap_fill_max_pixels": 65536,
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
   }
 }
