@@ -111,15 +111,30 @@ It keeps the notebook volume. Do not delete unrelated DNS records or containers.
 
 ## Acceptance record
 
-Before account setup, local `/health` passed but the existing public API returned
-HTTP 525. No Cloudflare login or connector token was available to this session.
-The local API passed the smoke check for the root, www and localhost origins,
-including one actual job creation and JSON cancellation. The pinned
-`cloudflare/cloudflared:2026.11.0` image ran, and both Compose configurations
-validated. A temporary Quick Tunnel on the same Docker network passed the full
-HTTPS smoke check and connector readiness returned 200. This establishes the
-Docker-to-Cloudflare transport, not the named domain or a finished live sequence.
+Verified November 16, 2026, after the account owner created the published route:
 
-The named-domain check still requires the account-owned route and connector
-token. No successful `api.khonsulive.earth` deployment or Pages rebuild is claimed.
-Merging this configuration does not establish public uptime.
+- `api.khonsulive.earth` routes through named tunnel `khonsu-local-api` to
+  `http://api:8000`. The Compose connector returned readiness 200. Its credential
+  remains in the ignored local secret file; the replaced standalone connector
+  was stopped after the managed connector connected.
+- Both Compose configurations validated. The pinned connector ran and local
+  smoke checks passed for root, www and localhost origins.
+- The named public HTTPS smoke check passed health, CORS, POST/PUT preflight,
+  cached real PNG delivery, validation, notebook privacy and actual job creation
+  followed by JSON cancellation.
+- Chrome opened the hosted console and loaded all requested cached image/raster
+  assets with HTTP 200 and no page errors. The public frontend already targeted
+  the correct API, so no configuration rebuild was needed.
+- The hosted UI stepped between November 7 and December 13, 2025. An isolated
+  notebook note saved, survived reload and was deleted successfully. The test
+  did not access an existing visitor's notebook.
+- A separate bounded live search (RA 270 degrees, Dec 66.5 degrees, six arcminutes,
+  detector 2, maximum two frames) reached retrieval but ended with
+  `archive_unavailable`: IRSA could not complete the request. No completed live
+  sequence is claimed for this run; cached imagery and cancellation passed.
+
+The first Python check returned Cloudflare 403/error 1010 because it used the
+library's default User-Agent. The smoke script now identifies itself honestly as
+`Khonsu-Deployment-Check/1.0`, following [Cloudflare's client guidance](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1010/).
+No browser impersonation or security-setting change was needed. Successful
+checks establish this deployment at test time, not continuous availability.
