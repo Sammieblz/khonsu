@@ -86,7 +86,7 @@ export function ResolutionLab() {
 
   return <main className={styles.lab}>
     <a className="skip-link" href="#comparison">Skip to image comparison</a>
-    <header className={styles.header}><a href="/" className={styles.brand}><img src="/khonsu-mark.svg" alt="" width={38} height={38} />KHONSU</a><a href="/">BACK TO OBSERVATORY ↗</a></header>
+    <header className={styles.header}><a href="/" className={styles.brand}><img src="/khonsu-mark.svg" alt="" width={38} height={38} />KHONSU</a><a href="/">BACK TO OBSERVATORY</a></header>
     <div className={styles.intro}><div><p className={styles.eyebrow}>RESOLUTION LAB / EXPERIMENT 02</p><h1>A CLOSER LOOK.</h1></div><p>Start with the same sky.<br />See what processing changes.<br/><a href="#quality-study">Compare masks and background</a></p></div>
     {error ? <div role="alert" className={styles.message}><p>{error}</p><button onClick={() => setAttempt(a => a+1)}>RETRY COMPARISON</button></div> : !field ? <p role="status">Loading the comparison...</p> : <>
       <div className={styles.workspace}>
@@ -139,11 +139,11 @@ export function ResolutionLab() {
           </>}
           <details><summary>HOW TO COMPARE</summary><p>Native resample starts with Reduce grain on. Toggle it to judge background texture on the same measured pixels. Show gaps changes only how missing data is marked.</p><p>Turn Reduce grain and Preserve bright cores off to compare resampling alone. Hold Original with the pointer, Space or Enter to restore the original treatment and slate marking.</p><p>Zoom keeps the same field. Scroll within the image to pan, then Fit / Reset to return.</p></details>
           {field.quality_flags && <details><summary>WHY THE GAPS?</summary><p>These pixels were rejected by the observation quality mask. Bloom, overflow, persistence and other artifacts can leave holes even in a bright source. Dark navy is a quieter marker; it is not a measured dark patch.</p><p>{field.quality_flags.scope}: {Object.entries(field.quality_flags.counts).map(([name, count]) => `${name} (${count})`).join(", ")}.</p></details>}
-          {field.source && <details><summary>SOURCE & MEASUREMENTS</summary><p>{field.source.observation_id}<br />{field.source.release} / {field.source.wavelength_um.toFixed(5)} µm</p><p>Exposure: {field.source.observed_start_utc}<br />to {field.source.observed_end_utc}</p><p>Maximum reference-peak position change: {metric("max_centroid_change_arcsec")} arcsec. A processing diagnostic, not a motion measurement.</p><a href={field.source.source_fits_url} target="_blank" rel="noreferrer">Original FITS at IRSA ↗</a><p className={styles.hash}>SHA-256 {field.source.raw_sha256}</p></details>}
+          {field.source && <details><summary>SOURCE & MEASUREMENTS</summary><p>{field.source.observation_id}<br />{field.source.release} / {field.source.wavelength_um.toFixed(5)} µm</p><p>Exposure: {field.source.observed_start_utc}<br />to {field.source.observed_end_utc}</p><p>Maximum reference-peak position change: {metric("max_centroid_change_arcsec")} arcsec. A processing diagnostic, not a motion measurement.</p><a href={field.source.source_fits_url} target="_blank" rel="noreferrer" aria-label="Original FITS at IRSA (opens in a new tab)">Original FITS at IRSA</a><p className={styles.hash}>SHA-256 {field.source.raw_sha256}</p></details>}
           <a className={styles.reportLink} href="/experiments/resolution/manifest.json" download>DOWNLOAD COMPARISON REPORT ↓</a>
         </aside>
       </div>
-      <footer className={styles.footer}><p>FIND WHAT TIME REVEALS.</p><span>Research preview. Original observations and saved candidate notes remain in the observatory.</span><a href="/">RETURN TO THE SKY ↗</a></footer>
+      <footer className={styles.footer}><p>FIND WHAT TIME REVEALS.</p><span>Research preview. Original observations and saved candidate notes remain in the observatory.</span><a href="/">RETURN TO THE SKY</a></footer>
     </>}
     <QualityStudy />
   </main>;

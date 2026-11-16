@@ -61,6 +61,20 @@ Large type should lead the entry experience. Metadata should remain legible in t
 - Reserve a strong amber fill for the main action. Secondary controls use line and text treatments.
 - The primary scientific viewport gets the most space. Context controls should open when needed.
 
+The landing entry panel uses equal side insets and a shared centre line for the
+brand, time arc and actions. Group brand and action content explicitly; use
+consistent gaps instead of independent paragraph margins. Primary labels are
+centred and balance naturally when they wrap. Secondary actions share the same
+content width. Decorative diagonal arrows are removed from navigation, target
+links, references and the resolution lab. Functional directional controls keep
+their meaning, and the crescent logo retains its original time path.
+On narrow phones, the hero headline scales down to stay within its content column.
+
+The #87 / BYT-57 cleanup was checked at 320, 390, 768, 1024 and 1440 pixels in
+both entry and return states, including keyboard navigation and no-JavaScript
+layout. [Desktop panel](evidence/landing-alignment/return-desktop.png) and
+[mobile actions](evidence/landing-alignment/return-mobile.png) show the result.
+
 ## Logo and custom icons
 
 The original vector mark in `apps/web/public/khonsu-mark.svg` combines a crescent, a diagonal time path, and two observation points. It is project-authored and does not reproduce the Marvel character's mark or a NASA insignia.
