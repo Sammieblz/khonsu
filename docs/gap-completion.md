@@ -5,6 +5,10 @@ GitHub [#70](https://github.com/Sammieblz/khonsu/issues/70), Linear
 the remaining patches reported after astro refinement, using the existing
 **CLEAN VIEW** control and separate estimate asset.
 
+The subsequent [Draconis core fix](draconis-gap-fill.md), #89 / BYT-58,
+extends the same method to larger enclosed holes. The v2 results below remain
+a record of the earlier cached-frame fix.
+
 ## Cause and result
 
 The screenshot matches the second cached WISE 0855 observation. Its prominent

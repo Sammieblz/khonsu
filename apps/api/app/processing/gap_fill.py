@@ -7,12 +7,22 @@ Broad missing regions stay unfilled. No neighboring epoch supplies a pixel.
 """
 import numpy as np
 from scipy.ndimage import find_objects, label
+from scipy.sparse import lil_matrix
+from scipy.sparse.linalg import spsolve
 
 ENCODING = "float32-le-estimate8-v1"
 POLICY = {
-    "gap_fill_method": "bounded-gap-harmonic-v2",
+    "gap_fill_method": "bounded-gap-harmonic-v3",
     "gap_fill_max_native_span": 8.0,
     "gap_fill_max_native_area": 32.0,
+    "gap_fill_max_prepared_span": 16,
+    "gap_fill_max_prepared_area": 128,
+    "gap_fill_enclosed_native_span": 12.0,
+    "gap_fill_enclosed_native_area": 96.0,
+    "gap_fill_enclosed_prepared_span": 32,
+    "gap_fill_enclosed_prepared_area": 512,
+    "gap_fill_enclosed_min_occupancy": 0.25,
+    "gap_fill_enclosed_policy": "larger compact interior holes only; same observed boundary bounds",
     "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
     "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
     "gap_fill_max_components": 2048,
@@ -43,23 +53,33 @@ def estimate_gaps(image, valid, pixels_per_native=2.0):
     samples = image[valid]
     if samples.size < 16:
         return estimates, estimated
-    span_limit = min(16, int(np.floor(POLICY["gap_fill_max_native_span"] * pixels_per_native)))
-    area_limit = min(128, int(np.floor(POLICY["gap_fill_max_native_area"] * pixels_per_native ** 2)))
+    span_limit = min(POLICY["gap_fill_max_prepared_span"], int(np.floor(POLICY["gap_fill_max_native_span"] * pixels_per_native)))
+    area_limit = min(POLICY["gap_fill_max_prepared_area"], int(np.floor(POLICY["gap_fill_max_native_area"] * pixels_per_native ** 2)))
+    enclosed_span = min(POLICY["gap_fill_enclosed_prepared_span"], int(np.floor(POLICY["gap_fill_enclosed_native_span"] * pixels_per_native)))
+    enclosed_area = min(POLICY["gap_fill_enclosed_prepared_area"], int(np.floor(POLICY["gap_fill_enclosed_native_area"] * pixels_per_native ** 2)))
     labels, _ = label(~valid, structure=np.ones((3, 3)))
     areas = np.bincount(labels.ravel())
     remaining = min(POLICY["gap_fill_max_pixels"], int(image.size * .1))
     processed = 0
     for identity, bounds in enumerate(find_objects(labels), 1):
-        if bounds is None or areas[identity] > area_limit or areas[identity] > remaining:
+        if bounds is None or areas[identity] > remaining:
             continue
         y, x = bounds
-        if max(y.stop - y.start, x.stop - x.start) > span_limit:
-            continue
+        height, width = y.stop - y.start, x.stop - x.start
+        if max(height, width) > span_limit or areas[identity] > area_limit:
+            enclosed = y.start > 0 and x.start > 0 and y.stop < image.shape[0] and x.stop < image.shape[1]
+            if (not enclosed or max(height, width) > enclosed_span or areas[identity] > enclosed_area
+                    or areas[identity] < height * width * POLICY["gap_fill_enclosed_min_occupancy"]):
+                continue
         ys, xs = np.where(labels[y, x] == identity)
         ys, xs = ys + y.start, xs + x.start
         coordinates = list(zip(ys.tolist(), xs.tolist()))
         indices = {point: index for index, point in enumerate(coordinates)}
-        matrix = np.zeros((len(coordinates), len(coordinates)), dtype=np.float64)
+        # Keep existing small fills numerically unchanged. Larger holes use the
+        # same Laplace equation with at most five sparse coefficients per row.
+        sparse = len(coordinates) > POLICY["gap_fill_max_prepared_area"]
+        shape = (len(coordinates), len(coordinates))
+        matrix = lil_matrix(shape, dtype=np.float64) if sparse else np.zeros(shape, dtype=np.float64)
         rhs = np.zeros(len(coordinates), dtype=np.float64)
         boundary = []
         for row, (cy, cx) in enumerate(coordinates):
@@ -77,7 +97,7 @@ def estimate_gaps(image, valid, pixels_per_native=2.0):
         # remains an estimate, including at an edge or inside a bright source.
         if not boundary:
             continue
-        values = np.linalg.solve(matrix, rhs)
+        values = spsolve(matrix.tocsr(), rhs) if sparse else np.linalg.solve(matrix, rhs)
         estimates[ys, xs] = np.clip(values, min(boundary), max(boundary))
         estimated[ys, xs] = True
         remaining -= len(coordinates)

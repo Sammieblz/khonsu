@@ -153,6 +153,12 @@ edge and bright-source holdout errors. The Clean View browser suite checks the
 specific second-WISE-frame medium hole and three smaller patches, with accurate
 remaining-gap wording and unchanged measurement validity.
 
+For #89 / BYT-58, run `python scripts/validate-draconis-fill.py`, then
+`node scripts/verify-draconis-fill.mjs` using the browser environment above.
+The [Draconis regression](draconis-gap-fill.md) replays the user's real inputs,
+checks CPU/GPU display parity, Original, estimate disclosure and strict candidate
+export. It is an offline display check; live deployment requires a fresh query.
+
 The [#64 image-quality pass](image-quality.md) adds
 `node scripts/verify-quality-display.mjs`. It checks real warning pixels,
 strict candidate exclusion, GPU/CPU parity, manual 4K and adaptive CPU fallback,

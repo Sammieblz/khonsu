@@ -46,6 +46,9 @@ may be based on the filtered image alone.
 The user-authorized [Clean View](clean-view.md) can display explicitly labelled
 bounded-gap estimates by default. The [v2 policy](gap-completion.md) also allows
 small edge notches and bright boundaries, without recovering their true signal.
+The [v3 Draconis extension](draconis-gap-fill.md) also permits bounded larger
+enclosed holes. A filled bright core is a visual estimate, never recovered target
+flux; the target-masked warning and original-only marking still apply.
 Keep that derivative separate from observations:
 preserve original masks and values, disclose the estimate, provide original and
 estimated-area views, and exclude estimates from measurements and candidate

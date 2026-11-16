@@ -1,0 +1,212 @@
+{
+  "tested_at_utc": "2026-11-16T17:43:01.976870+00:00",
+  "policy": {
+    "gap_fill_method": "bounded-gap-harmonic-v3",
+    "gap_fill_max_native_span": 8.0,
+    "gap_fill_max_native_area": 32.0,
+    "gap_fill_max_prepared_span": 16,
+    "gap_fill_max_prepared_area": 128,
+    "gap_fill_enclosed_native_span": 12.0,
+    "gap_fill_enclosed_native_area": 96.0,
+    "gap_fill_enclosed_prepared_span": 32,
+    "gap_fill_enclosed_prepared_area": 512,
+    "gap_fill_enclosed_min_occupancy": 0.25,
+    "gap_fill_enclosed_policy": "larger compact interior holes only; same observed boundary bounds",
+    "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
+    "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
+    "gap_fill_max_components": 2048,
+    "gap_fill_max_pixels": 65536,
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
+  },
+  "frames": [
+    {
+      "frame": "frame-0001",
+      "observation_id": "2025W29_2A_0288_3",
+      "release": "DR1",
+      "observed_start_utc": "2025-07-18T16:04:04.972800Z",
+      "input_raster_sha256": "dff65fb67f019f3bc2a15818cae9833bc1689840b9a6c56455718c2f826f1316",
+      "fill_sha256": "2e3ee148cb71b55eae8f151d03ff4ba18c3a7472544487ebf7baf396a8969ed7",
+      "central_mask_pixels": 269,
+      "estimated_pixels": 557,
+      "remaining_unfilled_pixels": 0,
+      "central_estimate_range_mjy_sr": [
+        7.291878700256348,
+        12.959909439086914
+      ],
+      "boundary_range_mjy_sr": [
+        6.210410118103027,
+        14.573122024536133
+      ],
+      "preparation_ms": 16.658900014590472,
+      "holdouts": [
+        {
+          "center_xy": [
+            33,
+            91
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.02328428626060486,
+          "p95_absolute_error_sky_sigma": 7.311039924621582
+        },
+        {
+          "center_xy": [
+            25,
+            32
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.02043735980987549,
+          "p95_absolute_error_sky_sigma": 4.466689586639404
+        },
+        {
+          "center_xy": [
+            45,
+            31
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.05921900272369385,
+          "p95_absolute_error_sky_sigma": 5.563479900360107
+        },
+        {
+          "center_xy": [
+            59,
+            77
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.6827839612960815,
+          "p95_absolute_error_sky_sigma": 12.146471977233887
+        },
+        {
+          "center_xy": [
+            78,
+            69
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.23804908990859985,
+          "p95_absolute_error_sky_sigma": 2.9257044792175293
+        },
+        {
+          "center_xy": [
+            68,
+            32
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.04834872484207153,
+          "p95_absolute_error_sky_sigma": 1.2446517944335938
+        },
+        {
+          "center_xy": [
+            36,
+            71
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.15861880779266357,
+          "p95_absolute_error_sky_sigma": 2.0879251956939697
+        },
+        {
+          "center_xy": [
+            25,
+            52
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.03294330835342407,
+          "p95_absolute_error_sky_sigma": 0.7540151476860046
+        }
+      ]
+    },
+    {
+      "frame": "frame-0002",
+      "observation_id": "2026W29_1A_0015_3",
+      "release": "QR3",
+      "observed_start_utc": "2026-07-13T01:43:29.913600Z",
+      "input_raster_sha256": "e2cab60b41c2a0d3b6d5c79539a166aec68881ae85c0d77c93aa4bebcff59d06",
+      "fill_sha256": "69573b413cce5061a8d43d687fae5dd715bfb30b856512e047beece59e911209",
+      "central_mask_pixels": 245,
+      "estimated_pixels": 538,
+      "remaining_unfilled_pixels": 0,
+      "central_estimate_range_mjy_sr": [
+        3.9541077613830566,
+        11.14660930633545
+      ],
+      "boundary_range_mjy_sr": [
+        3.374253273010254,
+        12.53482437133789
+      ],
+      "preparation_ms": 12.49140000436455,
+      "holdouts": [
+        {
+          "center_xy": [
+            46,
+            31
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.05147194862365723,
+          "p95_absolute_error_sky_sigma": 8.251891136169434
+        },
+        {
+          "center_xy": [
+            25,
+            33
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.01772671937942505,
+          "p95_absolute_error_sky_sigma": 8.116697311401367
+        },
+        {
+          "center_xy": [
+            35,
+            60
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.09919285774230957,
+          "p95_absolute_error_sky_sigma": 2.3840532302856445
+        },
+        {
+          "center_xy": [
+            78,
+            58
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.3299213647842407,
+          "p95_absolute_error_sky_sigma": 7.08651876449585
+        },
+        {
+          "center_xy": [
+            62,
+            78
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.25193309783935547,
+          "p95_absolute_error_sky_sigma": 5.426689147949219
+        },
+        {
+          "center_xy": [
+            27,
+            14
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.009949564933776855,
+          "p95_absolute_error_sky_sigma": 6.842905521392822
+        },
+        {
+          "center_xy": [
+            83,
+            39
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.038542211055755615,
+          "p95_absolute_error_sky_sigma": 0.8752375245094299
+        },
+        {
+          "center_xy": [
+            81,
+            80
+          ],
+          "pixels": 289,
+          "median_absolute_error_mjy_sr": 0.03434702754020691,
+          "p95_absolute_error_sky_sigma": 0.8535550832748413
+        }
+      ]
+    }
+  ],
+  "limits": "Boundary-based display estimates only. Real masked core truth is unknown. Holdouts hide measured pixels elsewhere and do not validate target flux, a hidden peak or variability."
+}

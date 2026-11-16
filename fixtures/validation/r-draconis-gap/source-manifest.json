@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.0",
+  "sequence_id": "job-35b322628291461987f3844e6631cc85",
+  "data_mode": "live",
+  "title": "SPHEREx observation sequence",
+  "disclosure": "Real archive observations rendered on one celestial grid. Display wavelengths are approximate; unmatched PSFs/backgrounds can resemble change. Candidate annotations require independent investigation.",
+  "target": {
+    "ra_deg": 248.16723307280128,
+    "dec_deg": 66.75502382666444,
+    "coordinate_frame": "ICRS"
+  },
+  "requested_fov_arcmin": 6.0,
+  "grid": {
+    "width_px": 117,
+    "height_px": 117,
+    "pixel_origin": "top-left",
+    "orientation": "north-up-east-left",
+    "pixel_center_convention": "zero-based-integer-centers",
+    "wcs_header": {
+      "WCSAXES": 2,
+      "CRPIX1": 59.0,
+      "CRPIX2": 59.0,
+      "CDELT1": -0.00085470085470085,
+      "CDELT2": 0.00085470085470085,
+      "CUNIT1": "deg",
+      "CUNIT2": "deg",
+      "CTYPE1": "RA---TAN",
+      "CTYPE2": "DEC--TAN",
+      "CRVAL1": 248.1672330728,
+      "CRVAL2": 66.755023826664,
+      "LONPOLE": 180.0,
+      "LATPOLE": 66.755023826664,
+      "MJDREF": 0.0,
+      "RADESYS": "ICRS"
+    },
+    "raster_to_wcs": "flip-y"
+  },
+  "display": {
+    "stretch": "asinh",
+    "vmin": 0.05481430379152302,
+    "vmax": 7.945711612701416
+  },
+  "frames": [
+    {
+      "frame_id": "frame-0001",
+      "label": "2025-07-18T16:04:04.972800+00:00",
+      "image_url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0001.png",
+      "raster": {
+        "url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0001.bin",
+        "encoding": "float32-le-quality8-v2",
+        "size_bytes": 68445,
+        "sha256": "dff65fb67f019f3bc2a15818cae9833bc1689840b9a6c56455718c2f826f1316"
+      },
+      "gap_fill": {
+        "url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0001-fill.bin",
+        "encoding": "float32-le-estimate8-v1",
+        "size_bytes": 68445,
+        "sha256": "55edf0008eed18bc390199e1bb9393606e2edfed1e6028447519c91dc977ac34"
+      },
+      "refinement": {
+        "raster": {
+          "url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0001-refined.bin",
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 68445,
+          "sha256": "17c8fd85376c78f35a36f5f411eb818049acc3825419f28a4e94ac30e786192a"
+        },
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.017082858361000593,
+        "robust_haar_sigma_mjy_sr": 0.02335567540079355,
+        "archive_sky_sigma_mjy_sr": 0.017082858361000593,
+        "input_raster_sha256": "dff65fb67f019f3bc2a15818cae9833bc1689840b9a6c56455718c2f826f1316"
+      },
+      "estimated_fraction": 0.0210387902695595,
+      "observed_start_utc": "2025-07-18T16:04:04.972800Z",
+      "observed_end_utc": "2025-07-18T16:06:00.057600Z",
+      "wavelength_um": 0.8365479426214449,
+      "bandwidth_um": 0.021000454346319922,
+      "detector": 1,
+      "release": "DR1",
+      "observation_id": "2025W29_2A_0288_3",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W29_2A/l2b-v27-2026-219/1/level2_2025W29_2A_0288_3D1_spx_l2b-v27-2026-219.fits?center=248.1672330728%2C66.7550238267&size=0.1500000000",
+      "masked_fraction": 0.040689604792168876,
+      "warning_fraction": 0.0,
+      "warnings": [
+        {
+          "code": "TARGET_MASKED",
+          "message": "The target's nearest input pixel is masked. Other field pixels may remain usable; this frame cannot establish a target-source measurement."
+        }
+      ]
+    },
+    {
+      "frame_id": "frame-0002",
+      "label": "2026-07-13T01:43:29.913600+00:00",
+      "image_url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0002.png",
+      "raster": {
+        "url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0002.bin",
+        "encoding": "float32-le-quality8-v2",
+        "size_bytes": 68445,
+        "sha256": "e2cab60b41c2a0d3b6d5c79539a166aec68881ae85c0d77c93aa4bebcff59d06"
+      },
+      "gap_fill": {
+        "url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0002-fill.bin",
+        "encoding": "float32-le-estimate8-v1",
+        "size_bytes": 68445,
+        "sha256": "7f1ce73643c2f978a51e1369245d547e41f07232c30d6335bc0fd7130ea968dc"
+      },
+      "refinement": {
+        "raster": {
+          "url": "/v1/sequences/job-35b322628291461987f3844e6631cc85/frames/frame-0002-refined.bin",
+          "encoding": "float32-le-refined8-v1",
+          "size_bytes": 68445,
+          "sha256": "667b0d6d4bc94af6e46fa32a15cf671d69bed2deb5ff1e48dd496e77f7789cf8"
+        },
+        "method": "native-mask-normalized-local-wiener",
+        "strength": 0.5,
+        "noise_sigma_mjy_sr": 0.016294782895379462,
+        "robust_haar_sigma_mjy_sr": 0.021486586873233317,
+        "archive_sky_sigma_mjy_sr": 0.016294782895379462,
+        "input_raster_sha256": "e2cab60b41c2a0d3b6d5c79539a166aec68881ae85c0d77c93aa4bebcff59d06"
+      },
+      "estimated_fraction": 0.021404047045072688,
+      "observed_start_utc": "2026-07-13T01:43:29.913600Z",
+      "observed_end_utc": "2026-07-13T01:45:25.084800Z",
+      "wavelength_um": 0.837022509391414,
+      "bandwidth_um": 0.020926598676194574,
+      "detector": 1,
+      "release": "QR3",
+      "observation_id": "2026W29_1A_0015_3",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W29_1A/l2b-v27-2026-276/1/level2_2026W29_1A_0015_3D1_spx_l2b-v27-2026-276.fits?center=248.1672330728%2C66.7550238267&size=0.1500000000",
+      "masked_fraction": 0.03930162904521883,
+      "warning_fraction": 0.0,
+      "warnings": [
+        {
+          "code": "TARGET_MASKED",
+          "message": "The target's nearest input pixel is masked. Other field pixels may remain usable; this frame cannot establish a target-source measurement."
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "code": "DISPLAY_COMPARISON_ONLY",
+      "message": "Common WCS and stretch support visual inspection. PSFs and backgrounds are not matched; apparent change is not a confirmed detection or calibrated variability measurement."
+    },
+    {
+      "code": "TARGET_SPECTRAL_MATCH",
+      "message": "Spectral matching is checked at the requested target position using approximate WCS-WAVE values. Wavelength varies across each image; other positions can have different spectral responses."
+    },
+    {
+      "code": "VARIANCE_VALIDITY_ONLY",
+      "message": "Input VARIANCE excludes invalid pixels. Resampling uncertainty and covariance are not propagated; no flux significance or photometric error bars are claimed."
+    },
+    {
+      "code": "INPUTS_EXCLUDED",
+      "message": "Selected 2 of 16 supplied observations after spectral, provenance and coverage checks. Other detector/wavelength groups were not merged."
+    }
+  ],
+  "processing": {
+    "pipeline_version": "khonsu-display-0.8.0",
+    "science_unit": "MJy/sr",
+    "reprojection": "validity-weighted bilinear over valid pixels only, common ICRS TAN grid",
+    "mask_interpolation": "nearest-neighbor: an output pixel is valid only when its nearest input pixel is valid and inside coverage",
+    "grid_width_px": 117,
+    "grid_scale_arcsec": 3.076923076923077,
+    "grid_oversample_target": 2.0,
+    "flags_policy": "IRSA SDT bad flags plus OUTLIER/PHANMISS; SOURCE/FULLSAMPLE retained; unknown excluded",
+    "display_warning_policy": "OUTLIER/OVERFLOW-only finite samples optional; quality 0 unavailable, 1 strict-valid, 2 warning-only; strict samples never include warning neighbors",
+    "wavelength_policy": "same detector; target center spread <= 0.25 * smallest bandwidth",
+    "wavelength_lookup": "WCS-WAVE alternate WCS W; display approximation, not calibrated spectroscopy",
+    "target_wavelength_min_um": 0.8365479426214449,
+    "target_wavelength_max_um": 0.837022509391414,
+    "maximum_center_spread_um": 0.005231649669048643,
+    "native_pixel_scale_arcsec": 6.154199110235513,
+    "asinh_a": 0.1,
+    "stretch_reference": "sky median and robust sigma (1.4826 * MAD) of valid pixels across all frames",
+    "stretch_low_sigma_below_sky": 2.0,
+    "stretch_high_percentile": 99.5,
+    "stretch_min_span_sigma": 50.0,
+    "background_subtracted": false,
+    "zodiacal_light_subtracted": false,
+    "psf_matched": false,
+    "variance_policy": "input variance finite and positive for validity; no output uncertainty propagation",
+    "resampling_uncertainty_propagated": false,
+    "input_count": 16,
+    "selected_count": 2,
+    "version_numpy": "2.2.5",
+    "version_astropy": "7.0.1",
+    "version_reproject": "0.14.1",
+    "version_pillow": "11.2.1",
+    "gap_fill_method": "bounded-gap-harmonic-v2",
+    "gap_fill_max_native_span": 8.0,
+    "gap_fill_max_native_area": 32.0,
+    "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
+    "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
+    "gap_fill_max_components": 2048,
+    "gap_fill_max_pixels": 65536,
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
+    "refinement_method": "native-mask-normalized-local-wiener",
+    "refinement_strength": 0.5,
+    "refinement_scope": "optional display copy; native linear values before WCS resampling; no temporal averaging or measurement change",
+    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery",
+    "observation_discovery": "irsa-sia",
+    "archive_busy_responses": 0
+  }
+}

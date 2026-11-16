@@ -19,7 +19,7 @@ from ..limits import MIN_FOV_ARCMIN, MAX_FOV_ARCMIN, MAX_GRID_SIDE, MAX_OBSERVAT
 from ..schemas import DisplaySettings, Frame, ImageGrid, QualityWarning, SequenceManifest, SkyTarget
 from .errors import ProcessingCancelled, ProcessingError
 
-PIPELINE_VERSION = "khonsu-display-0.8.0"
+PIPELINE_VERSION = "khonsu-display-0.9.0"
 
 
 def _check_cancelled(cancelled):

@@ -87,7 +87,7 @@ def test_empty_missing_native_limits_and_resource_bounds():
     assert not estimate_gaps(image, np.zeros_like(image, bool))[1].any()
     assert not estimate_gaps(image, np.ones_like(image, bool))[1].any()
     valid = np.ones_like(image, bool)
-    valid[20:29, 20:29] = False
+    valid[20:29, 20:31] = False  # 99 native areas exceeds even the interior allowance.
     assert not estimate_gaps(image, valid, pixels_per_native=1)[1].any()
     with pytest.raises(ValueError):
         estimate_gaps(image, valid, pixels_per_native=0)
@@ -106,3 +106,88 @@ def test_estimate_asset_is_separate_and_top_left(tmp_path):
     data = path.read_bytes()
     mask = np.frombuffer(data, np.uint8, offset=32*32*4).reshape(32, 32)
     np.testing.assert_array_equal(mask, np.flipud(~valid))
+
+
+def test_larger_enclosed_hole_preserves_a_plane_and_signed_values():
+    y, x = np.indices((64, 64))
+    truth = .1*x - .2*y - 10
+    valid = np.ones_like(truth, bool)
+    valid[20:37, 20:37] = False
+    broken = np.where(valid, truth, np.nan)
+    before = broken.copy()
+    values, estimated = estimate_gaps(broken, valid)
+    np.testing.assert_array_equal(estimated, ~valid)
+    np.testing.assert_allclose(values[estimated], truth[estimated], atol=1e-6)
+    np.testing.assert_array_equal(broken, before)
+    assert not values[valid].any()
+
+
+def test_larger_hidden_star_core_is_only_a_boundary_estimate():
+    from scipy.ndimage import binary_dilation
+    y, x = np.indices((80, 80))
+    radius2 = (x-40)**2+(y-40)**2
+    truth = 1000*np.exp(-radius2/150)
+    valid = radius2 > 81
+    values, estimated = estimate_gaps(np.where(valid, truth, np.nan), valid)
+    np.testing.assert_array_equal(estimated, ~valid)
+    boundary = binary_dilation(~valid) & valid
+    assert values[estimated].min() >= truth[boundary].min()-1e-5
+    assert values[estimated].max() <= truth[boundary].max()+1e-5
+    assert values[40, 40] < .65*truth[40, 40]
+
+
+@pytest.mark.parametrize('height,width,scale,edge', [
+    (20, 12, 2, True),   # Larger edge gaps keep the old limits.
+    (9, 11, 1, False),   # Native area cap.
+    (7, 13, 1, False),   # Native span cap.
+    (23, 23, 8, False),  # Absolute prepared-area cap, even at excessive sampling.
+    (9, 33, 8, False),   # Absolute prepared-span cap.
+])
+def test_expanded_fill_stays_bounded(height, width, scale, edge):
+    valid = np.ones((80, 80), bool)
+    start = 0 if edge else 20
+    valid[start:start+height, 20:20+width] = False
+    assert not estimate_gaps(np.ones(valid.shape), valid, scale)[1].any()
+
+
+def test_large_components_share_the_existing_frame_budget():
+    valid = np.ones((64, 64), bool)
+    valid[4:21, 4:21] = False
+    valid[35:52, 35:52] = False
+    _, estimated = estimate_gaps(np.ones(valid.shape), valid)
+    assert estimated.sum() == 289
+    assert estimated.sum() <= valid.size*.1
+    assert (~valid & ~estimated).any()
+
+
+@pytest.mark.parametrize('frame_index,core_size', [(0, 269), (1, 245)])
+def test_actual_draconis_cores_fill_without_modifying_observations(frame_index, core_size):
+    import hashlib
+    import json
+    from pathlib import Path
+    from scipy.ndimage import binary_dilation, label
+    folder = Path(__file__).resolve().parents[3]/'fixtures/validation/r-draconis-gap'
+    manifest = json.loads((folder/'source-manifest.json').read_text())
+    frame = manifest['frames'][frame_index]
+    raw = (folder/(frame['frame_id']+'.bin')).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == frame['raster']['sha256']
+    side = manifest['grid']['width_px']
+    image = np.frombuffer(raw, '<f4', count=side*side).reshape(side, side)
+    valid = np.frombuffer(raw, np.uint8, offset=side*side*4).reshape(side, side) == 1
+    before = image.copy(), valid.copy()
+    scale = manifest['processing']['native_pixel_scale_arcsec']/(manifest['requested_fov_arcmin']*60/side)
+    labels, _ = label(~valid, structure=np.ones((3, 3)))
+    core = labels == labels[side//2, side//2]
+    assert core.sum() == core_size
+    values, estimated = estimate_gaps(image, valid, scale)
+    assert estimated[core].all()
+    np.testing.assert_array_equal(estimated, ~valid)
+    boundary = binary_dilation(core) & valid
+    assert values[core].min() >= image[boundary].min()
+    assert values[core].max() <= image[boundary].max()
+    assert values[core].min() > manifest['display']['vmin']
+    np.testing.assert_array_equal(image, before[0])
+    np.testing.assert_array_equal(valid, before[1])
+    assert not values[valid].any()
+    changed = image.copy(); changed[~valid] = 1e30
+    np.testing.assert_array_equal(estimate_gaps(changed, valid, scale)[0], values)
