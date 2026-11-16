@@ -1,0 +1,216 @@
+{
+  "tested_at_utc": "2026-11-15T23:58:40.082186+00:00",
+  "method": {
+    "gap_fill_method": "bounded-gap-harmonic-v2",
+    "gap_fill_max_native_span": 8.0,
+    "gap_fill_max_native_area": 32.0,
+    "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
+    "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
+    "gap_fill_max_components": 2048,
+    "gap_fill_max_pixels": 65536,
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
+  },
+  "frames": [
+    {
+      "sequence": "real-wise-0855",
+      "frame": "frame-0001",
+      "observation_id": "2025W45_2A_0292_2",
+      "observed_start_utc": "2025-11-07T20:31:27.206400Z",
+      "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
+      "previous_filled_pixels": 273,
+      "filled_pixels": 441,
+      "excluded_pixels": 441,
+      "remaining_pixels": 0,
+      "preparation_ms": 6.502998003270477,
+      "originals_unchanged": true,
+      "boundary_bounds_pass": true,
+      "holdouts": {
+        "background": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 560,
+          "median_absolute_error_sky_sigma": 0.4623958617448807,
+          "p95_absolute_error_sky_sigma": 1.6047419965267178
+        },
+        "interior": {
+          "accepted_regions": 22,
+          "evaluated_pixels": 1540,
+          "median_absolute_error_sky_sigma": 1.0244944095611572,
+          "p95_absolute_error_sky_sigma": 19.214134788513146
+        },
+        "edge": {
+          "accepted_regions": 33,
+          "evaluated_pixels": 495,
+          "median_absolute_error_sky_sigma": 0.6309252977371216,
+          "p95_absolute_error_sky_sigma": 25.48308238983139
+        },
+        "bright": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 200,
+          "median_absolute_error_sky_sigma": 20.792773246765137,
+          "p95_absolute_error_sky_sigma": 222.9260520935057
+        }
+      }
+    },
+    {
+      "sequence": "real-wise-0855",
+      "frame": "frame-0002",
+      "observation_id": "2025W50_2A_0479_1",
+      "observed_start_utc": "2025-12-13T05:32:45.657600Z",
+      "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
+      "previous_filled_pixels": 323,
+      "filled_pixels": 420,
+      "excluded_pixels": 420,
+      "remaining_pixels": 0,
+      "preparation_ms": 5.302956997184083,
+      "originals_unchanged": true,
+      "boundary_bounds_pass": true,
+      "holdouts": {
+        "interior": {
+          "accepted_regions": 18,
+          "evaluated_pixels": 1260,
+          "median_absolute_error_sky_sigma": 1.7113427519798279,
+          "p95_absolute_error_sky_sigma": 34.78155212402342
+        },
+        "background": {
+          "accepted_regions": 12,
+          "evaluated_pixels": 840,
+          "median_absolute_error_sky_sigma": 0.42861388623714447,
+          "p95_absolute_error_sky_sigma": 1.3732718050479886
+        },
+        "edge": {
+          "accepted_regions": 35,
+          "evaluated_pixels": 525,
+          "median_absolute_error_sky_sigma": 0.7045250535011292,
+          "p95_absolute_error_sky_sigma": 16.251570892333945
+        },
+        "bright": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 200,
+          "median_absolute_error_sky_sigma": 40.36522102355957,
+          "p95_absolute_error_sky_sigma": 302.16407928466765
+        }
+      }
+    },
+    {
+      "sequence": "real-wise-0855",
+      "frame": "frame-0003",
+      "observation_id": "2026W18_2A_0663_1",
+      "observed_start_utc": "2026-05-03T05:10:37.948800Z",
+      "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
+      "previous_filled_pixels": 298,
+      "filled_pixels": 344,
+      "excluded_pixels": 344,
+      "remaining_pixels": 0,
+      "preparation_ms": 5.185830988921225,
+      "originals_unchanged": true,
+      "boundary_bounds_pass": true,
+      "holdouts": {
+        "interior": {
+          "accepted_regions": 24,
+          "evaluated_pixels": 1680,
+          "median_absolute_error_sky_sigma": 1.2353213429450989,
+          "p95_absolute_error_sky_sigma": 8.562219524383544
+        },
+        "background": {
+          "accepted_regions": 6,
+          "evaluated_pixels": 420,
+          "median_absolute_error_sky_sigma": 0.33682627975940704,
+          "p95_absolute_error_sky_sigma": 1.3669918179512015
+        },
+        "edge": {
+          "accepted_regions": 40,
+          "evaluated_pixels": 600,
+          "median_absolute_error_sky_sigma": 0.700845867395401,
+          "p95_absolute_error_sky_sigma": 15.743499755859354
+        },
+        "bright": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 200,
+          "median_absolute_error_sky_sigma": 41.34549903869629,
+          "p95_absolute_error_sky_sigma": 288.2134033203122
+        }
+      }
+    },
+    {
+      "sequence": "real-epsilon-indi-b",
+      "frame": "frame-0001",
+      "observation_id": "2025W19_1B_0344_3",
+      "observed_start_utc": "2025-05-07T05:14:15.590400Z",
+      "input_raster_sha256": "77e92e4408595095ab8476084810a4d0f26f2a19d74fe24a60875ef28b044b91",
+      "previous_filled_pixels": 107,
+      "filled_pixels": 437,
+      "excluded_pixels": 437,
+      "remaining_pixels": 0,
+      "preparation_ms": 3.5995390062453225,
+      "originals_unchanged": true,
+      "boundary_bounds_pass": true,
+      "holdouts": {
+        "background": {
+          "accepted_regions": 22,
+          "evaluated_pixels": 1540,
+          "median_absolute_error_sky_sigma": 0.12321030721068382,
+          "p95_absolute_error_sky_sigma": 0.44779079258441923
+        },
+        "interior": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 560,
+          "median_absolute_error_sky_sigma": 0.7508496940135956,
+          "p95_absolute_error_sky_sigma": 10.050596761703476
+        },
+        "edge": {
+          "accepted_regions": 41,
+          "evaluated_pixels": 615,
+          "median_absolute_error_sky_sigma": 0.13084529340267181,
+          "p95_absolute_error_sky_sigma": 0.6831302344799031
+        },
+        "bright": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 200,
+          "median_absolute_error_sky_sigma": 9.539348125457764,
+          "p95_absolute_error_sky_sigma": 108.90383529663083
+        }
+      }
+    },
+    {
+      "sequence": "real-epsilon-indi-b",
+      "frame": "frame-0002",
+      "observation_id": "2026W39_2A_0581_1",
+      "observed_start_utc": "2026-09-27T05:58:12.172800Z",
+      "input_raster_sha256": "5fe7d9ed463aebc05d73cb9b91e3b500f56953ccac2b4efde6014e16244b37de",
+      "previous_filled_pixels": 157,
+      "filled_pixels": 394,
+      "excluded_pixels": 394,
+      "remaining_pixels": 0,
+      "preparation_ms": 3.6282660003053024,
+      "originals_unchanged": true,
+      "boundary_bounds_pass": true,
+      "holdouts": {
+        "background": {
+          "accepted_regions": 18,
+          "evaluated_pixels": 1260,
+          "median_absolute_error_sky_sigma": 0.21820474416017532,
+          "p95_absolute_error_sky_sigma": 0.7955445587635039
+        },
+        "interior": {
+          "accepted_regions": 12,
+          "evaluated_pixels": 840,
+          "median_absolute_error_sky_sigma": 0.7526052594184875,
+          "p95_absolute_error_sky_sigma": 20.35845975875854
+        },
+        "edge": {
+          "accepted_regions": 37,
+          "evaluated_pixels": 555,
+          "median_absolute_error_sky_sigma": 0.19713887572288513,
+          "p95_absolute_error_sky_sigma": 1.0756379127502431
+        },
+        "bright": {
+          "accepted_regions": 8,
+          "evaluated_pixels": 200,
+          "median_absolute_error_sky_sigma": 14.09046220779419,
+          "p95_absolute_error_sky_sigma": 192.90940399169912
+        }
+      }
+    }
+  ],
+  "limits": "Visual completion only. Edge values are extrapolated. Holdouts hide known samples, not the true missing signal. Bright peaks and unknown sources can be suppressed; no flux recovery, new coverage or detection claim."
+}

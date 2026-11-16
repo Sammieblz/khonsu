@@ -65,10 +65,10 @@
       "gap_fill": {
         "encoding": "float32-le-estimate8-v1",
         "size_bytes": 69620,
-        "sha256": "c407014e813f3afb759cef2d31609811f380e69751831b5f1e8bd4037503663e",
+        "sha256": "b59c6a6acd58f28dcb7e91fb8b7159bc95f2b18663484bae9ce66d5aa0aaec49",
         "url": "/v1/examples/real-wise-0855/frames/frame-0001-fill.bin"
       },
-      "estimated_fraction": 0.019606434932490664,
+      "estimated_fraction": 0.031671933352484916,
       "refinement": {
         "method": "native-mask-normalized-local-wiener",
         "strength": 0.5,
@@ -108,10 +108,10 @@
       "gap_fill": {
         "encoding": "float32-le-estimate8-v1",
         "size_bytes": 69620,
-        "sha256": "2856b9c3216cac3406cb2ae530db1e9d3103361c7841cf01a3cc882601c830e2",
+        "sha256": "03001ddbb6dab30b40b88356f847a68ab0efcb905b98a11ffca65f5263fd6267",
         "url": "/v1/examples/real-wise-0855/frames/frame-0002-fill.bin"
       },
-      "estimated_fraction": 0.023197357081298477,
+      "estimated_fraction": 0.030163746049985635,
       "refinement": {
         "method": "native-mask-normalized-local-wiener",
         "strength": 0.5,
@@ -151,10 +151,10 @@
       "gap_fill": {
         "encoding": "float32-le-estimate8-v1",
         "size_bytes": 69620,
-        "sha256": "ae5dbaf13a22b31a1f4531886fcf2b940800bb000052c87f7289c360b2181b77",
+        "sha256": "f4fcec930eb0cc3179373e52c851bcbefec3ffe95f9b6a1c7a985557c3910721",
         "url": "/v1/examples/real-wise-0855/frames/frame-0003-fill.bin"
       },
-      "estimated_fraction": 0.021401896006894572,
+      "estimated_fraction": 0.02470554438379776,
       "refinement": {
         "method": "native-mask-normalized-local-wiener",
         "strength": 0.5,
@@ -225,16 +225,17 @@
     "cache_role": "primary",
     "browser_raster_encoding": "float32-le-quality8-v2",
     "browser_quality_policy": "0 unavailable; 1 strict-valid; 2 OUTLIER/OVERFLOW-only. Strict PNGs, stretch and source manifest unchanged.",
-    "gap_fill_method": "small-gap-harmonic-v1",
-    "gap_fill_max_native_span": 4.0,
-    "gap_fill_max_native_area": 12.0,
-    "gap_fill_bright_boundary_sigma": 5.0,
-    "gap_fill_max_components": 2048,
-    "gap_fill_max_pixels": 65536,
-    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
     "refinement_method": "native-mask-normalized-local-wiener",
     "refinement_strength": 0.5,
     "refinement_scope": "optional display copy; native linear values before WCS resampling; no temporal averaging or measurement change",
-    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery"
+    "refinement_highlights": "shared display shoulder after stretch: knee 0.65, width 0.35; no saturation recovery",
+    "gap_fill_method": "bounded-gap-harmonic-v2",
+    "gap_fill_max_native_span": 8.0,
+    "gap_fill_max_native_area": 32.0,
+    "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
+    "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
+    "gap_fill_max_components": 2048,
+    "gap_fill_max_pixels": 65536,
+    "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added"
   }
 }

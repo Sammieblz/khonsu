@@ -4,17 +4,21 @@ GitHub [#66](https://github.com/Sammieblz/khonsu/issues/66), Linear
 [BYT-50](https://linear.app/byteboyz/issue/BYT-50). This extends the
 [quality-mask pass](image-quality.md) with actual display-only gap filling.
 
+The subsequent [bounded-patch fix](gap-completion.md), #70 / BYT-52, expands
+eligibility to medium components, small edge notches and bright boundaries.
+The original v1 method and evaluation below remain a historical record.
+
 ## Try it
 
 With the updated Docker Compose images running, open http://localhost:3000 and
 hard-refresh. Load the primary WISE cached real example.
 
-1. **CLEAN VIEW** starts on for a new visitor. Small eligible patches blend into
+1. **CLEAN VIEW** starts on for a new visitor. Bounded eligible patches blend into
    the surrounding background. The notice states that some areas are estimated.
 2. **SHOW ORIGINAL** toggles the original observation at the same date, zoom and
    stretch. Toggle again to return. It pauses playback for inspection.
 3. **SHOW ESTIMATED AREAS** marks only the filled regions with amber stripes.
-   This overlay is off initially. Larger holes remain visible in both views.
+   This overlay is off initially. Holes beyond the bounds can remain visible.
 4. Step through actual dates. Each frame uses only its own neighboring samples.
 5. Switch to **MARK**. The original appears automatically, estimates and detail
    pause, and saved marks retain the original strict validity. A mark in a filled
@@ -25,12 +29,12 @@ hard-refresh. Load the primary WISE cached real example.
 7. Open **ADVANCED IMAGE DISPLAY** for sampling, detail, masks, stretch, GPU/CPU
    and display resolution. These are optional inspection controls.
 
-The Epsilon Indi backup has a large excluded star core. That core is deliberately
-unfilled; a PSF-based reconstruction is outside this change. Old sequences without
+Version 1 deliberately left bright cores unfilled. Version 2 can visually
+estimate a bounded core without recovering its true peak or flux. Old sequences without
 an estimate asset continue displaying their originals. If a fill asset fails
 verification or loading, the original still loads and the app explains the fallback.
 
-## Method and boundaries
+## Original v1 method and boundaries
 
 `apps/api/app/processing/gap_fill.py` prepares a separate derivative in CPython.
 An eight-connected component groups adjacent rejected pixels. A component must
@@ -95,7 +99,7 @@ records the input raster checksum, method and output checksum. Live processing
 uses the same implementation before publishing its manifest. Evidence retains
 the processing policy and original quality; it never treats a fill as a measurement.
 
-## Verification and limits
+## Original v1 verification and limits
 
 The [real-image evaluation](evidence/clean-view/science.json) records all five
 prepared frames, actual observation IDs, timestamps, checksums and settings.
@@ -139,7 +143,8 @@ Compare the same observation and stretch:
 
 ![Compact Clean View controls at mobile width](evidence/clean-view/controls-mobile.png)
 
-Reproduce with the science environment and the existing browser-test setup:
+To reproduce the historical v1 results, use the PR #67 revision. For current
+validation use the [v2 guide](gap-completion.md). The original commands were:
 
 ```sh
 python scripts/prepare-clean-examples.py

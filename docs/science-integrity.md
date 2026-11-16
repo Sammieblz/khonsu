@@ -44,7 +44,9 @@ measurement source; Mark pauses refinement. No photometric or detection claim
 may be based on the filtered image alone.
 
 The user-authorized [Clean View](clean-view.md) can display explicitly labelled
-small-gap estimates by default. Keep that derivative separate from observations:
+bounded-gap estimates by default. The [v2 policy](gap-completion.md) also allows
+small edge notches and bright boundaries, without recovering their true signal.
+Keep that derivative separate from observations:
 preserve original masks and values, disclose the estimate, provide original and
 estimated-area views, and exclude estimates from measurements and candidate
 validity. Mark mode shows original data. Never borrow a different date to fill

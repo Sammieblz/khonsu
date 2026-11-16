@@ -141,3 +141,13 @@ controls show faint-peak attenuation, so the preset starts off and Mark restores
 original samples. Existing real coadd compatibility gates stay in force; no
 cross-date averaging, sky-segmentation model, deconvolution or new dependency
 is added. Tyrone reviews the additive API contract.
+
+## November 15: bounded Clean View completion, #70 / BYT-52
+
+Samuel's screenshot showed medium and edge patches excluded by the initial
+fill policy. [Version 2](gap-completion.md) expands native span/area eligibility
+within the existing hard work limits, uses in-bounds harmonic neighbors for
+small edge notches and permits bounded bright-boundary estimates. These are
+labelled visual guesses, with potentially large errors near hidden stars.
+Original values, masks and evidence stay authoritative; original comparison
+and Mark remain intact. No public schema, dependency or measurement changes.

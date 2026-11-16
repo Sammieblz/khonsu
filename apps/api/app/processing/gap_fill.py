@@ -1,18 +1,20 @@
-"""Display-only harmonic estimates for small, enclosed gaps in one observation.
+"""Display-only harmonic estimates for bounded gaps in one observation.
 
 The source image and validity mask are immutable. These values are never passed
-to photometry, reprojection, coadds or differences. Large/edge/bright-core gaps
-remain unknown. No neighboring epoch supplies a pixel.
+to photometry, reprojection, coadds or differences. Small and medium gaps may
+include edges or bright boundaries; their true signal remains unknown.
+Broad missing regions stay unfilled. No neighboring epoch supplies a pixel.
 """
 import numpy as np
 from scipy.ndimage import find_objects, label
 
 ENCODING = "float32-le-estimate8-v1"
 POLICY = {
-    "gap_fill_method": "small-gap-harmonic-v1",
-    "gap_fill_max_native_span": 4.0,
-    "gap_fill_max_native_area": 12.0,
-    "gap_fill_bright_boundary_sigma": 5.0,
+    "gap_fill_method": "bounded-gap-harmonic-v2",
+    "gap_fill_max_native_span": 8.0,
+    "gap_fill_max_native_area": 32.0,
+    "gap_fill_edge_policy": "in-bounds neighbors only; zero outward flux; bounded visual extrapolation",
+    "gap_fill_bright_boundary_policy": "clamp to observed boundary; no recovered peak or flux claim",
     "gap_fill_max_components": 2048,
     "gap_fill_max_pixels": 65536,
     "gap_fill_scope": "display estimates only; strict neighbors in this observation; no measured coverage added",
@@ -26,7 +28,9 @@ def estimate_gaps(image, valid, pixels_per_native=2.0):
     samples. The maximum principle bounds estimates by that boundary: a smooth
     continuation cannot introduce a new interior peak. Eight-connected grouping
     keeps diagonal chains of missing coverage together. Limits use native sample
-    size as well as hard array/work caps; bright enclosing boundaries are skipped.
+    size as well as hard array/work caps. At an image edge, use only in-bounds
+    neighbors (zero outward flux). A bright boundary can produce a smooth visual
+    continuation, but cannot recover the unknown peak or flux behind a mask.
     """
     image = np.asarray(image)
     valid = np.asarray(valid, dtype=bool)
@@ -39,9 +43,6 @@ def estimate_gaps(image, valid, pixels_per_native=2.0):
     samples = image[valid]
     if samples.size < 16:
         return estimates, estimated
-    sky = float(np.median(samples))
-    sigma = max(float(1.4826 * np.median(np.abs(samples - sky))),
-                float(np.ptp(samples)) * 1e-7, 1e-12)
     span_limit = min(16, int(np.floor(POLICY["gap_fill_max_native_span"] * pixels_per_native)))
     area_limit = min(128, int(np.floor(POLICY["gap_fill_max_native_area"] * pixels_per_native ** 2)))
     labels, _ = label(~valid, structure=np.ones((3, 3)))
@@ -52,28 +53,29 @@ def estimate_gaps(image, valid, pixels_per_native=2.0):
         if bounds is None or areas[identity] > area_limit or areas[identity] > remaining:
             continue
         y, x = bounds
-        if (max(y.stop - y.start, x.stop - x.start) > span_limit
-                or y.start == 0 or x.start == 0
-                or y.stop == image.shape[0] or x.stop == image.shape[1]):
+        if max(y.stop - y.start, x.stop - x.start) > span_limit:
             continue
         ys, xs = np.where(labels[y, x] == identity)
         ys, xs = ys + y.start, xs + x.start
         coordinates = list(zip(ys.tolist(), xs.tolist()))
         indices = {point: index for index, point in enumerate(coordinates)}
-        matrix = np.eye(len(coordinates), dtype=np.float64) * 4
+        matrix = np.zeros((len(coordinates), len(coordinates)), dtype=np.float64)
         rhs = np.zeros(len(coordinates), dtype=np.float64)
         boundary = []
         for row, (cy, cx) in enumerate(coordinates):
             for neighbor in ((cy-1, cx), (cy+1, cx), (cy, cx-1), (cy, cx+1)):
+                if not (0 <= neighbor[0] < image.shape[0] and 0 <= neighbor[1] < image.shape[1]):
+                    continue
+                matrix[row, row] += 1
                 if neighbor in indices:
                     matrix[row, indices[neighbor]] -= 1
                 else:
                     value = float(image[neighbor])
                     boundary.append(value)
                     rhs[row] += value
-        # A missing source core is not a background gap. Do not turn a ring
-        # into a purported recovered stellar peak, even when the hole is small.
-        if max(boundary) > sky + POLICY["gap_fill_bright_boundary_sigma"] * sigma:
+        # Every solved component needs observed boundary information. The fill
+        # remains an estimate, including at an edge or inside a bright source.
+        if not boundary:
             continue
         values = np.linalg.solve(matrix, rhs)
         estimates[ys, xs] = np.clip(values, min(boundary), max(boundary))

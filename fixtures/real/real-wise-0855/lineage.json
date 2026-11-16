@@ -20,7 +20,7 @@
       "masked_fraction": 0.03167193335248497,
       "warnings": [],
       "warning_fraction": 0.015943694340706693,
-      "estimated_fraction": 0.019606434932490664
+      "estimated_fraction": 0.031671933352484916
     },
     {
       "frame_id": "frame-0002",
@@ -36,7 +36,7 @@
       "masked_fraction": 0.030163746049985618,
       "warnings": [],
       "warning_fraction": 0.013932777937374317,
-      "estimated_fraction": 0.023197357081298477
+      "estimated_fraction": 0.030163746049985635
     },
     {
       "frame_id": "frame-0003",
@@ -52,7 +52,7 @@
       "masked_fraction": 0.024705544383797795,
       "warnings": [],
       "warning_fraction": 0.0154409652398736,
-      "estimated_fraction": 0.021401896006894572
+      "estimated_fraction": 0.02470554438379776
     }
   ],
   "files": {
@@ -73,8 +73,8 @@
       "sha256": "d23fb384a7c8736d49c6f0564a7abf9ad68e13e76d1edacb9f1f7726a5a0ef28"
     },
     "manifest.json": {
-      "sha256": "f56d98ee89ced663e4b53825f3973c173444105648267ed95ec3234bd31e8c92",
-      "size_bytes": 11117
+      "sha256": "86c2c861acabfa0ce83024d318843f6846dec0012dbfb29b3e825a3d9f834a9d",
+      "size_bytes": 11282
     },
     "source-manifest.json": {
       "size_bytes": 6149,
@@ -93,15 +93,15 @@
       "sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d"
     },
     "frame-0001-fill.bin": {
-      "sha256": "c407014e813f3afb759cef2d31609811f380e69751831b5f1e8bd4037503663e",
+      "sha256": "b59c6a6acd58f28dcb7e91fb8b7159bc95f2b18663484bae9ce66d5aa0aaec49",
       "size_bytes": 69620
     },
     "frame-0002-fill.bin": {
-      "sha256": "2856b9c3216cac3406cb2ae530db1e9d3103361c7841cf01a3cc882601c830e2",
+      "sha256": "03001ddbb6dab30b40b88356f847a68ab0efcb905b98a11ffca65f5263fd6267",
       "size_bytes": 69620
     },
     "frame-0003-fill.bin": {
-      "sha256": "ae5dbaf13a22b31a1f4531886fcf2b940800bb000052c87f7289c360b2181b77",
+      "sha256": "f4fcec930eb0cc3179373e52c851bcbefec3ffe95f9b6a1c7a985557c3910721",
       "size_bytes": 69620
     },
     "frame-0001-refined.bin": {
@@ -168,18 +168,18 @@
   "gap_fill_revision": {
     "frame-0001": {
       "input_raster_sha256": "6a273f97e4ca7a3b5383bb8652c9586b09656194fccfb6404f4439d4fabf9e58",
-      "method": "small-gap-harmonic-v1",
-      "estimated_fraction": 0.019606434932490664
+      "method": "bounded-gap-harmonic-v2",
+      "estimated_fraction": 0.031671933352484916
     },
     "frame-0002": {
       "input_raster_sha256": "8c418131b6a58bd5a5bffa57a4a8b131932d67aef81e34dc02b4af1ca2870a45",
-      "method": "small-gap-harmonic-v1",
-      "estimated_fraction": 0.023197357081298477
+      "method": "bounded-gap-harmonic-v2",
+      "estimated_fraction": 0.030163746049985635
     },
     "frame-0003": {
       "input_raster_sha256": "543d871500d5305689c9425cd9d021aa2dfe444f927cdd8137b14b547bdb6e3d",
-      "method": "small-gap-harmonic-v1",
-      "estimated_fraction": 0.021401896006894572
+      "method": "bounded-gap-harmonic-v2",
+      "estimated_fraction": 0.02470554438379776
     }
   },
   "refinement_revision": {

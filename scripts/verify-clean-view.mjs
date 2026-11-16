@@ -23,7 +23,7 @@ try{
    page.on('pageerror',e=>errors.push(String(e)));
    await load(page);await advanced(page);await page.getByLabel('Display resolution',{exact:true}).selectOption('hd');await ready(page);
    assert.equal(await button(page,'CLEAN VIEW').getAttribute('aria-pressed'),'true');
-   assert.match(await page.locator('[data-clean-view]').textContent(),/Some missing areas are estimated/);
+   assert.match(await page.locator('[data-clean-view]').textContent(),/Missing areas are visually estimated/);
    const canvas=page.locator('canvas');
    await page.evaluate(()=>{const c=document.querySelector('canvas');window.__cleanPixels=c.getContext('2d').getImageData(0,0,c.width,c.height).data;});
    await canvas.screenshot({path:`${output}/${engine.name()}-clean.png`});
@@ -50,6 +50,25 @@ try{
    assert.notEqual(await page.locator('#observation-index').getAttribute('aria-valuetext'),stamp);
    assert.equal(await page.locator('[data-clean-view]').getAttribute('data-clean-view'),'on');
    await page.locator('#observation-index').fill('0');await ready(page);
+   // Reproduce the user's second-WISE-frame patches at a lifted display gamma.
+   await button(page,'Next observation').click();await ready(page);
+   await page.getByLabel('Gamma',{exact:true}).fill('1.8');await ready(page);
+   assert.doesNotMatch(await page.locator('[data-clean-view]').textContent(),/Larger gaps remain/);
+   await canvas.screenshot({path:`${output}/${engine.name()}-second-frame-filled.png`});
+   const patchChecks=await page.evaluate(async({api,primary})=>{
+    const frame=primary.frames[1],side=primary.grid.width_px,c=document.querySelector('canvas');
+    const raw=await(await fetch(api+frame.raster.url)).arrayBuffer(),fill=await(await fetch(api+frame.gap_fill.url)).arrayBuffer();
+    const quality=new Uint8Array(raw,side*side*4),mask=new Uint8Array(fill,side*side*4),pixels=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+    return [[28,71,7,10,41],[0,58,6,8,30],[115,19,3,5,9],[35,103,2,2,3]].map(([left,top,width,height,expected])=>{
+     const excluded=[];for(let y=top;y<top+height;y++)for(let x=left;x<left+width;x++)if(quality[y*side+x]!==1)excluded.push([x,y]);
+     const [x,y]=excluded[Math.floor(excluded.length/2)]??[left,top],i=(Math.floor((y+.5)*c.height/side)*c.width+Math.floor((x+.5)*c.width/side))*4;
+     return {left,top,width,height,expected,excluded:excluded.length,estimated:excluded.filter(([x,y])=>mask[y*side+x]===1).length,color:Array.from(pixels.slice(i,i+3))};
+    });
+   },{api,primary});
+   for(const patch of patchChecks){assert.equal(patch.excluded,patch.expected,JSON.stringify(patch));assert.equal(patch.estimated,patch.expected,JSON.stringify(patch));assert(patch.color[0]>15&&patch.color.every(v=>v===patch.color[0]),JSON.stringify(patch));}
+   await button(page,'SHOW ESTIMATED AREAS').click();await ready(page);await canvas.screenshot({path:`${output}/${engine.name()}-second-frame-estimates.png`});
+   await button(page,'SHOW ESTIMATED AREAS').click();await ready(page);
+   await page.getByLabel('Gamma',{exact:true}).fill('1');await button(page,'Previous observation').click();await ready(page);
    const raw=new Uint8Array(await(await fetch(api+primary.frames[0].gap_fill.url)).arrayBuffer()),side=primary.grid.width_px,mask=raw.subarray(side*side*4);
    const selected=mask.findIndex((q,i)=>q===1&&i%side>side*.25&&i%side<side*.75&&Math.floor(i/side)>side*.25&&Math.floor(i/side)<side*.75);assert(selected>=0);
    await button(page,'MARK').click();await ready(page);
@@ -108,7 +127,7 @@ try{
    assert.equal(await button(blocked,'CLEAN VIEW').getAttribute('aria-pressed'),'true');
    await button(blocked,'CLEAN VIEW').click();await ready(blocked);assert.equal(await button(blocked,'CLEAN VIEW').getAttribute('aria-pressed'),'false');await blocked.close();
    assert.deepEqual(errors,[]);
-   report.browsers.push({browser:engine.name(),version:browser.version(),...comparison,...parity,markUsesOriginal:true,estimatedMarkExcluded:true,exportExcludesEstimate:true,preferencePersists:true,blockedStorageUsable:true,realDateStepping:true,mobileNoOverflow:true,keyboardToggle:true,failedFillFallsBack:true,legacyCompatible:true});
+   report.browsers.push({browser:engine.name(),version:browser.version(),...comparison,...parity,secondFramePatches:patchChecks,accurateRemainingNotice:true,markUsesOriginal:true,estimatedMarkExcluded:true,exportExcludesEstimate:true,preferencePersists:true,blockedStorageUsable:true,realDateStepping:true,mobileNoOverflow:true,keyboardToggle:true,failedFillFallsBack:true,legacyCompatible:true});
    console.log(engine.name()+': Clean View passed');
   }finally{await browser.close();}
  }

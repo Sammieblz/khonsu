@@ -102,6 +102,12 @@ estimated-area overlays, CPU/GPU parity, preference, candidate and fallback chec
 `test_gap_fill.py` covers bounds, bright cores and unchanged inputs. Existing
 enhancement controls now live inside Advanced and their suites open it explicitly.
 
+For [bounded patch completion](gap-completion.md), also run
+`python scripts/validate-gap-completion.py`. It separates quiet-background,
+edge and bright-source holdout errors. The Clean View browser suite checks the
+specific second-WISE-frame medium hole and three smaller patches, with accurate
+remaining-gap wording and unchanged measurement validity.
+
 The [#64 image-quality pass](image-quality.md) adds
 `node scripts/verify-quality-display.mjs`. It checks real warning pixels,
 strict candidate exclusion, GPU/CPU parity, manual 4K and adaptive CPU fallback,

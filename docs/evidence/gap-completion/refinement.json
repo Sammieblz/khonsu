@@ -1,0 +1,43 @@
+{
+  "testedAt": "2026-11-16T00:02:18.978Z",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "151.0.7922.34",
+      "changedDisplayPixels": 403594,
+      "maximumByteDifference": 1,
+      "checks": 160,
+      "gpuMode": "WebGL2",
+      "adapter": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "startsOff": true,
+      "originalExact": true,
+      "holdOriginalExact": true,
+      "markOriginal": true,
+      "evidenceValidityUnchanged": true,
+      "realDateStepping": true,
+      "mobileNoOverflow": true,
+      "keyboardToggle": true,
+      "failedOrCorruptOriginalFallback": true,
+      "legacyCompatible": true
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "changedDisplayPixels": 403600,
+      "maximumByteDifference": 1,
+      "checks": 160,
+      "gpuMode": "WebGL2",
+      "adapter": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "startsOff": true,
+      "originalExact": true,
+      "holdOriginalExact": true,
+      "markOriginal": true,
+      "evidenceValidityUnchanged": true,
+      "realDateStepping": true,
+      "mobileNoOverflow": true,
+      "keyboardToggle": true,
+      "failedOrCorruptOriginalFallback": true,
+      "legacyCompatible": true
+    }
+  ]
+}
