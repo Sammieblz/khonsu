@@ -24,7 +24,11 @@ def main():
 
     def request(path, method='GET', value=None, headers=None, expected=200):
         assert path.startswith('/') and not path.startswith('//')
-        request_headers = {'Origin': args.origin, **(headers or {})}
+        request_headers = {
+            'Origin': args.origin,
+            'User-Agent': 'Khonsu-Deployment-Check/1.0 (+https://github.com/Sammieblz/khonsu)',
+            **(headers or {}),
+        }
         data = None if value is None else json.dumps(value).encode()
         if data is not None:
             request_headers['Content-Type'] = 'application/json'
