@@ -27,6 +27,44 @@
         "title": "ApiError",
         "type": "object"
       },
+      "CatalogPosition": {
+        "additionalProperties": false,
+        "properties": {
+          "dec_deg": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Dec Deg",
+            "type": "number"
+          },
+          "frame_id": {
+            "title": "Frame Id",
+            "type": "string"
+          },
+          "ra_deg": {
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Ra Deg",
+            "type": "number"
+          },
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "frame_id",
+          "x",
+          "y",
+          "ra_deg",
+          "dec_deg"
+        ],
+        "title": "CatalogPosition",
+        "type": "object"
+      },
       "DisplayRefinement": {
         "additionalProperties": false,
         "properties": {
@@ -293,6 +331,182 @@
           "image_url"
         ],
         "title": "Frame",
+        "type": "object"
+      },
+      "GaiaContext": {
+        "additionalProperties": false,
+        "properties": {
+          "catalog": {
+            "const": "Gaia DR3",
+            "default": "Gaia DR3",
+            "title": "Catalog",
+            "type": "string"
+          },
+          "catalog_url": {
+            "default": "https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/355/gaiadr3",
+            "title": "Catalog Url",
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "provider": {
+            "const": "CDS VizieR (Harvard mirror)",
+            "default": "CDS VizieR (Harvard mirror)",
+            "title": "Provider",
+            "type": "string"
+          },
+          "query_dec_deg": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Query Dec Deg",
+            "type": "number"
+          },
+          "query_ra_deg": {
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Query Ra Deg",
+            "type": "number"
+          },
+          "query_radius_deg": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 2.0,
+            "title": "Query Radius Deg",
+            "type": "number"
+          },
+          "query_url": {
+            "title": "Query Url",
+            "type": "string"
+          },
+          "retrieved_at_utc": {
+            "format": "date-time",
+            "title": "Retrieved At Utc",
+            "type": "string"
+          },
+          "row_limit": {
+            "default": 500,
+            "title": "Row Limit",
+            "type": "integer"
+          },
+          "sequence_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "title": "Sequence Id",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/GaiaSource"
+            },
+            "maxItems": 500,
+            "title": "Sources",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sequence_id",
+          "retrieved_at_utc",
+          "query_ra_deg",
+          "query_dec_deg",
+          "query_radius_deg",
+          "query_url",
+          "truncated",
+          "sources",
+          "notes"
+        ],
+        "title": "GaiaContext",
+        "type": "object"
+      },
+      "GaiaSource": {
+        "additionalProperties": false,
+        "properties": {
+          "dec_deg": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Dec Deg",
+            "type": "number"
+          },
+          "g_magnitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "G Magnitude"
+          },
+          "pmdec_mas_yr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pmdec Mas Yr"
+          },
+          "pmra_mas_yr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pmra Mas Yr"
+          },
+          "position_method": {
+            "enum": [
+              "proper-motion",
+              "catalog-position"
+            ],
+            "title": "Position Method",
+            "type": "string"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogPosition"
+            },
+            "maxItems": 96,
+            "title": "Positions",
+            "type": "array"
+          },
+          "ra_deg": {
+            "exclusiveMaximum": 360.0,
+            "minimum": 0.0,
+            "title": "Ra Deg",
+            "type": "number"
+          },
+          "ref_epoch": {
+            "title": "Ref Epoch",
+            "type": "number"
+          },
+          "source_id": {
+            "pattern": "^[0-9]{1,20}$",
+            "title": "Source Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "ra_deg",
+          "dec_deg",
+          "ref_epoch",
+          "position_method",
+          "positions"
+        ],
+        "title": "GaiaSource",
         "type": "object"
       },
       "HealthResponse": {
@@ -900,7 +1114,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           }
         },
         "summary": "Synthetic Frame",
@@ -975,6 +1189,109 @@
         ]
       }
     },
+    "/v1/examples/{example_id}/context/gaia": {
+      "get": {
+        "operationId": "example_gaia_v1_examples__example_id__context_gaia_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "example_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Example Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GaiaContext"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Example Gaia",
+        "tags": [
+          "context"
+        ]
+      }
+    },
     "/v1/examples/{example_id}/frames/{filename}": {
       "get": {
         "operationId": "example_frame_v1_examples__example_id__frames__filename__get",
@@ -1021,7 +1338,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "503": {
             "content": {
@@ -1117,7 +1434,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "429": {
             "content": {
@@ -1210,7 +1527,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "429": {
             "content": {
@@ -1303,7 +1620,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "429": {
             "content": {
@@ -1339,6 +1656,99 @@
         "summary": "Cancel Sequence",
         "tags": [
           "sequences"
+        ]
+      }
+    },
+    "/v1/sequences/{sequence_id}/context/gaia": {
+      "get": {
+        "operationId": "sequence_gaia_v1_sequences__sequence_id__context_gaia_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sequence_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+              "title": "Sequence Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GaiaContext"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Sequence Gaia",
+        "tags": [
+          "context"
         ]
       }
     },
@@ -1408,7 +1818,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "429": {
             "content": {
@@ -1501,7 +1911,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "429": {
             "content": {

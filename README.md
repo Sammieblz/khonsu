@@ -20,10 +20,17 @@ The observation console now supports real-date rewind dragging, pan/zoom/reset, 
 
 Searches can be shared by URL. A candidate mark records its ICRS position, the observations compared and a snapshot of the sequence, and stays in the browser until exported as a versioned evidence file. See [shared search links, candidate marks and evidence export](docs/integration.md#shared-search-links). A public hosted demonstration and the official project submission remain release gates. The [initial backend handoff](docs/implementation-handoff.md) is historical; current tickets and acceptance evidence govern completion.
 
+[Sky context](docs/sky-context.md) adds optional Gaia DR3 source rings with
+observation-date proper motion, a separately labeled AllWISE reference pane in
+CDS Aladin Lite, a pixel-quality inspector and compact coordinate-based embeds.
+Catalog and reference imagery never replace SPHEREx measurements or dates.
+
 [Clean View](docs/clean-view.md) fills eligible small gaps for a clearer first look,
 with estimated-area labels, an original-view comparison and a remembered on/off
-choice. Original measurements stay intact; large holes and bright cores remain
-unfilled. Mark mode shows original data. Technical controls are under Advanced.
+choice. [Bounded patch completion](docs/gap-completion.md) also handles eligible
+medium holes and edge notches. Larger gaps remain unavailable; estimates near
+bright sources can be inaccurate. Mark mode shows original data. Technical
+controls are under Advanced.
 
 Cached real observations and synthetic development fixtures are distinct. A cached example is usable only when its verified bundle is present and the interface labels it as previously acquired data. A failed live query must not silently load another field or synthetic imagery. Coverage alone does not prove a target detection, motion, brightness change or Planet X discovery.
 

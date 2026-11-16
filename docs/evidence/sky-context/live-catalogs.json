@@ -1,0 +1,28 @@
+[
+  {
+    "sequence_id": "real-wise-0855",
+    "catalog": "Gaia DR3",
+    "provider": "CDS VizieR (Harvard mirror)",
+    "retrieved_at_utc": "2026-11-16T00:35:40.070969Z",
+    "query_url": "https://vizier.cfa.harvard.edu/viz-bin/asu-tsv?-source=I%2F355%2Fgaiadr3&-c=133.7601213914+-7.2421279412&-c.rd=0.1707106422&-out=Source%2CRA_ICRS%2CDE_ICRS%2CpmRA%2CpmDE%2CGmag&-out.max=501&-sort=Gmag",
+    "sources_in_grid": 55,
+    "truncated": true,
+    "sources_without_proper_motion": 1,
+    "catalog_refetch_bytes": 43617,
+    "catalog_refetch_sha256": "362f2f82d9b083ddb59ece7d37c6a4bc3cd9277b1f3b647ea721b0c3c39eace3",
+    "note": "Catalog table re-fetched from the same recorded query immediately after context generation. Not a SPHEREx observation or a source detection."
+  },
+  {
+    "sequence_id": "real-epsilon-indi-b",
+    "catalog": "Gaia DR3",
+    "provider": "CDS VizieR (Harvard mirror)",
+    "retrieved_at_utc": "2026-11-16T00:35:49.601713Z",
+    "query_url": "https://vizier.cfa.harvard.edu/viz-bin/asu-tsv?-source=I%2F355%2Fgaiadr3&-c=331.0986113345+-56.8008041403&-c.rd=0.1707106422&-out=Source%2CRA_ICRS%2CDE_ICRS%2CpmRA%2CpmDE%2CGmag&-out.max=501&-sort=Gmag",
+    "sources_in_grid": 64,
+    "truncated": true,
+    "sources_without_proper_motion": 0,
+    "catalog_refetch_bytes": 43618,
+    "catalog_refetch_sha256": "c344b2a2c4ce58abc8905c2c65a724f5f1257b117dba1e7f9df32288ab781d7a",
+    "note": "Catalog table re-fetched from the same recorded query immediately after context generation. Not a SPHEREx observation or a source detection."
+  }
+]

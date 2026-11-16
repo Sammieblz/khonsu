@@ -56,7 +56,11 @@ The browser reads `NEXT_PUBLIC_API_BASE_URL` at build time. Static Cloudflare Pa
 
 ## Shared search links
 
-The address bar describes the live search on screen, so copying it, or using **Copy search link** on a ready sequence, reproduces that search. The link is a plain query string on the static page; no Next.js server route is involved. `readSharedSearch` and `sharedSearchQuery` in `apps/web/src/features/explorer/coordinates.ts` own the format.
+The optional [sky-context contract](sky-context.md#additive-api) adds bounded Gaia
+catalog routes without changing frame, raster or candidate records. Compact
+sharing uses `embed=1` on this same static page; it never starts a job by itself.
+
+The address bar describes the live search on screen. **Share this field** builds a query link and iframe markup from the current sequence's coordinates and selected observation. A cached example becomes a new archive query, with that limitation stated beside the controls. The link is a plain query string on the static page; no Next.js server route is involved. `readSharedSearch` and `sharedSearchQuery` in `apps/web/src/features/explorer/coordinates.ts` own the search format; `features/context/links.ts` builds safe compact links.
 
 | Parameter | Meaning | When invalid |
 | --- | --- | --- |
@@ -65,8 +69,9 @@ The address bar describes the live search on screen, so copying it, or using **C
 | `fov_arcmin` | Field of view in arcminutes, from 0.5 to 120 | The default 6′ is used, with a note |
 | `frame` | `ICRS`, the only supported frame | Any other frame restores nothing |
 | `obs` | IRSA observation ID to select | Ignored unless it is a plain identifier; selected only if the returned sequence contains it |
+| `embed` | `1` selects the compact layout of the same static page | Any other value uses the ordinary layout |
 
-Opening a link fills the form; the visitor still chooses **Explore the sky**, so a link never starts an archive download by itself. The frame count stays the form's fixed bound because links cannot carry it. Coordinates are validated with the same rules as typed input and are never wrapped, clamped or rounded, so a link cannot silently move the requested position. Unknown parameters are ignored, and values that look like URLs are never used. Loading a cached example clears the parameters, because a link cannot reproduce it. Candidate notes stay in the browser and are never part of a link. The frontend does not yet expose wavelength or time filters, so links do not carry them.
+Opening a link fills the form; the visitor still chooses **Explore the sky**, so a link never starts an archive download by itself. The frame count stays the form's fixed bound because links cannot carry it. Coordinates are validated with the same rules as typed input and are never wrapped, clamped or rounded, so a link cannot silently move the requested position. Unknown parameters are ignored, and values that look like URLs are never used. Loading a cached example clears search parameters and preserves compact mode when selected. Share this field can create a new coordinate query, but cannot reproduce that cached bundle. Candidate notes stay in the browser and are never part of a link. The frontend does not yet expose wavelength or time filters, so links do not carry them.
 
 ## Candidate marks
 

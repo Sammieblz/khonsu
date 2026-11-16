@@ -1,0 +1,55 @@
+{
+  "testedAt": "2026-11-16T00:48:42.102Z",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "151.0.7922.34",
+      "catalogSources": 55,
+      "truncated": true,
+      "fit": {
+        "dx": 2.0163369640613382e-7,
+        "dy": 0.000024857767130015418
+      },
+      "zoom": {
+        "dx": 0.0000016553065336211148,
+        "dy": 5.546307875192724e-7
+      },
+      "wiseView": {
+        "ra": 133.7601213914074,
+        "dec": -7.242127941212259,
+        "fov": 0.1,
+        "hips": "https://irsa.ipac.caltech.edu/data/hips/CDS/AllWISE/RGB-W4-W2-W1"
+      },
+      "wiseTiles": 3,
+      "quality": "estimated gap explained without creating a candidate",
+      "failure": "503 retry and playback passed",
+      "sharing": "compact mode preserves coordinates; no auto archive request",
+      "errors": []
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "catalogSources": 55,
+      "truncated": true,
+      "fit": {
+        "dx": 0.008170879909272344,
+        "dy": 0.0008793499546300154
+      },
+      "zoom": {
+        "dx": 0.02063153811903362,
+        "dy": 0.0010991874432875193
+      },
+      "wiseView": {
+        "ra": 133.7601213914074,
+        "dec": -7.242127941212259,
+        "fov": 0.1,
+        "hips": "https://irsa.ipac.caltech.edu/data/hips/CDS/AllWISE/RGB-W4-W2-W1"
+      },
+      "wiseTiles": 4,
+      "quality": "estimated gap explained without creating a candidate",
+      "failure": "503 retry and playback passed",
+      "sharing": "compact mode preserves coordinates; no auto archive request",
+      "errors": []
+    }
+  ]
+}

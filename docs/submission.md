@@ -48,7 +48,7 @@ The November 14 validation pass selects the WISE 0855 field as primary (`real-wi
 
 Next.js and TypeScript provide a static-export-compatible interface. Canvas renders prepared images. FastAPI supplies bounded temporary jobs and controlled asset routes. Scientific work runs in normal CPython with NumPy, Astropy, reproject and Pillow. Docker Compose provides the local frontend/API route. No browser FITS processing, database or authentication service is required for that route.
 
-The current implementation has live coordinate search, dated frame selection/stepping/playback, masks, quality notes and local raster-pixel notes. Pan/zoom/reset, A/B blink, complete irregular-time interaction, query URLs, sky-coordinate annotations and a versioned evidence export remain feature work until accepted. Gaia DR3, WISE and NEOSSat integrations are future work. Do not describe them as delivered because they appear in the MVP plan or resource list.
+The current implementation supports live coordinate search, dated playback, pan/zoom/reset, A/B comparison, masks, quality notes, query URLs, local sky-coordinate annotations and versioned evidence export. Optional [sky context](sky-context.md) adds Gaia DR3 source markers, a separate AllWISE atlas reference, quality inspection and compact embeds. The catalog and atlas do not establish SPHEREx detections or supply missing measurements. Cross-mission scientific comparison and NEOSSat integration remain future work. Public hosting and the final submission remain separate acceptance gates.
 
 ### Team responsibilities
 

@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from .jobs import JobManager, JobError
 from .paths import fixture_directory
-from .schemas import ApiError, HealthResponse, PresetTarget, SequenceJob, SequenceManifest, SequenceRequest
+from .schemas import ApiError, GaiaContext, HealthResponse, PresetTarget, SequenceJob, SequenceManifest, SequenceRequest
 
 VERSION = "1.0.0"
 FIXTURES = fixture_directory(Path(__file__), os.environ.get("KHONSU_FIXTURE_DIR"))
@@ -113,6 +113,12 @@ def sequence_manifest(sequence_id: SequencePath):
     return get_manager().manifest(sequence_id)
 
 
+@app.get("/v1/sequences/{sequence_id}/context/gaia", response_model=GaiaContext, responses=ERRORS, tags=["context"])
+def sequence_gaia(sequence_id: SequencePath):
+    from .retrieval.gaia import gaia_context
+    return gaia_context(get_manager().manifest(sequence_id))
+
+
 @app.get("/v1/sequences/{sequence_id}/frames/{filename}", response_class=FileResponse,
          responses={404: {"model": ApiError}, **ERRORS}, tags=["sequences"])
 def sequence_frame(sequence_id: SequencePath, filename: str):
@@ -136,6 +142,21 @@ def examples():
         return real_examples()
     except CachedExampleError:
         return cached_example_failure()
+
+
+@app.get("/v1/examples/{example_id}/context/gaia", response_model=GaiaContext,
+         responses={404: {"model": ApiError}, **ERRORS}, tags=["context"])
+def example_gaia(example_id: SequencePath):
+    from .examples import CachedExampleError
+    from .retrieval.gaia import gaia_context
+    try:
+        available = real_examples()
+    except CachedExampleError:
+        return cached_example_failure()
+    manifest = next((item for item in available if item.sequence_id == example_id), None)
+    if manifest is None:
+        return error_response(404, 'CONTEXT_UNAVAILABLE', 'This cached field is not available.')
+    return gaia_context(manifest)
 
 
 @app.get("/v1/examples/{example_id}/frames/{filename}", response_class=FileResponse,

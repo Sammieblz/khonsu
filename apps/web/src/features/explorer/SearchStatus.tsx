@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import type { FailureGuide, SequenceJob } from "@/lib/api/client";
 import { observationLabel } from "@/features/viewer/time";
@@ -51,26 +50,6 @@ function fieldSummary(request: Pick<SequenceRequest, "ra_deg" | "dec_deg" | "fov
   return `RA ${request.ra_deg.toFixed(5)}°, Dec ${request.dec_deg.toFixed(5)}°, ${request.fov_arcmin ?? 6}′ field`;
 }
 
-/** Copies the address bar, which the explorer keeps in sync with the live search. */
-function ShareSearchLink() {
-  const [copy, setCopy] = useState<"idle" | "copied" | "failed">("idle");
-  async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopy("copied");
-    } catch {
-      setCopy("failed");
-    }
-  }
-  return <>
-    <div className={styles.statusActions}><button type="button" className={styles.secondaryButton} onClick={() => void copyLink()}>COPY SEARCH LINK</button></div>
-    <p className={styles.statusDetail} role="status">
-      {copy === "copied" ? "Link copied. " : copy === "failed" ? "This browser blocked copying; copy the address bar instead. " : ""}
-      The link repeats this search and selected observation. Your candidate notes stay in this browser and are not included.
-    </p>
-  </>;
-}
-
 function QualityNotes({ manifest }: { manifest: SequenceManifest }) {
   const warnings = manifest.warnings ?? [];
   if (!warnings.length) return null;
@@ -106,7 +85,6 @@ export function SearchStatus({ state, canLoadExample, onCancel, onRetry, onEditS
         ? <p className={styles.statusDetail}>Previously acquired observations of {manifest.title}. This is not a live result for the coordinates in the form.</p>
         : <p className={styles.statusDetail}>Live result for {fieldSummary({ ...manifest.target, fov_arcmin: manifest.requested_fov_arcmin })}.</p>}
       <QualityNotes manifest={manifest} />
-      {!cached && <ShareSearchLink />}
     </section>;
   }
 
