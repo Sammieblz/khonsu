@@ -7,6 +7,23 @@ export type SequenceJob = components["schemas"]["SequenceJob"];
 export type SequenceManifest = components["schemas"]["SequenceManifest"];
 export type JobStatus = SequenceJob["status"];
 export type PresetTarget = components['schemas']['PresetTarget'];
+export type GaiaContext = components['schemas']['GaiaContext'];
+export type GaiaSource = components['schemas']['GaiaSource'];
+
+export async function loadGaiaContext(sequence: SequenceManifest, signal: AbortSignal): Promise<GaiaContext> {
+  if (sequence.data_mode === 'synthetic' || !/^[a-zA-Z0-9_-]{1,80}$/.test(sequence.sequence_id)) {
+    throw new ApiClientError('Catalog context requires a real observation sequence.', 409, 'CONTEXT_UNAVAILABLE');
+  }
+  const kind = sequence.data_mode === 'cached-real' ? 'examples' : 'sequences';
+  const result = await requestJson<GaiaContext>(`/v1/${kind}/${sequence.sequence_id}/context/gaia`, {signal});
+  const frames = new Set(sequence.frames.map(frame => frame.frame_id));
+  if (result.sequence_id !== sequence.sequence_id || result.catalog !== 'Gaia DR3' || !Array.isArray(result.sources) || result.sources.length > 500 ||
+      result.sources.some(source => !/^[0-9]{1,20}$/.test(source.source_id) || !Array.isArray(source.positions) || source.positions.length > frames.size ||
+        source.positions.some(point => !frames.has(point.frame_id) || !Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < -.5 || point.y < -.5 || point.x >= sequence.grid.width_px-.5 || point.y >= sequence.grid.height_px-.5))) {
+    throw new ApiClientError('The catalog context does not match this sky grid.', 502, 'INVALID_RESPONSE');
+  }
+  return result;
+}
 export async function listPresets(signal?:AbortSignal):Promise<PresetTarget[]> {
   const items=await requestJson<PresetTarget[]>('/v1/presets',{signal});
   if(!Array.isArray(items))throw new ApiClientError('The target catalog is unavailable.',502,'INVALID_RESPONSE');

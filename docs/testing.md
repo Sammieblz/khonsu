@@ -36,6 +36,12 @@ Commit a five-target coverage report, including actual epoch coordinates, dates 
 
 ## Browser acceptance
 
+The [sky-context pass](sky-context.md) adds `test_catalog_context.py`,
+`context.test.ts` and `node scripts/verify-context.mjs`. The browser suite needs
+real Gaia/WISE services for its live checks and explicitly injects a catalog
+outage for recovery testing. It also checks marker alignment, untouched canvas
+pixels, quality inspection and compact links without automatic archive queries.
+
 Verify the main journey at 390px and desktop widths. Test keyboard focus, labelled icons, reduced motion, pointer cancellation, visible selection and readable contrast. In Time mode, dragging selects genuine epochs. Pan mode changes viewport only. Mark mode records the correct image/sky position at zoom and after panning. A/B blink uses two real frames with crisp transitions and a pause control.
 
 Verify invalid RA/Dec, no coverage, one usable frame, incompatible wavelength, failed image, backend offline, archive timeout, cancelled query, expired job and container restart. Ensure stale network responses cannot overwrite a newer query. Confirm a shared URL reproduces the query and candidate export contains source lineage and limitations.

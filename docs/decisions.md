@@ -151,3 +151,21 @@ small edge notches and permits bounded bright-boundary estimates. These are
 labelled visual guesses, with potentially large errors near hidden stars.
 Original values, masks and evidence stay authoritative; original comparison
 and Mark remain intact. No public schema, dependency or measurement changes.
+
+## 2026-11-15: Scoped catalog context and compact sharing
+
+Samuel explicitly authorized the proposed [sky-context integration](sky-context.md)
+after the core image work: Gaia DR3 source markers, WISE reference context,
+quality inspection and compact embedding. This supersedes deferral of those
+specific context features. It does not authorize a second science image adapter,
+cross-mission detections or the separately planned #61 console-page redesign.
+
+Astropy computes Gaia epoch positions and common-grid coordinates in CPython.
+Real service checks selected the official VizieR Harvard mirror because IRSA TAP
+timed out. Provider, exact query and catalog epoch are explicit. The WISE pane
+uses the independently hosted CDS Aladin viewer with IRSA's verified AllWISE
+HiPS URL; no Aladin dependency, duplicate renderer or license change is bundled.
+New context routes and models are additive and generated with the API contract.
+The compact view reuses the existing static explorer and never auto-starts an
+archive search. Original science arrays, masks, observations and evidence remain
+unchanged. GitHub #72 / Linear BYT-53 track verification and integration.

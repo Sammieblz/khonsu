@@ -13,13 +13,17 @@ Keep the full [official resource list](https://www.spaceappschallenge.org/2026/c
 | [NASA/IPAC Infrared Science Archive](https://irsa.ipac.caltech.edu/Missions/spherex.html) | SPHEREx data, release documentation and access services. IPAC is the Infrared Processing and Analysis Center; IRSA is its Infrared Science Archive. | Required source of observations. |
 | [SPHEREx Tutorial Notebooks](https://caltech-ipac.github.io/irsa-tutorials/spherex/) | Python examples for images, cutouts, point spread functions, source discovery and cubes. | Required implementation reference; cite reused methods. |
 | [WiseView](http://byw.tools/wiseview) | Time-comparison interface for the earlier Wide-field Infrared Survey Explorer (WISE) mission. | Interaction reference; optional WISE comparison later. |
-| [Gaia Mission Data](https://archive.stsci.edu/missions-and-data/gaia) | Stellar positions, motions and other catalog information. | Optional Data Release 3 catalog overlay later. |
+| [Gaia Mission Data](https://archive.stsci.edu/missions-and-data/gaia) | Stellar positions, motions and other catalog information. | Optional DR3 source rings through the official VizieR mirror; see [context implementation](sky-context.md). |
 | [NEOSSat mission](https://www.asc-csa.gc.ca/eng/satellites/neossat/) | Canadian mission background for asteroid, comet, satellite and stellar observations. | Optional supporting context. |
 | [Canadian Astronomy Data Centre](https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/) | Telescope archives, region searches and download services. | Optional complementary archive later. |
 | [NEOSSat Data Tutorial](https://github.com/asc-csa/NEOSSAT_Tutorial) | Python notebooks for download, filtering, Flexible Image Transport System (FITS) images and elementary processing. | Optional reference; its simple motion demonstration does not correct image drift. |
 | [NEOSSat Dataset](https://data.asc-csa.gc.ca/dataset/neossat) | Near-Earth Object Surveillance Satellite astronomy images. | Optional future provider; this exact portal timed out during review. Use the [CADC product guide](https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/neossat/) to verify available product variants. |
 
 Do not add eight separate minimum viable product (MVP) integrations or eight blocking issue groups. Deliver SPHEREx access and temporal comparison first. WISE, Gaia Data Release 3 and NEOSSat belong in a clearly optional roadmap until that works.
+
+After the core SPHEREx journey, Samuel authorized [#72's bounded context scope](sky-context.md):
+Gaia DR3 catalog markers and an isolated AllWISE atlas reference in CDS Aladin.
+This does not add cross-mission science playback or a NEOSSat adapter.
 
 ## Current release policy
 

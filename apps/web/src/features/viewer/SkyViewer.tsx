@@ -9,6 +9,10 @@ import { nearestObservation, observationLabel, timePositions } from "./time";
 import { boundedView, centerField, clientPointToRaster, FIT, nativeSampling, visibleField, zoomAt } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
 import { ObservationDetails } from '@/features/annotations/ObservationDetails';
+import { ContextPanel } from '@/features/context/ContextPanel';
+import { GaiaLayer } from '@/features/context/GaiaLayer';
+import { useGaia } from '@/features/context/useGaia';
+import { qualityOverlay } from '@/features/context/quality';
 import { usePreparedFrames } from './usePreparedFrames';
 import { displaySize, measuredResolution, HD_DISPLAY_SIDE, MAX_DISPLAY_SIDE, type AutoResolution, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
@@ -21,6 +25,10 @@ export function SkyViewer(props: SkyViewerProps) {
 function ObservationConsole({ sequence, activeFrameId, annotations, selectedCandidateId = null, onFrameChange, onSelect }: SkyViewerProps) {
   const canvas = useRef<HTMLCanvasElement>(null), viewport = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<ViewerTool>('time');
+  const [gaiaEnabled,setGaiaEnabled]=useState(false),[wiseEnabled,setWiseEnabled]=useState(false),[qualityEnabled,setQualityEnabled]=useState(false);
+  const [selectedSource,setSelectedSource]=useState('');
+  const [layersOpen,setLayersOpen]=useState(false);
+  const gaia=useGaia(sequence,gaiaEnabled);
   const [view, setView] = useState(FIT), [expanded, setExpanded] = useState(false);
   const [speed, setSpeed] = useState(700), [blink, setBlink] = useState(false);
   const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'subtle',sampling:'smooth',detail:0,includeWarnings:false};
@@ -108,6 +116,11 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
         context.fillStyle=effectiveDisplay.mask==='subtle'?'#070b12':'#273140';context.fillRect(0,0,width,height);context.imageSmoothingEnabled=false;
         if(rendered instanceof ImageData){const temporary=document.createElement('canvas');temporary.width=rendered.width;temporary.height=rendered.height;temporary.getContext('2d')!.putImageData(rendered,0,0);context.drawImage(temporary,0,0,width,height);}
         else context.drawImage(rendered,0,0,width,height);
+        if(qualityEnabled&&raster){
+          const overlay=document.createElement('canvas');overlay.width=raster.width;overlay.height=raster.height;
+          overlay.getContext('2d')!.putImageData(new ImageData(qualityOverlay(raster),raster.width,raster.height),0,0);
+          context.drawImage(overlay,0,0,width,height);
+        }
         context.strokeStyle='#f3bc60';context.lineWidth=Math.max(2,width/400);
         // Every frame shares one grid, so a mark is the same sky position on every epoch.
         // Solid on the observation it was made on, dashed on the others, numbered as in the list.
@@ -117,7 +130,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
           context.setLineDash(note.selection.frameId===active.frame_id?[]:[radius/3,radius/4]);context.beginPath();context.arc(x,y,radius,0,Math.PI*2);context.stroke();
           context.setLineDash([]);context.font=`${Math.max(14,Math.round(width/36))}px monospace`;context.fillText(String(number+1).padStart(2,'0'),x+radius*.75,y-radius*.75);context.restore();
         });
-        if(tool==='mark'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scaleX,cursor.y*scaleY,scaleX,scaleY);}
+        if(tool==='mark'||tool==='inspect'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scaleX,cursor.y*scaleY,scaleX,scaleY);}
         const mode=raster?(renderer.current?.mode??'CPU canvas'):'Original PNG';
         // Include the next presentation opportunity, not just GPU submission.
         await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
@@ -129,7 +142,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       finally{if(rendered instanceof ImageBitmap)rendered.close();}
     };
     if(!drawing.current){drawing.current=true;void(async()=>{while(latestDraw.current){const job=latestDraw.current;latestDraw.current=null;await job();}drawing.current=false;})();}
-  },[sequence,active,images,annotations,selectedCandidateId,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision]);
+  },[sequence,active,images,annotations,selectedCandidateId,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision,qualityEnabled]);
   function mark(x:number,y:number){
     if(!sequence||!active||!ready)return;
     // Validity comes from the verified raster mask; a PNG-only frame cannot say.
@@ -154,7 +167,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
   }
   function pointerEnd(event:PointerEvent<HTMLDivElement>){
-    if(event.type==='pointerup'&&tool==='mark'&&!rendering&&!drag.current?.moved&&sequence&&canvas.current){const point=clientPointToRaster(event.clientX,event.clientY,canvas.current.getBoundingClientRect(),sequence.grid.width_px,sequence.grid.height_px);if(point){setCursor(point);mark(point.x,point.y);}}
+    if(event.type==='pointerup'&&(tool==='mark'||tool==='inspect')&&!rendering&&!drag.current?.moved&&sequence&&canvas.current){const point=clientPointToRaster(event.clientX,event.clientY,canvas.current.getBoundingClientRect(),sequence.grid.width_px,sequence.grid.height_px);if(point){setCursor(point);if(tool==='mark')mark(point.x,point.y);}}
     pointers.current.delete(event.pointerId);drag.current=null;
   }
   function zoom(factor:number){const element=viewport.current;if(element)setView(current=>zoomAt(current,factor,0,0,element.clientWidth,element.clientHeight));}
@@ -171,11 +184,15 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     <div className={styles.instrumentHeading}><span>{sequence?.title ?? 'YOUR OBSERVATORY'}</span><span>{sequence?.data_mode.toUpperCase() ?? 'NO OBSERVATIONS LOADED'}</span></div>
     {active&&<p className={styles.activeDate}>{observationLabel(active.observed_start_utc)}</p>}
     <div className={styles.tools} role="group" aria-label="Viewer tool">
-      {(['time','pan','mark'] as ViewerTool[]).map(value=><button key={value} aria-pressed={tool===value} disabled={!active} onClick={()=>{stop();setTool(value);}}>{value==='time'?'REWIND':value.toUpperCase()}</button>)}
+      {(['time','pan','mark','inspect'] as ViewerTool[]).map(value=><button key={value} aria-pressed={tool===value} disabled={!active} onClick={()=>{stop();setTool(value);if(value==='inspect')setLayersOpen(true);}}>{value==='time'?'REWIND':value.toUpperCase()}</button>)}
       <button disabled={!active} onClick={()=>zoom(.8)} aria-label="Zoom out">−</button><button disabled={!active} onClick={()=>zoom(1.25)} aria-label="Zoom in">+</button>
       <button disabled={!active} onClick={()=>setView(FIT)}>FIT / RESET</button><button onClick={()=>setExpanded(!expanded)} aria-pressed={expanded}>{expanded?'CONTRACT':'EXPAND'}</button>
       <button disabled={!active||nativeAcross===null} title="One native sample per display pixel when the field is large enough" onClick={()=>{stop();setView(boundedView({zoom:nativeAcross!/(viewportSize.width*window.devicePixelRatio),x:0,y:0},viewportSize.width,viewportSize.height));}}>NATIVE SCALE</button>
     </div>
+    {sequence&&active&&<ContextPanel sequence={sequence} active={active} raster={raster} cursor={cursor} estimatesShown={estimatesShown}
+      gaiaEnabled={gaiaEnabled} onGaia={setGaiaEnabled} gaia={gaia} selected={selectedSource} onSelect={id=>{stop();setSelectedSource(id);}}
+      wiseEnabled={wiseEnabled} onWise={setWiseEnabled} qualityEnabled={qualityEnabled} onQuality={setQualityEnabled}
+      open={layersOpen} onOpen={setLayersOpen} onInspect={()=>{stop();setTool('inspect');viewport.current?.focus({preventScroll:true});}}/>}
     {active&&<div className={styles.cleanControls} role="group" aria-label="Clean view controls">
       <button aria-pressed={estimatesShown} disabled={!cleanAvailable||tool==='mark'} onClick={toggleClean}>CLEAN VIEW</button>
       <button aria-pressed={originalShown} disabled={!displayAvailable||tool==='mark'} onClick={()=>{stop();setOriginalShown(value=>!value);}}>SHOW ORIGINAL</button>
@@ -186,16 +203,18 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       </p>
       <p className={styles.cleanNotice} data-refinement={refinementShown?'on':'off'}>{refinementShown?`${effectiveDisplay.reduceGrain&&refinementAvailable?'Grain softened. ':''}${effectiveDisplay.softHighlights?'Bright areas gently compressed. ':''}Faint features may soften; compare Original when checking changes.`:raster?.refinementFailed?'Image refinement could not load. Original samples remain available.':tool==='mark'?'Image refinement pauses while marking.':refinementAvailable?'Refine Image softens grain and bright areas. It starts off.':'Native grain reduction is unavailable for this observation.'}</p>
     </div>}
-    <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
+    <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'||tool==='inspect'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
       {view.zoom>1&&active&&ready&&<button className={styles.overview} aria-label="Field overview: click to recenter, Enter to center the field" onPointerDown={event=>event.stopPropagation()} onKeyDown={event=>{if(event.key!=='Escape')event.stopPropagation();}} onClick={event=>{event.stopPropagation();stop();const rect=event.currentTarget.getBoundingClientRect();const x=event.detail===0 ? .5 : (event.clientX-rect.left)/rect.width,y=event.detail===0 ? .5 : (event.clientY-rect.top)/rect.height;setView(current=>centerField(current,x,y,viewportSize.width,viewportSize.height));}}>
         <img src={images.get(active.frame_id)!.src} crossOrigin="anonymous" alt="" draggable={false}/>
         <span className={styles.overviewRegion} style={{left:`${region.left*100}%`,top:`${region.top*100}%`,width:`${region.width*100}%`,height:`${region.height*100}%`}}/>
         <span className={styles.overviewLabel}>FULL FIELD</span>
       </button>}
       {sequence&&active?<><canvas ref={canvas} className={styles.canvas} data-sampling={displayAvailable?display.sampling:'pixels'} style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={outputSize.width} height={outputSize.height} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
+      {sequence&&active&&gaiaEnabled&&gaia.data&&ready&&!rendering&&<GaiaLayer data={gaia.data} frameId={active.frame_id} width={sequence.grid.width_px} height={sequence.grid.height_px}
+        view={view} viewportWidth={viewportSize.width} selected={selectedSource} interactive={tool!=='mark'&&tool!=='inspect'} onSelect={id=>{stop();setLayersOpen(true);setSelectedSource(id);}}/>}
     </div>
-    <div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool==='pan'?'PAN':'MARK'} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
-    <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
+    <div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool.toUpperCase()} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
+    <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':tool==='inspect'?`Select a pixel to inspect quality, or move with arrow keys. Keyboard cursor: ${cursor.x}, ${cursor.y}.`:`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
     <PlaybackControls frames={frames} index={index} playing={playing} speed={speed} onSpeed={setSpeed} onIndexChange={selectIndex} onToggle={()=>{setBlink(false);releaseHold();if(!playing&&index===frames.length-1&&frames[0])onFrameChange(frames[0].frame_id);setPlaying(!playing);}} />
     {active&&<div className={styles.comparison}>
       <label>REFERENCE / A<select aria-label="Comparison A" value={a} onChange={event=>{stop();setA(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>

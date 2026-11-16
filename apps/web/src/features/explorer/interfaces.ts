@@ -4,7 +4,7 @@ import type { components } from "@/lib/api/generated";
 export type SequenceRequest = components["schemas"]["SequenceRequest"];
 export type SequenceManifest = components["schemas"]["SequenceManifest"];
 export type ObservationFrame = SequenceManifest["frames"][number];
-export type ViewerTool = "time" | "pan" | "mark";
+export type ViewerTool = "time" | "pan" | "mark" | "inspect";
 
 export interface ImageSelection {
   sequenceId: string;

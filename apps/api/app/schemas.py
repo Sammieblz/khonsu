@@ -62,6 +62,43 @@ class QualityWarning(ApiModel):
     message: str = Field(min_length=1, max_length=500)
 
 
+class CatalogPosition(ApiModel):
+    frame_id: str
+    x: float
+    y: float
+    ra_deg: RaDegrees
+    dec_deg: DecDegrees
+
+
+class GaiaSource(ApiModel):
+    # Gaia identifiers exceed JavaScript's safe integer range.
+    source_id: str = Field(pattern=r"^[0-9]{1,20}$")
+    ra_deg: RaDegrees
+    dec_deg: DecDegrees
+    ref_epoch: float
+    pmra_mas_yr: float | None = None
+    pmdec_mas_yr: float | None = None
+    g_magnitude: float | None = None
+    position_method: Literal["proper-motion", "catalog-position"]
+    positions: list[CatalogPosition] = Field(max_length=MAX_OBSERVATIONS)
+
+
+class GaiaContext(ApiModel):
+    sequence_id: SequenceId
+    catalog: Literal["Gaia DR3"] = "Gaia DR3"
+    provider: Literal["CDS VizieR (Harvard mirror)"] = "CDS VizieR (Harvard mirror)"
+    catalog_url: str = "https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/355/gaiadr3"
+    retrieved_at_utc: datetime
+    query_ra_deg: RaDegrees
+    query_dec_deg: DecDegrees
+    query_radius_deg: float = Field(gt=0, le=2)
+    query_url: str
+    row_limit: int = 500
+    truncated: bool
+    sources: list[GaiaSource] = Field(max_length=500)
+    notes: list[str]
+
+
 class ImageGrid(ApiModel):
     width_px: int = Field(ge=1, le=4096)
     height_px: int = Field(ge=1, le=4096)

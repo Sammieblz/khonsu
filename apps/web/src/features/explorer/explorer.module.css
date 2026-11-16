@@ -1,4 +1,7 @@
 .site{max-width:1600px;margin:0 auto;padding:0 48px;background:#070b12;}
+.site[data-embed="true"]{max-width:none;padding:0 16px;}
+.site[data-embed="true"] .introduction,.site[data-embed="true"] .guide,.site[data-embed="true"] .mission,.site[data-embed="true"] .credits,.site[data-embed="true"] .footer,.site[data-embed="true"] .header nav,.site[data-embed="true"] .buildLabel{display:none;}
+.site[data-embed="true"] .header{min-height:64px;}
 .header{min-height:100px;display:flex;align-items:center;gap:24px;border-bottom:1px solid #66707c;position:relative;z-index:2;}
 .header nav{display:flex;align-items:center;gap:28px;margin-left:auto;}
 .header nav a,.header nav button{border:0;background:none;color:var(--ivory);text-decoration:none;font:12px var(--font-data);letter-spacing:.12em;padding:16px 0;}

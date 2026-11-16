@@ -7,6 +7,8 @@ import { downloadText } from "@/features/annotations/download";
 import { sequenceContext } from "@/features/annotations/records";
 import { useAnnotations } from "@/features/annotations/useAnnotations";
 import { SkyViewer } from "@/features/viewer/SkyViewer";
+import { ShareField } from '@/features/context/ShareField';
+import { compactMode } from '@/features/context/links';
 import { ApiClientError, describeFailure, listExamples, listPresets, type PresetTarget, runSequenceJob } from "@/lib/api/client";
 import { SequenceSession } from "@/lib/api/session";
 import { CoordinateForm, type SharedLinkState } from "./CoordinateForm";
@@ -17,6 +19,7 @@ import type { ImageSelection, SequenceManifest, SequenceRequest } from "./interf
 import styles from "./explorer.module.css";
 
 export function ExplorerScreen() {
+  const [compact,setCompact]=useState(false);
   const [sequence, setSequence] = useState<SequenceManifest | null>(null);
   const [activeFrameId, setActiveFrameId] = useState<string | null>(null);
   const [selection, setSelection] = useState<ImageSelection | null>(null);
@@ -46,6 +49,7 @@ export function ExplorerScreen() {
   // reproduces that search. Candidate notes are never part of it.
   function setAddress(query: string) {
     try {
+      if(compactMode(window.location.search))query+=(query?'&':'?')+'embed=1';
       window.history.replaceState(null, "", `${window.location.pathname}${query}${window.location.hash}`);
     } catch {
       // A blocked history update only loses the shareable address.
@@ -59,6 +63,7 @@ export function ExplorerScreen() {
 
   useEffect(() => {
     const controller = new AbortController();
+    setCompact(compactMode(window.location.search));
     const link = readSharedSearch(window.location.search);
     if (link.kind === "ok") {
       const { ra_deg, dec_deg, fov_arcmin } = link.search.values;
@@ -213,9 +218,9 @@ export function ExplorerScreen() {
   }, [search, activeFrameId]);
 
   const picker=<CachedExamplePicker examples={examples} selectedId={selectedExampleId} error={exampleError} loading={examplesLoading} onSelect={id=>{activeExampleLoad.current?.abort();activeExampleLoad.current=null;setSelectedExampleId(id);setExampleError('');}} onLoad={()=>void loadExample()}/>;
-  const showConsole=!!sequence||search.phase!=='idle';
+  const showConsole=compact||!!sequence||search.phase!=='idle';
   return (
-    <div id="top" className={styles.site} data-loaded={showConsole}>
+    <div id="top" className={styles.site} data-loaded={showConsole} data-embed={compact}>
       <a className="skip-link" href="#field-command">Skip to field controls</a>
       <header className={styles.header}>
         <Brand />
@@ -235,6 +240,7 @@ export function ExplorerScreen() {
         {showConsole&&<section id="explorer" tabIndex={-1} className={styles.workspace} aria-label="Sky observation explorer">
           <div className={styles.mainInstrument}><SkyViewer sequence={sequence} activeFrameId={activeFrameId} annotations={candidates.annotations} selectedCandidateId={selectedCandidateId} onFrameChange={setActiveFrameId} onSelect={setSelection}/></div>
           <aside className={styles.sidePanel} aria-label="Observation context and candidate notes">
+            {sequence&&<ShareField sequence={sequence} activeFrameId={activeFrameId}/>}
             <SearchStatus state={search} canLoadExample={examples.length > 0} onCancel={cancelSearch} onRetry={retrySearch} onEditSearch={editSearch} onLoadExample={()=>void loadExample()}/>
             {picker}
             <AnnotationPanel sequence={sequence} selection={selection} annotations={candidates.annotations} contexts={candidates.contexts} selectedCandidateId={selectedCandidateId} storage={candidates.storage} atCapacity={candidates.atCapacity} onAdd={addCandidate} onUpdate={candidates.updateNote} onRemove={removeCandidate} onSelectCandidate={selectCandidate} onStartFresh={candidates.startFresh} onDownloadUnreadable={downloadUnreadable}/>

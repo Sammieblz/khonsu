@@ -39,7 +39,7 @@ The scaffold establishes folders, ownership, skills, visual tokens, a frontend c
 
 ## Scope held until after the MVP
 
-Defer automatic AI detection or classification, webcam hand tracking, historical star-sky reconstruction, 2,000-year rewinds, spectrum analysis, global sky streaming, accounts, multiplayer annotations, persistence services, a new Blender satellite model, and native desktop/mobile apps. Gaia DR3 overlays, WISE cross-mission blinking, and NEOSSat/CADC adapters have a documented future integration seam but are outside this weekend's critical path.
+Defer automatic AI detection or classification, webcam hand tracking, historical star-sky reconstruction, 2,000-year rewinds, spectrum analysis, global sky streaming, accounts, multiplayer annotations, persistence services, a new Blender satellite model, and native desktop/mobile apps. WISE cross-mission blinking and NEOSSat/CADC science adapters remain outside the critical path. After core playback, Samuel authorized [bounded sky context](sky-context.md): optional Gaia DR3 source markers, a separate AllWISE reference pane, pixel-quality explanations and compact coordinate embeds. These do not change SPHEREx measurement validity or establish full MVP acceptance.
 
 A lightweight NASA Eyes mission-context link or embed may be included only after the core journey works. Its simulation clock must remain separate from observation time. The dramatic sky-swipe idea becomes direct manipulation of genuine epochs, with cinematic motion confined to interface decoration.
 
