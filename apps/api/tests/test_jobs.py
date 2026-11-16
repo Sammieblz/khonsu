@@ -63,6 +63,29 @@ def test_dedup_ready_assets_and_expiry(tmp_path):
         manager.close()
 
 
+def test_archive_diagnostics_survive_job_failure_and_retry_creates_new_job(tmp_path):
+    from app.retrieval.service import RetrievalError
+    diagnostics = ["Archive stage: image search", "Attempts: 5 of 5", "Upstream HTTP status: 502"]
+
+    class UnavailableRetriever(Retriever):
+        async def retrieve(self, request, directory):
+            raise RetrievalError("archive_unavailable", "IRSA image search is unavailable (HTTP 502).", details=diagnostics)
+
+    manager = JobManager(tmp_path, retriever_factory=UnavailableRetriever, processor_factory=Processor)
+    try:
+        request = SequenceRequest(ra_deg=10, dec_deg=20)
+        first = manager.submit(request)
+        failed = finish(manager, first.sequence_id)
+        assert failed.error.code == "archive_unavailable"
+        assert failed.error.details == diagnostics
+        assert failed.manifest_url is None
+        retry = manager.submit(request)
+        assert retry.sequence_id != first.sequence_id
+        assert finish(manager, retry.sequence_id).status == "failed"
+    finally:
+        manager.close()
+
+
 def test_skipped_archive_downloads_are_disclosed_in_the_manifest(tmp_path):
     class PartialRetriever(Retriever):
         async def retrieve(self, request, directory):

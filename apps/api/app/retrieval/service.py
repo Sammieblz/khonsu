@@ -66,10 +66,11 @@ LOG = logging.getLogger(__name__)
 class RetrievalError(RuntimeError):
     """Actionable error suitable for an API job result."""
 
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: str, message: str, *, details: list[str] | None = None):
         super().__init__(message)
         self.code = code
         self.message = message
+        self.details = details or []
 
 
 @dataclass(frozen=True)
@@ -377,9 +378,20 @@ class IrsaRetriever:
                 delay = self._retry_delay(attempt, exc)
                 if (attempt == attempts - 1 or not retryable
                         or time.monotonic() + delay >= self._deadline):
+                    stage = "image search" if destination is None else "image download"
+                    status = exc.code if isinstance(exc, HTTPError) else None
+                    details = [f"Archive stage: {stage}", f"Attempts: {attempt + 1} of {attempts}"]
+                    if status is not None:
+                        details.append(f"Upstream HTTP status: {status}")
+                    else:
+                        details.append("Archive connection failed or timed out")
+                    LOG.warning("IRSA %s failed: status=%s attempts=%d", stage, status, attempt + 1)
                     if isinstance(exc, HTTPError) and exc.code in BUSY_STATUS:
-                        raise RetrievalError("archive_busy", "The IRSA archive is busy and asked clients to retry later. Wait a minute, then retry the search or request fewer frames.") from exc
-                    raise RetrievalError("archive_unavailable", "IRSA could not complete the request. Retry later or narrow the query.") from exc
+                        raise RetrievalError("archive_busy", "The IRSA archive is busy and asked clients to retry later. Wait a minute, then retry the search or request fewer frames.", details=details) from exc
+                    message = f"IRSA's {stage} service could not complete the request."
+                    if status is not None and status >= 500:
+                        message = f"IRSA's {stage} service is temporarily unavailable (HTTP {status})."
+                    raise RetrievalError("archive_unavailable", message, details=details) from exc
                 self._pause(delay)
         raise AssertionError("unreachable")
 

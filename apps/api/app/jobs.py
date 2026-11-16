@@ -14,6 +14,7 @@ import time
 import uuid
 
 from .interfaces import ProcessingOptions
+from .retrieval.service import RetrievalError
 from .schemas import ApiError, SequenceJob, SequenceManifest, SequenceRequest
 
 LOG = logging.getLogger(__name__)
@@ -264,7 +265,8 @@ class JobManager:
                 LOG.warning("Job %s failed: %s", record.job.sequence_id, type(exc).__name__)
                 self._update(record, status="failed", message="The sequence could not be prepared",
                              error=ApiError(code=exc.code if known else "PROCESSING_FAILED",
-                                            message=getattr(exc, "message", str(exc)) if known else "Processing failed. Try another region or fewer frames."))
+                                            message=getattr(exc, "message", str(exc)) if known else "Processing failed. Try another region or fewer frames.",
+                                            details=exc.details if isinstance(exc, RetrievalError) else []))
             shutil.rmtree(record.directory, ignore_errors=True)
         finally:
             with self.lock:
