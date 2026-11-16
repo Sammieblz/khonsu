@@ -63,6 +63,10 @@ python -m uvicorn app.main:app --app-dir apps/api --reload --port 8000
 
 Copy the relevant `.env.example` files before changing defaults. See [deployment](docs/deployment.md), [integration](docs/integration.md), and [testing](docs/testing.md) for environment variables, science dependencies, contract generation, and verification.
 
+For the Pages frontend with your own computer running the API, use the
+[named Cloudflare Tunnel setup](docs/tunnel-deployment.md). It uses the existing
+Docker backend at `api.khonsulive.earth` without a Workers Paid deployment.
+
 ## Stack and ownership
 
 | Area | Choice | Initial owner |

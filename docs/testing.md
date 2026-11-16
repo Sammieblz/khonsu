@@ -4,6 +4,13 @@ Test the feature's acceptance criteria and scientific assumptions. A successful 
 
 ## Automated commands
 
+For the named local-backend tunnel, run `python scripts/verify-tunnel.py` against
+the overlay-enabled API and repeat with
+`--base-url https://api.khonsulive.earth` once configured. Add `--cancel-job` to
+create and immediately cancel a bounded live request. The default check uses
+cached real data and a new notebook key, without changing a visitor's notes.
+See [tunnel acceptance](tunnel-deployment.md#verify-before-announcing-the-public-url).
+
 From the repository root, with an activated Python 3.12 environment:
 
 ```sh

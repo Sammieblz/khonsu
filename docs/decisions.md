@@ -199,3 +199,17 @@ short dial-release spring, with immediate pointer following and real-date
 selection. No image interpolation or scientific processing changes are made.
 The installed animation skills and [implementation record](guided-notebook.md)
 document the choices and acceptance checks.
+
+## Named tunnel to the local Docker backend (#80)
+
+Samuel selected Cloudflare Pages with a named Cloudflare Tunnel to the existing
+local CPython backend, instead of purchasing Workers Paid for Containers. The
+opt-in Compose overlay adds a pinned connector, an ignored file-mounted token,
+explicit public origins and restart policies. Inside Compose, the tunnel route
+uses `http://api:8000`; the browser uses `https://api.khonsulive.earth` compiled
+into Pages. No science schema or frontend contract changes are required.
+
+The local notebook volume remains durable across container recreation; image
+jobs remain temporary. Public availability depends on the host computer, Docker
+and the connector staying online. The optional paid Worker/Containers files are
+retained for a future hosting decision. See [setup and verification](tunnel-deployment.md).

@@ -6,6 +6,11 @@ The API advertises `live_processing_available` according to installed scientific
 
 ## Supported arrangement
 
+The selected no-Workers-Paid route is now [Pages with the local Docker API through
+a named Cloudflare Tunnel](tunnel-deployment.md). It keeps `api.khonsulive.earth`
+stable while the computer and connector are online. The Containers arrangement
+below remains an optional paid alternative, not a prerequisite for this route.
+
 | Part | Local development | Planned Cloudflare deployment |
 | --- | --- | --- |
 | Next.js and TypeScript frontend | Next.js development server. | Static export on Cloudflare Pages. |
@@ -100,7 +105,7 @@ Checked on November 14, 2026 (BYT-32) without any Cloudflare account or paid ser
 
 Not verified: the Worker and container together. `wrangler dev` does not support local containers on native Windows. Run it on Linux, macOS or WSL with Docker available to rehearse the gateway end to end.
 
-Remaining prerequisite for a hosted backend: a Cloudflare account on the Workers Paid plan, which the team must choose to purchase. Then follow [the gateway README](../infra/cloudflare/README.md):
+Remaining prerequisite for the optional Cloudflare Containers backend: a Cloudflare account on the Workers Paid plan, which the team must choose to purchase. The [named tunnel path](tunnel-deployment.md) does not need that plan. For Containers, follow [the gateway README](../infra/cloudflare/README.md):
 
 1. Set the Pages origin in `KHONSU_CORS_ORIGINS` and run `npm run deploy`.
 2. Build Pages with the gateway origin.

@@ -18,7 +18,7 @@ The team targets Sunday November 15, 2026 at 23:59. Planning uses America/New_Yo
 
 - [ ] A fresh checkout follows the documented local setup without repository-specific secrets.
 - [ ] The frontend builds to a static export and deploys on Cloudflare Pages.
-- [ ] The same Python backend image runs in local Docker and has a documented, validated Cloudflare Containers deployment path.
+- [ ] The Python backend runs in local Docker with a documented, validated named Cloudflare Tunnel path; Cloudflare Containers remains an optional paid alternative.
 - [ ] One real bounded coordinate query completes end to end through the UI with at least two usable epochs where the archive provides them.
 - [ ] All five challenge targets have a committed coverage report: Barnard's Star, Epsilon Indi B, WISE 0855, RW Aurigae, and R Draconis. Each reports verified coordinates and epoch, release, returned dates, usable frames, and honest limitations. Do not invent missing coverage or claim every target visibly moves.
 - [ ] Presets with usable coverage open real prepared sequences. Targets lacking usable data show a truthful explanation and an alternative verified example.

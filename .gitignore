@@ -9,6 +9,7 @@ __pycache__/
 .ruff_cache/
 *.tsbuildinfo
 .env
+.secrets/
 .env.*
 !.env.example
 .wrangler/
