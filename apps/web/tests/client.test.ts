@@ -4,7 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
-  ApiClientError, apiConfigurationProblem, describeFailure, knownFailureCodes, recoveryFor, resolveAssetUrl, runSequenceJob,
+  ApiClientError, apiConfigurationProblem, cancelSequence, describeFailure, knownFailureCodes, recoveryFor, resolveAssetUrl, runSequenceJob,
 } from "../src/lib/api/client.ts";
 
 interface Step { status?: number; body?: unknown; reject?: Error }
@@ -40,6 +40,18 @@ const liveManifest = (extra: Record<string, unknown> = {}) => ({
 });
 const instant = async () => {};
 const offline = (): Step => ({ reject: new TypeError("fetch failed") });
+
+test("cancellation sends the JSON request required by the gateway", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = (async (_input, init) => {
+    assert.equal(init?.method, "POST");
+    assert.equal(new Headers(init?.headers).get("Content-Type"), "application/json");
+    assert.equal(init?.body, "{}");
+    return new Response(JSON.stringify(job("cancelled")), {headers: {"Content-Type": "application/json"}});
+  }) as typeof fetch;
+  try { assert.equal((await cancelSequence("job-abc")).status, "cancelled"); }
+  finally { globalThis.fetch = original; }
+});
 
 test("polls a live job through each state to its manifest", async () => {
   const manifest = liveManifest();

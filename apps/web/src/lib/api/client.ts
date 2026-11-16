@@ -161,7 +161,11 @@ export function getSequenceManifest(sequenceId: string, signal?: AbortSignal): P
 }
 
 export function cancelSequence(sequenceId: string): Promise<SequenceJob> {
-  return requestJson<SequenceJob>(`${jobPath(sequenceId)}/cancel`, { method: "POST" });
+  return requestJson<SequenceJob>(`${jobPath(sequenceId)}/cancel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
 }
 
 /** Verified cached-real sequences bundled with the backend; often empty. */
