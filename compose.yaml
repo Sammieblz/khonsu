@@ -11,6 +11,8 @@ services:
       KHONSU_CORS_ORIGINS: ${KHONSU_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       KHONSU_FIXTURE_DIR: /app/fixtures
       KHONSU_NOTEBOOK_DB: /app/data/notebooks.sqlite3
+      KHONSU_OBSERVATION_INDEX_DB: /app/data/observations.sqlite3
+      KHONSU_OBSERVATION_INDEX_SEEDS: /app/fixtures/archive-index
     volumes:
       - notebook-data:/app/data
     healthcheck:

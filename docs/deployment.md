@@ -28,6 +28,8 @@ Run `docker compose up --build` from the repository root for the declared local 
 | --- | --- | --- |
 | `NEXT_PUBLIC_API_BASE_URL` | Public API origin compiled into the frontend. | Build-time configuration. |
 | `KHONSU_NOTEBOOK_DB` | Server-selected SQLite path, unset disables database backup. | Compose sets `/app/data/notebooks.sqlite3` on the persistent `notebook-data` volume. |
+| `KHONSU_OBSERVATION_INDEX_DB` | Persistent, bounded SPHEREx discovery metadata; unset keeps live-only discovery. | Compose sets `/app/data/observations.sqlite3`. See [index operation](observation-index.md). |
+| `KHONSU_OBSERVATION_INDEX_SEEDS` | Operator-selected directory of checksummed partial metadata snapshots. | Compose sets `/app/fixtures/archive-index`. No rendered examples are used for live jobs. |
 | `KHONSU_CORS_ORIGINS` | Comma-separated permitted browser origins. | Defaults to `http://localhost:3000,http://127.0.0.1:3000`. |
 | `KHONSU_FIXTURE_DIR` | Directory of allowlisted demo fixtures. | Uses repository fixtures locally and `/app/fixtures` in Docker. |
 | `KHONSU_CACHE_DIR` | Temporary processing/cache directory. | Defaults under the operating system temp directory. |

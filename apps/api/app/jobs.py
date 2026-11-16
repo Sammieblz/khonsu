@@ -191,6 +191,8 @@ class JobManager:
 
             if hasattr(retriever, "on_download"):
                 retriever.on_download = on_download
+            if hasattr(retriever, "on_discovery"):
+                retriever.on_discovery = lambda message: self._update(record, message=message)
             if hasattr(retriever, "enough_epochs") and isinstance(processor, AstronomyProcessor) and processor.available():
                 retriever.enough_epochs = enough_comparable_epochs(
                     record.request, min(record.request.max_frames, EARLY_STOP_EPOCHS))
@@ -222,6 +224,10 @@ class JobManager:
             if len(frames) < 2:
                 raise JobError(422, "INSUFFICIENT_SPECTRAL_OVERLAP", "Fewer than two comparable frames meet the selected wavelength range.")
             payload = {**manifest.model_dump(), "frames": frames}
+            discovery_notice = getattr(retriever, "discovery_notice", None)
+            if discovery_notice:
+                payload["warnings"] = [*payload["warnings"], discovery_notice]
+            payload["processing"] = {**payload["processing"], **(getattr(retriever, "discovery_metadata", None) or {})}
             # Optional retriever report: cutouts the archive would not serve.
             skipped = list(getattr(retriever, "skipped_downloads", None) or [])
             if skipped:

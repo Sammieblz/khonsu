@@ -19,6 +19,7 @@ import logging
 import math
 from pathlib import Path
 import re
+import sqlite3
 import threading
 import time
 from typing import TYPE_CHECKING, Callable
@@ -264,7 +265,7 @@ class _ByteBudget:
 
 
 class IrsaRetriever:
-    def __init__(self, *, cancel_event: threading.Event | None = None, cancelled: Callable[[], bool] | None = None, timeout_seconds: float = 30, deadline_seconds: float = 240):
+    def __init__(self, *, cancel_event: threading.Event | None = None, cancelled: Callable[[], bool] | None = None, timeout_seconds: float = 30, deadline_seconds: float = 240, observation_index=None):
         self.cancel_event = cancel_event or threading.Event()
         self.cancelled = cancelled or (lambda: False)
         self.timeout_seconds = min(max(timeout_seconds, 1), 60)
@@ -280,6 +281,17 @@ class IrsaRetriever:
         self._stats_lock = threading.Lock()
         # Set when one download fails fatally so the others stop promptly.
         self._abort = threading.Event()
+        self.on_discovery: Callable[[str], None] | None = None
+        self.discovery_notice: dict | None = None
+        self.discovery_metadata: dict = {}
+        self.observation_index = observation_index
+        if self.observation_index is None:
+            from .index import configured_index
+            try:
+                self.observation_index = configured_index()
+            except (OSError, ValueError, sqlite3.Error, RetrievalError):
+                # An optional local disk failure must not disable the live archive.
+                LOG.warning("Observation index unavailable; using live discovery only")
 
     def cancel(self) -> None:
         self.cancel_event.set()
@@ -396,7 +408,50 @@ class IrsaRetriever:
         raise AssertionError("unreachable")
 
     def _search(self, request: SequenceRequest) -> list[ObservationMetadata]:
-        return parse_metadata(self._read(query_url(request), MAX_METADATA_BYTES), request)
+        url = query_url(request)
+        self.discovery_notice = None
+        self.discovery_metadata = {}
+        try:
+            payload = self._read(url, MAX_METADATA_BYTES)
+            rows = parse_metadata(payload, request)
+        except RetrievalError as exc:
+            if (self.observation_index is None
+                    or exc.code not in {"archive_busy", "archive_unavailable", "archive_timeout"}
+                    or (isinstance(exc.__cause__, HTTPError) and exc.__cause__.code not in RETRYABLE_STATUS)):
+                raise
+            self._check()
+            try:
+                result = self.observation_index.search(request, check=self._check)
+            except (OSError, ValueError, sqlite3.Error):
+                LOG.warning("Local observation lookup failed; preserving upstream error")
+                raise exc
+            if not result.observations:
+                raise RetrievalError("archive_unavailable",
+                    "IRSA search is unavailable, and the local observation index has no matching records for this field and filters. This does not mean the sky has no observations. Try again after IRSA search recovers.",
+                    details=[*exc.details, "Local index: no matching records; coverage is partial"]) from exc
+            self.discovery_notice = {
+                "code": "LOCAL_OBSERVATION_INDEX",
+                "message": f"IRSA search is unavailable. These images were freshly downloaded using a partial local observation index, with metadata recorded between {result.oldest_recorded_utc} and {result.newest_recorded_utc}. Newer or unindexed observations may be missing.",
+            }
+            self.discovery_metadata = {
+                "observation_discovery": "local-index",
+                "observation_index_coverage": "partial",
+                "observation_metadata_oldest_utc": result.oldest_recorded_utc,
+                "observation_metadata_newest_utc": result.newest_recorded_utc,
+                "observation_index_matches": len(result.observations),
+            }
+            if self.on_discovery:
+                self.on_discovery("IRSA search is unavailable. Using saved observation metadata to download fresh images for this field.")
+            return result.observations
+        if self.observation_index is not None:
+            self._check()
+            try:
+                self.observation_index.ingest(payload, query_url=url,
+                    recorded_utc=datetime.now(timezone.utc).isoformat())
+            except (OSError, ValueError, sqlite3.Error, RetrievalError):
+                LOG.warning("Could not persist observation metadata; live results remain usable")
+        self.discovery_metadata = {"observation_discovery": "irsa-sia"}
+        return rows
 
     async def search(self, request: SequenceRequest) -> list[ObservationMetadata]:
         self._deadline = time.monotonic() + self.deadline_seconds
