@@ -6,7 +6,7 @@ import { describeComparison } from "./comparison";
 import { useFrameLoader } from "./useFrameLoader";
 import { usePlayback } from "./usePlayback";
 import { nearestObservation, observationLabel, timePositions } from "./time";
-import { boundedView, centerField, clientPointToRaster, FIT, nativeSampling, visibleField, zoomAt } from "./viewport";
+import { boundedImageView, centerImageField, clientPointToRaster, FIT, nativeSampling, visibleImageField, zoomImageAt, fittedImage, fillImage } from "./viewport";
 import { DisplayRenderer } from './displayRenderer';
 import { ObservationDetails } from '@/features/annotations/ObservationDetails';
 import { ContextPanel } from '@/features/context/ContextPanel';
@@ -16,36 +16,42 @@ import { qualityOverlay } from '@/features/context/quality';
 import { usePreparedFrames } from './usePreparedFrames';
 import { displaySize, measuredResolution, HD_DISPLAY_SIDE, MAX_DISPLAY_SIDE, type AutoResolution, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
+import {Inspector,type InspectorTab} from '@/features/explorer/Inspector';
+import {useViewerSetting} from '@/features/explorer/ViewerMemory';
 const EMPTY_FRAMES: ObservationFrame[] = [];
 const CLEAN_VIEW_KEY='khonsu.clean-view.v1';
 
 export function SkyViewer(props: SkyViewerProps) {
   return <ObservationConsole key={props.sequence?.sequence_id ?? 'empty'} {...props} />;
 }
-function ObservationConsole({ sequence, activeFrameId, annotations, selectedCandidateId = null, onFrameChange, onSelect }: SkyViewerProps) {
+function ObservationConsole({ sequence, activeFrameId, annotations, selectedCandidateId = null, onFrameChange, onSelect,fieldPanel,notesPanel,onPresentationState }: SkyViewerProps) {
+  const memoryKey=sequence?.sequence_id??'empty';
   const canvas = useRef<HTMLCanvasElement>(null), viewport = useRef<HTMLDivElement>(null);
-  const [tool, setTool] = useState<ViewerTool>('time');
-  const [gaiaEnabled,setGaiaEnabled]=useState(false),[wiseEnabled,setWiseEnabled]=useState(false),[qualityEnabled,setQualityEnabled]=useState(false);
+  const [tool, setTool] = useViewerSetting<ViewerTool>(memoryKey,'tool','time');
+  const [gaiaEnabled,setGaiaEnabled]=useViewerSetting(memoryKey,'gaiaEnabled',false),[wiseEnabled,setWiseEnabled]=useViewerSetting(memoryKey,'wiseEnabled',false),[qualityEnabled,setQualityEnabled]=useViewerSetting(memoryKey,'qualityEnabled',false);
   const [selectedSource,setSelectedSource]=useState('');
-  const [layersOpen,setLayersOpen]=useState(false);
+  const [panel,setPanel]=useViewerSetting<InspectorTab>(memoryKey,'panel',sequence?'display':'field');
+  const [showMarks,setShowMarks]=useViewerSetting(memoryKey,'marks',true),[showLabels,setShowLabels]=useViewerSetting(memoryKey,'labels',true);
+  function openPanel(tab:InspectorTab){setPanel(tab);setExpanded(false);}
+  useEffect(()=>{if(matchMedia('(max-width: 1099px), (max-height: 599px)').matches)setExpanded(true);const field=()=>openPanel('field');window.addEventListener('khonsu:field',field);return()=>window.removeEventListener('khonsu:field',field);},[]);
   const gaia=useGaia(sequence,gaiaEnabled);
-  const [view, setView] = useState(FIT), [expanded, setExpanded] = useState(false);
-  const [speed, setSpeed] = useState(700), [blink, setBlink] = useState(false);
+  const [view, setView] = useViewerSetting(memoryKey,'view',FIT), [expanded, setExpanded] = useState(false);
+  const [speed, setSpeed] = useViewerSetting(memoryKey,'speed',700), [blink, setBlink] = useState(false);
   const original:DisplayOptions={low:sequence?.display.vmin??0,high:sequence?.display.vmax??1,a:Number(sequence?.processing?.asinh_a??.1),gamma:1,curve:sequence?.display.stretch??'asinh',mask:'subtle',sampling:'smooth',detail:0,includeWarnings:false};
-  const [display,setDisplay]=useState<DisplayOptions>({...original,a:.3});
+  const [display,setDisplay]=useViewerSetting<DisplayOptions>(memoryKey,'display',{...original,a:.3});
   const [originalHeld,setOriginalHeld]=useState(false),[outputSize,setOutputSize]=useState({width:1,height:1});
-  const [cleanView,setCleanView]=useState(true),[showEstimates,setShowEstimates]=useState(false),[originalShown,setOriginalShown]=useState(false);
+  const [cleanView,setCleanView]=useViewerSetting(memoryKey,'cleanView',true),[showEstimates,setShowEstimates]=useViewerSetting(memoryKey,'showEstimates',false),[originalShown,setOriginalShown]=useState(false);
   useEffect(()=>{try{const saved=localStorage.getItem(CLEAN_VIEW_KEY);if(saved==='off')setCleanView(false);}catch{/* Optional preference storage. */}},[]);
-  const [viewportSize,setViewportSize]=useState({width:1,height:1});
-  const [resolution,setResolution]=useState<'auto'|'hd'|'4k'>('auto'),[autoResolution,setAutoResolution]=useState<AutoResolution>('checking');
+  const [viewportSize,setViewportSize]=useViewerSetting(memoryKey,'viewportSize',{width:1,height:1});
+  const [resolution,setResolution]=useViewerSetting<'auto'|'hd'|'4k'>(memoryKey,'resolution','auto'),[autoResolution,setAutoResolution]=useState<AutoResolution>('checking');
   const [renderMs,setRenderMs]=useState<number|null>(null);
   const maxSide=resolution==='4k'||(resolution==='auto'&&autoResolution==='4k')?MAX_DISPLAY_SIDE:HD_DISPLAY_SIDE;
   const effectiveDisplay=useMemo(()=>({...display,detail:originalHeld||originalShown||tool==='mark'?0:display.detail,includeWarnings:originalHeld||originalShown||tool==='mark'?false:display.includeWarnings,reduceGrain:!originalHeld&&!originalShown&&tool!=='mark'&&display.reduceGrain,softHighlights:!originalHeld&&!originalShown&&tool!=='mark'&&display.softHighlights,cleanView:cleanView&&!originalHeld&&!originalShown&&tool!=='mark',showEstimates}),[display,originalHeld,originalShown,tool,cleanView,showEstimates]);
-  const [forceCpu,setForceCpu]=useState(false),[rendererMode,setRendererMode]=useState('Preparing display'),[rendering,setRendering]=useState(false);
+  const [forceCpu,setForceCpu]=useViewerSetting(memoryKey,'forceCpu',false),[rendererMode,setRendererMode]=useState('Preparing display'),[rendering,setRendering]=useState(false);
   const [adapter,setAdapter]=useState('');
   const [rendererRevision,setRendererRevision]=useState(0);
   const renderer=useRef<DisplayRenderer|null>(null),revision=useRef(0),drawing=useRef(false),latestDraw=useRef<(()=>Promise<void>)|null>(null);
-  const [a, setA] = useState(0), [b, setB] = useState(Math.max(0,(sequence?.frames.length ?? 1)-1));
+  const [a, setA] = useViewerSetting(memoryKey,'a',0), [b, setB] = useViewerSetting(memoryKey,'b',Math.max(0,(sequence?.frames.length ?? 1)-1));
   const [cursor, setCursor] = useState({x:Math.floor((sequence?.grid.width_px ?? 1)/2),y:Math.floor((sequence?.grid.height_px ?? 1)/2)});
   const held = useRef<string | null>(null);
   const pointers = useRef(new Map<number,{x:number;y:number}>());
@@ -67,7 +73,12 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const frameReady=(frame:ObservationFrame|undefined)=>!!frame&&images.has(frame.frame_id)&&(!frame.raster||rasters.has(frame.frame_id)||rasterFailed.includes(frame.frame_id));
   const ready=frameReady(active),comparisonReady=a!==b&&frameReady(frames[a])&&frameReady(frames[b]);
   const nativeAcross=sequence?nativeSampling(sequence.requested_fov_arcmin,sequence.processing?.native_pixel_scale_arcsec):null;
-  const region=visibleField(view,viewportSize.width,viewportSize.height);
+  const geometry={stageWidth:viewportSize.width,stageHeight:viewportSize.height,rasterWidth:sequence?.grid.width_px??1,rasterHeight:sequence?.grid.height_px??1};
+  const geometryRef=useRef(geometry);geometryRef.current=geometry;
+  const fit=fittedImage(geometry),region=visibleImageField(view,geometry);
+  const fitStyle={left:fit.left,top:fit.top,width:fit.width,height:fit.height};
+  const presentationPhase=!active?'empty':failedIds.includes(active.frame_id)?'failed':ready&&!rendering?'ready':'loading';
+  useEffect(()=>{onPresentationState?.({sequenceId:sequence?.sequence_id??null,frameId:active?.frame_id??null,phase:presentationPhase});},[sequence?.sequence_id,active?.frame_id,presentationPhase,onPresentationState]);
   const {playing,setPlaying}=usePlayback(frameIds,active?.frame_id ?? null,onFrameChange,speed,ready&&!rendering);
   useLayoutEffect(()=>{renderer.current=new DisplayRenderer(()=>setRendererRevision(value=>value+1),forceCpu);return()=>{revision.current++;latestDraw.current=null;renderer.current?.dispose();renderer.current=null;};},[forceCpu]);
 
@@ -86,10 +97,13 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
     const resize=()=>{
-      setView(current=>boundedView(current,element.clientWidth,element.clientHeight));
+      const previous=geometryRef.current;
+      const next={...previous,stageWidth:element.clientWidth,stageHeight:element.clientHeight};
+      const nextFit=fittedImage(next),oldFit=fittedImage(previous);
+      setView(current=>boundedImageView({...current,x:current.x*nextFit.width/Math.max(1,oldFit.width),y:current.y*nextFit.height/Math.max(1,oldFit.height)},next));
       setViewportSize({width:element.clientWidth,height:element.clientHeight});
-      const scale=resolution==='4k'?MAX_DISPLAY_SIDE/Math.max(1,element.clientWidth,element.clientHeight):window.devicePixelRatio*view.zoom;
-      const size=displaySize(Math.max(1,element.clientWidth*scale),Math.max(1,element.clientHeight*scale),maxSide);
+      const scale=resolution==='4k'?MAX_DISPLAY_SIDE/Math.max(1,nextFit.width,nextFit.height):window.devicePixelRatio*view.zoom;
+      const size=displaySize(Math.max(1,nextFit.width*scale),Math.max(1,nextFit.height*scale),maxSide);
       setOutputSize(old=>old.width===size.width&&old.height===size.height?old:size);
     };
     const observer=new ResizeObserver(resize);resize();observer.observe(element);window.addEventListener('resize',resize);
@@ -97,7 +111,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   },[view.zoom,maxSide,resolution]);
   useEffect(()=>{
     const element=viewport.current;if(!element)return;
-    const wheel=(event:WheelEvent)=>{if(tool!=='pan'||!sequence)return;event.preventDefault();const rect=element.getBoundingClientRect();setView(current=>zoomAt(current,Math.exp(-event.deltaY*.002),event.clientX-rect.left-rect.width/2,event.clientY-rect.top-rect.height/2,rect.width,rect.height));};
+    const wheel=(event:WheelEvent)=>{if(tool!=='pan'||!sequence)return;event.preventDefault();const rect=element.getBoundingClientRect();setView(current=>zoomImageAt(current,Math.exp(-event.deltaY*.002),event.clientX-rect.left-rect.width/2,event.clientY-rect.top-rect.height/2,geometryRef.current));};
     element.addEventListener('wheel',wheel,{passive:false});return()=>element.removeEventListener('wheel',wheel);
   },[tool,sequence]);
   useLayoutEffect(()=>{
@@ -124,11 +138,11 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
         context.strokeStyle='#f3bc60';context.lineWidth=Math.max(2,width/400);
         // Every frame shares one grid, so a mark is the same sky position on every epoch.
         // Solid on the observation it was made on, dashed on the others, numbered as in the list.
-        annotations.filter(note=>note.selection.sequenceId===sequence.sequence_id).forEach((note,number)=>{
+        annotations.filter(note=>showMarks&&note.selection.sequenceId===sequence.sequence_id).forEach((note,number)=>{
           const radius=Math.max(10,width/40),x=(note.selection.x+.5)*scaleX,y=(note.selection.y+.5)*scaleY,selected=note.id===selectedCandidateId;
           context.save();context.strokeStyle=context.fillStyle=selected?'#79c7e8':'#f3bc60';context.lineWidth=Math.max(2,width/400)*(selected?1.8:1);
           context.setLineDash(note.selection.frameId===active.frame_id?[]:[radius/3,radius/4]);context.beginPath();context.arc(x,y,radius,0,Math.PI*2);context.stroke();
-          context.setLineDash([]);context.font=`${Math.max(14,Math.round(width/36))}px monospace`;context.fillText(String(number+1).padStart(2,'0'),x+radius*.75,y-radius*.75);context.restore();
+          context.setLineDash([]);context.font=`${Math.max(14,Math.round(width/36))}px monospace`;if(showLabels)context.fillText(String(number+1).padStart(2,'0'),x+radius*.75,y-radius*.75);context.restore();
         });
         if(tool==='mark'||tool==='inspect'){context.strokeStyle='#79c7e8';context.strokeRect(cursor.x*scaleX,cursor.y*scaleY,scaleX,scaleY);}
         const mode=raster?(renderer.current?.mode??'CPU canvas'):'Original PNG';
@@ -142,7 +156,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       finally{if(rendered instanceof ImageBitmap)rendered.close();}
     };
     if(!drawing.current){drawing.current=true;void(async()=>{while(latestDraw.current){const job=latestDraw.current;latestDraw.current=null;await job();}drawing.current=false;})();}
-  },[sequence,active,images,annotations,selectedCandidateId,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision,qualityEnabled]);
+  },[sequence,active,images,annotations,selectedCandidateId,outputSize,cursor,tool,raster,ready,effectiveDisplay,forceCpu,rendererRevision,qualityEnabled,showMarks,showLabels]);
   function mark(x:number,y:number){
     if(!sequence||!active||!ready)return;
     // Validity comes from the verified raster mask; a PNG-only frame cannot say.
@@ -161,39 +175,30 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
     if(Math.hypot(event.clientX-start.x,event.clientY-start.y)>3)start.moved=true;
     if(tool==='pan'){
       const other=[...pointers.current.entries()].find(([id])=>id!==event.pointerId)?.[1];
-      if(other){const oldDistance=Math.hypot(previous.x-other.x,previous.y-other.y),distance=Math.hypot(event.clientX-other.x,event.clientY-other.y);if(oldDistance>0)setView(current=>zoomAt(current,distance/oldDistance,(event.clientX+other.x)/2-rect.left-rect.width/2,(event.clientY+other.y)/2-rect.top-rect.height/2,rect.width,rect.height));}
-      else setView(current=>boundedView({...current,x:current.x+event.clientX-previous.x,y:current.y+event.clientY-previous.y},rect.width,rect.height));
+      if(other){const oldDistance=Math.hypot(previous.x-other.x,previous.y-other.y),distance=Math.hypot(event.clientX-other.x,event.clientY-other.y);if(oldDistance>0)setView(current=>zoomImageAt(current,distance/oldDistance,(event.clientX+other.x)/2-rect.left-rect.width/2,(event.clientY+other.y)/2-rect.top-rect.height/2,geometry));}
+      else setView(current=>boundedImageView({...current,x:current.x+event.clientX-previous.x,y:current.y+event.clientY-previous.y},geometry));
     } else if(tool==='time') {const next=nearestObservation(positions,start.position+(event.clientX-start.x)/rect.width);if(frames[next])onFrameChange(frames[next].frame_id);}
     pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
   }
   function pointerEnd(event:PointerEvent<HTMLDivElement>){
-    if(event.type==='pointerup'&&(tool==='mark'||tool==='inspect')&&!rendering&&!drag.current?.moved&&sequence&&canvas.current){const point=clientPointToRaster(event.clientX,event.clientY,canvas.current.getBoundingClientRect(),sequence.grid.width_px,sequence.grid.height_px);if(point){setCursor(point);if(tool==='mark')mark(point.x,point.y);}}
+    if(event.type==='pointerup'&&(tool==='mark'||tool==='inspect')&&!rendering&&!drag.current?.moved&&sequence&&canvas.current){const point=clientPointToRaster(event.clientX,event.clientY,canvas.current.getBoundingClientRect(),sequence.grid.width_px,sequence.grid.height_px);if(point){setCursor(point);if(tool==='mark'){mark(point.x,point.y);openPanel('notes');}}}
     pointers.current.delete(event.pointerId);drag.current=null;
   }
-  function zoom(factor:number){const element=viewport.current;if(element)setView(current=>zoomAt(current,factor,0,0,element.clientWidth,element.clientHeight));}
+  function zoom(factor:number){const element=viewport.current;if(element)setView(current=>zoomImageAt(current,factor,0,0,geometry));}
   function key(event:KeyboardEvent<HTMLDivElement>){
     if(!active)return;
     if(event.key==='Escape'){stop();setExpanded(false);return;}
     const delta: [number,number] | null=event.key==='ArrowLeft'?[-1,0]:event.key==='ArrowRight'?[1,0]:event.key==='ArrowUp'?[0,-1]:event.key==='ArrowDown'?[0,1]:null;
-    if(delta){event.preventDefault();stop();if(tool==='time')selectIndex(Math.max(0,Math.min(frames.length-1,index+(delta[0]||-delta[1]))));else if(tool==='pan'&&viewport.current)setView(current=>boundedView({...current,x:current.x-delta[0]*24,y:current.y-delta[1]*24},viewport.current!.clientWidth,viewport.current!.clientHeight));else if(sequence)setCursor(current=>({x:Math.max(0,Math.min(sequence.grid.width_px-1,current.x+delta[0])),y:Math.max(0,Math.min(sequence.grid.height_px-1,current.y+delta[1]))}));}
-    if(event.key==='Enter'&&tool==='mark'){event.preventDefault();mark(cursor.x,cursor.y);}
+    if(delta){event.preventDefault();stop();if(tool==='time')selectIndex(Math.max(0,Math.min(frames.length-1,index+(delta[0]||-delta[1]))));else if(tool==='pan'&&viewport.current)setView(current=>boundedImageView({...current,x:current.x-delta[0]*24,y:current.y-delta[1]*24},geometry));else if(sequence)setCursor(current=>({x:Math.max(0,Math.min(sequence.grid.width_px-1,current.x+delta[0])),y:Math.max(0,Math.min(sequence.grid.height_px-1,current.y+delta[1]))}));}
+    if(event.key==='Enter'&&tool==='mark'){event.preventDefault();mark(cursor.x,cursor.y);openPanel('notes');}
     if(event.key===' '){event.preventDefault();setBlink(false);setPlaying(!playing);}
     if(event.key==='+'||event.key==='=')zoom(1.25);if(event.key==='-')zoom(.8);if(event.key==='0')setView(FIT);
   }
-  return <section className={`${styles.instrument} ${expanded?styles.expanded:''}`} aria-label="Sky image viewer">
-    <div className={styles.instrumentHeading}><span>{sequence?.title ?? 'YOUR OBSERVATORY'}</span><span>{sequence?.data_mode.toUpperCase() ?? 'NO OBSERVATIONS LOADED'}</span></div>
-    {active&&<p className={styles.activeDate}>{observationLabel(active.observed_start_utc)}</p>}
-    <div className={styles.tools} role="group" aria-label="Viewer tool">
-      {(['time','pan','mark','inspect'] as ViewerTool[]).map(value=><button key={value} aria-pressed={tool===value} disabled={!active} onClick={()=>{stop();setTool(value);if(value==='inspect')setLayersOpen(true);}}>{value==='time'?'REWIND':value.toUpperCase()}</button>)}
-      <button disabled={!active} onClick={()=>zoom(.8)} aria-label="Zoom out">−</button><button disabled={!active} onClick={()=>zoom(1.25)} aria-label="Zoom in">+</button>
-      <button disabled={!active} onClick={()=>setView(FIT)}>FIT / RESET</button><button onClick={()=>setExpanded(!expanded)} aria-pressed={expanded}>{expanded?'CONTRACT':'EXPAND'}</button>
-      <button disabled={!active||nativeAcross===null} title="One native sample per display pixel when the field is large enough" onClick={()=>{stop();setView(boundedView({zoom:nativeAcross!/(viewportSize.width*window.devicePixelRatio),x:0,y:0},viewportSize.width,viewportSize.height));}}>NATIVE SCALE</button>
-    </div>
-    {sequence&&active&&<ContextPanel sequence={sequence} active={active} raster={raster} cursor={cursor} estimatesShown={estimatesShown}
+  const layerPanel=sequence&&active&&<ContextPanel sequence={sequence} active={active} raster={raster} cursor={cursor} estimatesShown={estimatesShown}
       gaiaEnabled={gaiaEnabled} onGaia={setGaiaEnabled} gaia={gaia} selected={selectedSource} onSelect={id=>{stop();setSelectedSource(id);}}
       wiseEnabled={wiseEnabled} onWise={setWiseEnabled} qualityEnabled={qualityEnabled} onQuality={setQualityEnabled}
-      open={layersOpen} onOpen={setLayersOpen} onInspect={()=>{stop();setTool('inspect');viewport.current?.focus({preventScroll:true});}}/>}
-    {active&&<div className={styles.cleanControls} role="group" aria-label="Clean view controls">
+      onInspect={()=>{stop();setTool('inspect');viewport.current?.focus({preventScroll:true});}}/>;
+  const cleanPanel=active&&<div className={styles.cleanControls} role="group" aria-label="Clean view controls">
       <button aria-pressed={estimatesShown} disabled={!cleanAvailable||tool==='mark'} onClick={toggleClean}>CLEAN VIEW</button>
       <button aria-pressed={originalShown} disabled={!displayAvailable||tool==='mark'} onClick={()=>{stop();setOriginalShown(value=>!value);}}>SHOW ORIGINAL</button>
       <button aria-pressed={showEstimates&&estimatesShown} disabled={!estimatesShown} onClick={()=>{stop();setShowEstimates(value=>!value);}}>SHOW ESTIMATED AREAS</button>
@@ -202,34 +207,17 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
         {tool==='mark'?'Original shown while marking. Estimates are excluded from measurements.':raster?.gapFillFailed?'Clean View could not load. Missing areas remain unfilled.':!displayAvailable?(ready?'Original observation shown. Clean View is unavailable for this image.':'Loading the original observation.'):estimatesShown?`Missing areas are visually estimated (${((active.estimated_fraction??0)*100).toFixed(1)}%). ${showEstimates?'Amber stripes show estimated areas.':Math.max(0,(active.masked_fraction??0)-(active.estimated_fraction??0))>1e-7?'Larger gaps remain visible.':'Use Original to inspect the missing areas.'} Estimates can hide unknown features.`:originalShown||originalHeld?'Original observation shown. Visual refinements are paused.':cleanAvailable?`${refinementShown?'Gaps are shown.':'Original observation shown.'} Turn on Clean View to estimate bounded gaps.`:'No eligible gaps in this observation.'}
       </p>
       <p className={styles.cleanNotice} data-refinement={refinementShown?'on':'off'}>{refinementShown?`${effectiveDisplay.reduceGrain&&refinementAvailable?'Grain softened. ':''}${effectiveDisplay.softHighlights?'Bright areas gently compressed. ':''}Faint features may soften; compare Original when checking changes.`:raster?.refinementFailed?'Image refinement could not load. Original samples remain available.':tool==='mark'?'Image refinement pauses while marking.':refinementAvailable?'Refine Image softens grain and bright areas. It starts off.':'Native grain reduction is unavailable for this observation.'}</p>
-    </div>}
-    <div ref={viewport} className={styles.viewport} style={{aspectRatio:sequence?`${sequence.grid.width_px}/${sequence.grid.height_px}`:'1',cursor:tool==='pan'?'grab':tool==='mark'||tool==='inspect'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
-      {view.zoom>1&&active&&ready&&<button className={styles.overview} aria-label="Field overview: click to recenter, Enter to center the field" onPointerDown={event=>event.stopPropagation()} onKeyDown={event=>{if(event.key!=='Escape')event.stopPropagation();}} onClick={event=>{event.stopPropagation();stop();const rect=event.currentTarget.getBoundingClientRect();const x=event.detail===0 ? .5 : (event.clientX-rect.left)/rect.width,y=event.detail===0 ? .5 : (event.clientY-rect.top)/rect.height;setView(current=>centerField(current,x,y,viewportSize.width,viewportSize.height));}}>
-        <img src={images.get(active.frame_id)!.src} crossOrigin="anonymous" alt="" draggable={false}/>
-        <span className={styles.overviewRegion} style={{left:`${region.left*100}%`,top:`${region.top*100}%`,width:`${region.width*100}%`,height:`${region.height*100}%`}}/>
-        <span className={styles.overviewLabel}>FULL FIELD</span>
-      </button>}
-      {sequence&&active?<><canvas ref={canvas} className={styles.canvas} data-sampling={displayAvailable?display.sampling:'pixels'} style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={outputSize.width} height={outputSize.height} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
-      {sequence&&active&&gaiaEnabled&&gaia.data&&ready&&!rendering&&<GaiaLayer data={gaia.data} frameId={active.frame_id} width={sequence.grid.width_px} height={sequence.grid.height_px}
-        view={view} viewportWidth={viewportSize.width} selected={selectedSource} interactive={tool!=='mark'&&tool!=='inspect'} onSelect={id=>{stop();setLayersOpen(true);setSelectedSource(id);}}/>}
-    </div>
-    <div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool.toUpperCase()} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{view.zoom>1?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div>
-    <p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':tool==='inspect'?`Select a pixel to inspect quality, or move with arrow keys. Keyboard cursor: ${cursor.x}, ${cursor.y}.`:`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
-    <PlaybackControls frames={frames} index={index} playing={playing} speed={speed} onSpeed={setSpeed} onIndexChange={selectIndex} onToggle={()=>{setBlink(false);releaseHold();if(!playing&&index===frames.length-1&&frames[0])onFrameChange(frames[0].frame_id);setPlaying(!playing);}} />
-    {active&&<div className={styles.comparison}>
+    </div>;
+  const comparePanel=active&&<div className={styles.comparison}>
       <label>REFERENCE / A<select aria-label="Comparison A" value={a} onChange={event=>{stop();setA(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>
       <label>COMPARE / B<select aria-label="Comparison B" value={b} onChange={event=>{stop();setB(Number(event.target.value));}}>{frames.map((frame,i)=><option key={frame.frame_id} value={i}>{i+1}: {observationLabel(frame.observed_start_utc)}</option>)}</select></label>
-      <button disabled={a===b} aria-pressed={blink} onClick={()=>{setPlaying(false);releaseHold();onFrameChange(frames[a]!.frame_id);setBlink(!blink);}}>{blink?'STOP BLINK':'BLINK A/B'}</button>
-      <button disabled={a===b} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);beginHold();}} onPointerUp={releaseHold} onPointerCancel={releaseHold} onLostPointerCapture={releaseHold} onBlur={releaseHold} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();beginHold();}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')releaseHold();}}>HOLD FOR B</button>
-      {/* One press switches between A and B, for anyone who cannot hold a button or prefers no blinking. */}
-      <button disabled={a===b} aria-label={active.frame_id===frames[b]?.frame_id?`Show A, ${observationLabel(frames[a]?.observed_start_utc)}`:`Show B, ${observationLabel(frames[b]?.observed_start_utc)}`} onClick={()=>{stop();onFrameChange(active.frame_id===frames[b]!.frame_id?frames[a]!.frame_id:frames[b]!.frame_id);}}>{active.frame_id===frames[b]?.frame_id?'SHOW A':'SHOW B'}</button>
       {blink&&a!==b&&!comparisonReady&&<p className={styles.comparisonStatus} role="status">{[a,b].some(i=>failedIds.includes(frames[i]?.frame_id ?? ''))?<>Observation {[a,b].filter(i=>failedIds.includes(frames[i]?.frame_id ?? '')).map(i=>i===a?'A':'B').join(' and ')} could not be loaded, so blinking is paused. <button onClick={retry}>RETRY IMAGE</button></>:'Blinking starts when both observations have loaded.'}</p>}
       {(()=>{const comparison=sequence?describeComparison(sequence,a,b):null;if(!comparison)return null;return <div className={styles.comparisonNotes}>
         <p>{comparison.sides[0]}</p><p>{comparison.sides[1]}</p>
         {comparison.notes.length>0&&<ul aria-label="Limits of this comparison">{comparison.notes.map(note=><li key={note}>{note}</li>)}</ul>}
       </div>;})()}
-    </div>}
-    {active&&<details className={styles.displayControls}>
+    </div>;
+  const advancedPanel=active&&<details className={styles.displayControls}>
       <summary>ADVANCED IMAGE DISPLAY <span data-renderer={rendererMode}>{rendererMode}</span></summary>
       {sequence&&<p className={styles.samplingReadout} data-native-samples={nativeAcross??undefined}>
         {nativeAcross===null?'Native sampling unavailable':`About ${Math.round(nativeAcross)} native samples across the full field`} · {sequence.grid.width_px} × {sequence.grid.height_px} prepared pixels · {outputSize.width} × {outputSize.height} display pixels.
@@ -266,7 +254,33 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
       <p className={styles.hint} data-resolution={resolution==='auto'?autoResolution:resolution}>Aspect ratio preserved; 4K uses at most 8.3 million pixels (2880 square). {renderMs!==null&&`Last render and presentation interval: ${Math.round(renderMs)} ms.`} Adaptive uses HD on CPU or after a slow frame.</p>
       <p className={styles.hint} data-adapter={adapter}>{rendererMode==='WebGL2'?`Graphics adapter: ${adapter}`:rendererMode.startsWith('CPU')?'CPU display active. GPU availability depends on this browser and device.':''}</p>
       <p className={styles.hint}>One display setting across all epochs. Black {display.low.toPrecision(4)} / white {display.high.toPrecision(4)} MJy/sr | {display.curve} {display.a.toFixed(2)} | gamma {display.gamma.toFixed(2)}. Display changes do not add measured detail.</p>
-    </details>}
-    {sequence&&<ObservationDetails sequence={sequence} activeFrameId={active?.frame_id ?? null} comparison={frames.length?{a,b}:null} />}
+    </details>;
+  const infoPanel=sequence&&<ObservationDetails sequence={sequence} activeFrameId={active?.frame_id ?? null} comparison={frames.length?{a,b}:null} />;
+  return <section className={styles.instrument} data-focus={expanded} aria-label="Sky image viewer">
+    <div className={styles.tools} role="group" aria-label="Viewer tool">
+      {(['time','pan','mark','inspect'] as ViewerTool[]).map(value=><button key={value} aria-pressed={tool===value} disabled={!active} onClick={()=>{stop();setTool(value);if(value==='inspect')openPanel('layers');if(value==='mark')openPanel('notes');}}>{value==='time'?'REWIND':value.toUpperCase()}</button>)}
+      <div className={styles.zoomButtons}><button disabled={!active} onClick={()=>zoom(.8)} aria-label="Zoom out">-</button><button disabled={!active} onClick={()=>zoom(1.25)} aria-label="Zoom in">+</button></div>
+      <button disabled={!active} onClick={()=>setView(FIT)}>FIT</button><button disabled={!active} onClick={()=>setView(fillImage(geometry))}>FILL</button>
+      <button onClick={()=>setExpanded(!expanded)} aria-pressed={expanded}>FOCUS</button>
+    </div>
+    <div className={styles.stage}>
+      <div className={styles.stageHeading}><span>{sequence?.data_mode.toUpperCase()??'CHOOSE A FIELD'}</span><span>{active?.wavelength_um?.toFixed(3)}{active?.wavelength_um?' μm':''}</span></div>
+      <div id="observation-canvas" ref={viewport} className={styles.viewport} style={{cursor:tool==='pan'?'grab':tool==='mark'||tool==='inspect'?'crosshair':'ew-resize'}} tabIndex={0} role="group" aria-label="Observation canvas" aria-describedby="viewer-help" onKeyDown={key} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={()=>{pointers.current.clear();drag.current=null;}}>
+      {view.zoom>1&&active&&ready&&<button className={styles.overview} aria-label="Field overview: click to recenter, Enter to center the field" onPointerDown={event=>event.stopPropagation()} onKeyDown={event=>{if(event.key!=='Escape')event.stopPropagation();}} onClick={event=>{event.stopPropagation();stop();const rect=event.currentTarget.getBoundingClientRect();const x=event.detail===0 ? .5 : (event.clientX-rect.left)/rect.width,y=event.detail===0 ? .5 : (event.clientY-rect.top)/rect.height;setView(current=>centerImageField(current,x,y,geometry));}}>
+        <img src={images.get(active.frame_id)!.src} crossOrigin="anonymous" alt="" draggable={false}/>
+        <span className={styles.overviewRegion} style={{left:`${region.left*100}%`,top:`${region.top*100}%`,width:`${region.width*100}%`,height:`${region.height*100}%`}}/>
+        <span className={styles.overviewLabel}>FULL FIELD</span>
+      </button>}
+      {sequence&&active?<><canvas ref={canvas} className={styles.canvas} data-sampling={displayAvailable?display.sampling:'pixels'} style={{...fitStyle,transform:`translate(${view.x}px,${view.y}px) scale(${view.zoom})`,visibility:ready&&!rendering?'visible':'hidden'}} width={outputSize.width} height={outputSize.height} aria-label={`Observation ${active.observation_id ?? active.frame_id}`} />{(!ready||rendering)&&<div className={styles.loadState} role="status">{failedIds.includes(active.frame_id)?<>This observation could not be loaded.<button onPointerDown={event=>event.stopPropagation()} onClick={retry}>RETRY IMAGE</button></>:'Loading this observation...'}</div>}</>:<div className={styles.emptyState}><span>ONE SKY. MANY MOMENTS.</span><h2>Find what<br/>time reveals.</h2><p>Choose a target or open saved observations.</p><small>NO SCIENTIFIC IMAGE IS DISPLAYED</small></div>}
+      {sequence&&active&&gaiaEnabled&&gaia.data&&ready&&!rendering&&<div className={styles.layerFrame} style={fitStyle}><GaiaLayer data={gaia.data} frameId={active.frame_id} width={sequence.grid.width_px} height={sequence.grid.height_px}
+        view={view} viewportWidth={fit.width} selected={selectedSource} interactive={tool!=='mark'&&tool!=='inspect'} onSelect={id=>{stop();openPanel('layers');setSelectedSource(id);}}/></div>}
+    </div><div className={styles.orientation}><strong>{tool==='time'?'REWIND':tool.toUpperCase()} TOOL</strong><span>N ↑ · E ←</span><span>{Math.round(view.zoom*100)}%{region.width<.999||region.height<.999?' · CROPPED VIEW':''}</span><span><i/> No data</span>{sequence&&<span>{sequence.requested_fov_arcmin} arcmin full field</span>}</div><p id="viewer-help" className={styles.hint}>{tool==='time'?'Drag left for earlier, right for later. Arrow keys step observations.':tool==='pan'?'Drag to pan. Scroll or pinch to zoom. Arrow keys move; 0 fits the field.':tool==='inspect'?`Select a pixel to inspect quality, or move with arrow keys. Keyboard cursor: ${cursor.x}, ${cursor.y}.`:`Select a pixel, or use arrow keys then Enter. Keyboard cursor: ${cursor.x}, ${cursor.y}.`} Space plays or pauses.</p>
+    </div>
+    <Inspector tab={panel} onTab={setPanel} open={!expanded} onOpen={open=>setExpanded(!open)} panels={{field:fieldPanel,notes:notesPanel,display:<>{cleanPanel}{advancedPanel}<button disabled={!active||nativeAcross===null} onClick={()=>setView(boundedImageView({zoom:nativeAcross!/Math.max(1,fit.width*window.devicePixelRatio),x:0,y:0},geometry))}>NATIVE SCALE</button></>,layers:<><p>SPHEREx base image (always visible)</p><div className={styles.layerSwitches}><label><input type="checkbox" checked={showMarks} onChange={event=>setShowMarks(event.target.checked)}/> Candidate marks</label><label><input type="checkbox" disabled={!showMarks} checked={showLabels} onChange={event=>setShowLabels(event.target.checked)}/> Candidate labels</label></div>{layerPanel}</>,compare:comparePanel,info:infoPanel}}/>
+    <div className={styles.bottomDock}><PlaybackControls frames={frames} index={index} playing={playing} speed={speed} onSpeed={setSpeed} onIndexChange={selectIndex} onToggle={()=>{setBlink(false);releaseHold();if(!playing&&index===frames.length-1&&frames[0])onFrameChange(frames[0].frame_id);setPlaying(!playing);}} /><div className={styles.quickCompare}>{active&&<>      <button disabled={a===b} aria-pressed={blink} onClick={()=>{setPlaying(false);releaseHold();onFrameChange(frames[a]!.frame_id);setBlink(!blink);}}>{blink?'STOP BLINK':'BLINK A/B'}</button>
+      <button disabled={a===b} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);beginHold();}} onPointerUp={releaseHold} onPointerCancel={releaseHold} onLostPointerCapture={releaseHold} onBlur={releaseHold} onKeyDown={event=>{if(event.key===' '||event.key==='Enter'){event.preventDefault();beginHold();}}} onKeyUp={event=>{if(event.key===' '||event.key==='Enter')releaseHold();}}>HOLD FOR B</button>
+      {/* One press switches between A and B, for anyone who cannot hold a button or prefers no blinking. */}
+      <button disabled={a===b} aria-label={active.frame_id===frames[b]?.frame_id?`Show A, ${observationLabel(frames[a]?.observed_start_utc)}`:`Show B, ${observationLabel(frames[b]?.observed_start_utc)}`} onClick={()=>{stop();onFrameChange(active.frame_id===frames[b]!.frame_id?frames[a]!.frame_id:frames[b]!.frame_id);}}>{active.frame_id===frames[b]?.frame_id?'SHOW A':'SHOW B'}</button>
+</>}</div></div>
   </section>;
 }

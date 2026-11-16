@@ -33,6 +33,16 @@
 .smallLabel{font:10px var(--font-data);color:var(--silver);}
 .muted{font-size:11px;line-height:1.7;color:var(--silver);margin:10px 0 16px;max-width:1000px;}
 .commandFields{display:grid;grid-template-columns:1fr 1fr .8fr 1.25fr;border:1px solid #9aa1ac;padding:7px;gap:7px;align-items:stretch;}
+.targetLinks{display:flex;flex-wrap:wrap;gap:16px;}.targetLinks a{min-height:44px;display:flex;align-items:center;}
+:global([data-console]) .coordinateForm{padding:0;}
+:global([data-console]) .commandFields{grid-template-columns:1fr;border:0;padding:0;}
+:global([data-console]) .commandFields>div{padding:8px 0;border-right:0;}
+:global([data-console]) .primaryButton{font-size:20px;min-height:48px;}
+:global([data-console]) .referenceTargets{padding:12px 0;}
+:global([data-console]) .searchStatus{padding:16px 0;}
+.entryPanel>.primaryButton{text-decoration:none;font-size:23px;padding:16px;text-align:center;width:calc(100% - 32px);}
+.entryPanel>p:not(.tagline){padding:0 24px;font-size:12px;line-height:1.7;color:var(--silver);}
+.entryPanel>a:not(.primaryButton){min-height:44px;font:11px var(--font-data);display:flex;align-items:center;}
 .commandFields>div{padding:6px 20px;border-right:1px solid #66707c;min-width:0;}
 .coordinateForm label{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font:10px var(--font-data);letter-spacing:.08em;}
 .coordinateForm label span{color:var(--silver);font-size:9px;}

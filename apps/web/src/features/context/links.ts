@@ -16,7 +16,7 @@ export function compactMode(query:string):boolean {
 export function shareLinks(base:string,values:CoordinateValues,observation?:string|null) {
   const url=new URL(base);
   if(!['https:','http:'].includes(url.protocol))throw Error('Sharing requires an HTTP page address.');
-  url.search=sharedSearchQuery(values,observation);url.hash='';
+  url.pathname='/console/';url.search=sharedSearchQuery(values,observation);url.hash='';
   const link=url.toString();url.searchParams.set('embed','1');
   const embed=url.toString();
   const escaped=embed.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
