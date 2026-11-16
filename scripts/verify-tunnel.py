@@ -2,10 +2,12 @@
 
 The optional cancellation check starts one small archive job then cancels it.
 The default checks use existing real cached data and an isolated notebook key.
+Add --live-search to require a newly processed sequence and real frame downloads.
 """
 import argparse
 import json
 import secrets
+import time
 from urllib.error import HTTPError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
@@ -16,6 +18,10 @@ def main():
     parser.add_argument('--base-url', default='http://localhost:8000')
     parser.add_argument('--origin', default='https://khonsulive.earth')
     parser.add_argument('--cancel-job', action='store_true')
+    parser.add_argument('--live-search', action='store_true')
+    parser.add_argument('--ra', type=float, default=270.02)
+    parser.add_argument('--dec', type=float, default=66.51)
+    parser.add_argument('--max-frames', type=int, default=24)
     args = parser.parse_args()
     base = args.base_url.rstrip('/')
     parsed = urlsplit(base)
@@ -82,10 +88,46 @@ def main():
         sequence = json.loads(body)['sequence_id']
         _, body = request(f'/v1/sequences/{sequence}/cancel', 'POST', {})
         assert json.loads(body)['status'] == 'cancelled'
+    live_result = {'status': 'not run'}
+    if args.live_search:
+        started = time.monotonic()
+        _, body = request('/v1/sequences', 'POST', {
+            'ra_deg': args.ra, 'dec_deg': args.dec, 'fov_arcmin': 6, 'max_frames': args.max_frames,
+        }, expected=202)
+        job = json.loads(body)
+        sequence = job['sequence_id']
+        terminal = {'ready', 'failed', 'cancelled', 'expired'}
+        try:
+            while job['status'] not in terminal and time.monotonic() - started < 300:
+                time.sleep(2)
+                _, body = request(f'/v1/sequences/{sequence}')
+                job = json.loads(body)
+            assert job['status'] == 'ready', f'Live search did not complete: {job}'
+            _, body = request(f'/v1/sequences/{sequence}/manifest')
+            manifest = json.loads(body)
+            assert manifest['sequence_id'] == sequence and manifest['data_mode'] == 'live'
+            assert abs(manifest['target']['ra_deg'] - args.ra) < 1e-8
+            assert abs(manifest['target']['dec_deg'] - args.dec) < 1e-8
+            assert len(manifest['frames']) >= 2
+            assert len({f['observed_start_utc'] for f in manifest['frames']}) >= 2
+            for frame in manifest['frames'][:2]:
+                assert frame['release'] in ('DR1', 'QR3') and frame['observation_id']
+                assert frame['source_fits_url'].startswith('https://irsa.ipac.caltech.edu/ibe/data/spherex/')
+                assert frame['image_url'].startswith(f'/v1/sequences/{sequence}/frames/')
+                _, image = request(frame['image_url'])
+                assert image.startswith(b'\x89PNG\r\n\x1a\n')
+            live_result = {'status': 'passed', 'sequence_id': sequence,
+                           'frames': len(manifest['frames']), 'elapsed_seconds': round(time.monotonic() - started, 1),
+                           'discovery': manifest['processing'].get('observation_discovery', 'unspecified'),
+                           'warnings': [w['code'] for w in manifest['warnings']]}
+        finally:
+            if job['status'] not in terminal:
+                request(f'/v1/sequences/{sequence}/cancel', 'POST', {})
     print(json.dumps({'base_url': base, 'origin': args.origin, 'health': 'passed',
                       'cors_and_preflight': 'passed', 'real_cached_png': 'passed',
                       'validation_and_cancel_route': 'passed', 'private_notebook': 'passed',
-                      'live_job_cancellation': 'passed' if args.cancel_job else 'not run'}))
+                      'live_job_cancellation': 'passed' if args.cancel_job else 'not run',
+                      'live_search': live_result}))
 
 
 if __name__ == '__main__':

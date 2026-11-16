@@ -11,6 +11,12 @@ create and immediately cancel a bounded live request. The default check uses
 cached real data and a new notebook key, without changing a visitor's notes.
 See [tunnel acceptance](tunnel-deployment.md#verify-before-announcing-the-public-url).
 
+Add `--live-search` to that command to require fresh downloads, a completed
+sequence at the requested coordinates, distinct real dates and actual PNG
+delivery. Health and cached example checks alone do not satisfy live production
+acceptance. See [the persistent observation index](observation-index.md) for
+outage discovery, partial coverage and metadata refresh verification.
+
 From the repository root, with an activated Python 3.12 environment:
 
 ```sh

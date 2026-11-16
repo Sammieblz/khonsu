@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "coverage": "partial",
+  "provenance_report": "docs/evidence/resolution/acquisition.json",
+  "date_note": "recorded_utc is the acquisition report timestamp, not a measured individual CSV response time.",
+  "snapshots": [
+    {
+      "file": "real-wise-0855.csv.gz",
+      "sha256": "ecf4a0c47ca71a09c69abd98928ec323afc859ae0fd1e3a68e73f4cb03348ad2",
+      "recorded_utc": "2026-11-15T04:55:55.941099+00:00",
+      "query_url": "https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+133.7601213914+-7.2421279412+0.0002777778&DPTYPE=image&CALIB=2&RESPONSEFORMAT=CSV&MAXREC=5001&COLLECTION=spherex_dr1&COLLECTION=spherex_qr3"
+    },
+    {
+      "file": "real-epsilon-indi-b.csv.gz",
+      "sha256": "e566809cc27ce0bf15311cd10fe01de72c61fe5b3d9417696775c59d7158e7b8",
+      "recorded_utc": "2026-11-15T04:55:55.941099+00:00",
+      "query_url": "https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+331.0986113345+-56.8008041403+0.0002777778&DPTYPE=image&CALIB=2&RESPONSEFORMAT=CSV&MAXREC=5001&COLLECTION=spherex_dr1&COLLECTION=spherex_qr3"
+    },
+    {
+      "file": "north-ecliptic-pole.csv.gz",
+      "sha256": "e1b4aabb3b22e38bbf20d7d0eb482195b122f5499401fdf8f804cd1c192f2b36",
+      "recorded_utc": "2026-11-15T04:55:55.941099+00:00",
+      "query_url": "https://irsa.ipac.caltech.edu/SIA?POS=CIRCLE+270.0000000000+66.5607000000+0.0002777778&DPTYPE=image&CALIB=2&RESPONSEFORMAT=CSV&MAXREC=5001&COLLECTION=spherex_dr1&COLLECTION=spherex_qr3"
+    }
+  ]
+}

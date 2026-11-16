@@ -213,3 +213,15 @@ The local notebook volume remains durable across container recreation; image
 jobs remain temporary. Public availability depends on the host computer, Docker
 and the connector staying online. The optional paid Worker/Containers files are
 retained for a future hosting decision. See [setup and verification](tunnel-deployment.md).
+
+## Persistent observation metadata index (#85 / BYT-56)
+
+Samuel authorized a bounded SQLite metadata index on November 16, 2026 after
+IRSA SIA/TAP failed while direct FITS cutouts remained available. It stores
+verified observation metadata and spherical footprints, not generated images
+or persistent jobs. Successful live searches update it; transient discovery
+failures may use its explicitly partial coverage to download fresh cutouts.
+The initial recorded metadata covers three field regions, not the whole sky.
+This scoped decision permits the additional database under the repository's
+database constraint. No paid service, account system or schema change is needed.
+See [operation, provenance and limits](observation-index.md).

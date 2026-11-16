@@ -302,3 +302,28 @@ def test_early_stop_check_uses_processing_wavelength_rules(tmp_path):
     # A requested wavelength range applies before grouping, as in processing.
     filtered = enough_comparable_epochs(SequenceRequest(ra_deg=RA, dec_deg=DEC, wavelength_max_um=1.002), 2)
     assert not filtered([first, far, near])
+
+
+def test_local_discovery_age_and_partial_coverage_survive_manifest_publication(tmp_path):
+    class IndexedRetriever(Retriever):
+        on_discovery = None
+        discovery_notice = {'code': 'LOCAL_OBSERVATION_INDEX', 'message': 'Partial index, fresh downloads.'}
+        discovery_metadata = {'observation_discovery': 'local-index',
+                              'observation_index_coverage': 'partial',
+                              'observation_metadata_oldest_utc': '2026-11-15T00:00:00+00:00'}
+
+        async def retrieve(self, request, directory):
+            self.on_discovery('Using saved metadata to download fresh observations')
+            return [object(), object()]
+
+    manager = JobManager(tmp_path, retriever_factory=IndexedRetriever, processor_factory=Processor)
+    try:
+        job = manager.submit(SequenceRequest(ra_deg=10, dec_deg=20))
+        assert finish(manager, job.sequence_id).status == 'ready'
+        manifest = manager.manifest(job.sequence_id)
+        assert any(item.code == 'LOCAL_OBSERVATION_INDEX' for item in manifest.warnings)
+        assert manifest.processing['observation_discovery'] == 'local-index'
+        assert manifest.processing['observation_index_coverage'] == 'partial'
+        assert manifest.processing['observation_metadata_oldest_utc'] == '2026-11-15T00:00:00+00:00'
+    finally:
+        manager.close()

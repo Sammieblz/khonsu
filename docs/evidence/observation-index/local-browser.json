@@ -1,0 +1,66 @@
+{
+  "base": "http://localhost:3000",
+  "checked_utc": "2026-11-16T07:19:15.809Z",
+  "request": {
+    "ra_deg": 270.03,
+    "dec_deg": 66.52,
+    "fov_arcmin": 6,
+    "coordinate_frame": "ICRS",
+    "max_frames": 16
+  },
+  "sequence_id": "job-35126ad04d314a18af1eaa73ec57efe6",
+  "frames": [
+    {
+      "observation_id": "2026W20_2A_0368_2",
+      "date": "2026-05-16T20:06:16.848000Z",
+      "release": "QR3",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W20_2A/l2b-v27-2026-267/5/level2_2026W20_2A_0368_2D5_spx_l2b-v27-2026-267.fits?center=270.0300000000%2C66.5200000000&size=0.1500000000"
+    },
+    {
+      "observation_id": "2026W28_2A_0049_2",
+      "date": "2026-07-09T16:09:11.520000Z",
+      "release": "QR3",
+      "source_fits_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W28_2A/l2b-v27-2026-276/5/level2_2026W28_2A_0049_2D5_spx_l2b-v27-2026-276.fits?center=270.0300000000%2C66.5200000000&size=0.1500000000"
+    }
+  ],
+  "discovery": "local-index",
+  "frame_assets": [
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0001.png",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0002.png",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0001.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0002.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0001-fill.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0001-refined.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0002-fill.bin",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8000/v1/sequences/job-35126ad04d314a18af1eaa73ec57efe6/frames/frame-0002-refined.bin",
+      "status": 200
+    }
+  ],
+  "desktop": true,
+  "mobile": true,
+  "step": true,
+  "provenance": true,
+  "page_errors": []
+}
