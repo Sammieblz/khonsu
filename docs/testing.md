@@ -36,6 +36,11 @@ Commit a five-target coverage report, including actual epoch coordinates, dates 
 
 ## Browser acceptance
 
+For the dedicated `/console/` layout, run `node scripts/verify-console-design.mjs`.
+See [the console design contract](console-design.md) for state, routing and
+responsive acceptance. Older browser scripts refer to historical page controls;
+their renderer-unit checks remain useful independently of those selectors.
+
 The [sky-context pass](sky-context.md) adds `test_catalog_context.py`,
 `context.test.ts` and `node scripts/verify-context.mjs`. The browser suite needs
 real Gaia/WISE services for its live checks and explicitly injects a catalog

@@ -1,4 +1,6 @@
 import type { components } from "@/lib/api/generated";
+import type {ReactNode} from 'react';
+import type {PresentationState} from './ExplorerSession';
 
 // Robel owns these frontend seams. Tyrone owns the generated API definitions.
 export type SequenceRequest = components["schemas"]["SequenceRequest"];
@@ -85,6 +87,9 @@ export type CandidateStorageState =
   | { kind: "too-large" };
 
 export interface SkyViewerProps {
+  fieldPanel?:ReactNode;
+  notesPanel?:ReactNode;
+  onPresentationState?:(state:PresentationState)=>void;
   sequence: SequenceManifest | null;
   activeFrameId: string | null;
   annotations: CandidateAnnotation[];

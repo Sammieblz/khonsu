@@ -10,7 +10,6 @@ interface Props {
   gaiaEnabled:boolean; onGaia:(value:boolean)=>void; gaia:{data:GaiaContext|null;error:string;loading:boolean;retry:()=>void};
   selected:string; onSelect:(id:string)=>void; wiseEnabled:boolean; onWise:(value:boolean)=>void;
   qualityEnabled:boolean; onQuality:(value:boolean)=>void; onInspect:()=>void;
-  open:boolean; onOpen:(value:boolean)=>void;
 }
 export function ContextPanel(props:Props) {
   const {sequence,active,raster,cursor,estimatesShown,gaiaEnabled,onGaia,gaia,selected,onSelect,wiseEnabled,onWise,qualityEnabled,onQuality,onInspect}=props;
@@ -18,8 +17,8 @@ export function ContextPanel(props:Props) {
   const source=sources.find(item=>item.source_id===selected);
   const point=source?.positions.find(item=>item.frame_id===active.frame_id);
   const quality=pixelQuality(raster,cursor.x,cursor.y,estimatesShown);
-  return <details className={styles.panel} open={props.open} onToggle={event=>props.onOpen(event.currentTarget.open)}>
-    <summary>LAYERS &amp; SKY CONTEXT <span>{[gaiaEnabled&&'Gaia',wiseEnabled&&'WISE',qualityEnabled&&'Quality'].filter(Boolean).join(' · ')||'Optional reference tools'}</span></summary>
+  return <section className={styles.panel} aria-label="Layers & sky context">
+    <h3>LAYERS &amp; SKY CONTEXT <span>{[gaiaEnabled&&'Gaia',wiseEnabled&&'WISE',qualityEnabled&&'Quality'].filter(Boolean).join(' · ')||'Optional reference tools'}</span></h3>
     <div className={styles.switches}>
       <label><input type="checkbox" checked={gaiaEnabled} disabled={sequence.data_mode==='synthetic'} onChange={event=>onGaia(event.target.checked)}/> Known sources / Gaia DR3</label>
       <label><input type="checkbox" checked={wiseEnabled} disabled={sequence.data_mode==='synthetic'} onChange={event=>onWise(event.target.checked)}/> WISE reference pane</label>
@@ -54,5 +53,5 @@ export function ContextPanel(props:Props) {
       </>}
     </section>}
     {wiseEnabled&&<WiseReference sequence={sequence}/>}
-  </details>;
+  </section>;
 }

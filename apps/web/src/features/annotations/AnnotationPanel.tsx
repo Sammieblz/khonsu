@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import {useExplorer} from '@/features/explorer/ExplorerSession';
 import { Icon } from "@/components/ui/Icon";
 import type { AnnotationPanelProps, CandidateAnnotation, CandidateStorageState, ImageSelection, SequenceManifest } from "@/features/explorer/interfaces";
 import { observationLabel } from "@/features/viewer/time";
@@ -43,7 +44,7 @@ export function AnnotationPanel({
   sequence, selection, annotations, contexts, selectedCandidateId, storage, atCapacity,
   onAdd, onUpdate, onRemove, onSelectCandidate, onStartFresh, onDownloadUnreadable,
 }: AnnotationPanelProps) {
-  const [note, setNote] = useState("");
+  const {noteDraft:note,setNoteDraft:setNote}=useExplorer();
   const [exportMessage, setExportMessage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const current = annotations.filter(item => item.selection.sequenceId === sequence?.sequence_id);

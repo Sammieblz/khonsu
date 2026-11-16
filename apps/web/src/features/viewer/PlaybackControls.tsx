@@ -26,7 +26,5 @@ export function PlaybackControls({ frames, index, playing, speed, onSpeed, onTog
       <button disabled={!active||index>=frames.length-1} onClick={()=>onIndexChange(index+1)} aria-label="Next observation">NEXT</button>
       <label>Rate <select aria-label="Playback rate" value={speed} onChange={event=>onSpeed(Number(event.target.value))}><option value={1400}>Slow</option><option value={700}>Normal</option><option value={350}>Fast</option></select></label>
     </div>
-    {active && <div className={styles.epochButtons}>{frames.map((frame,i)=><button key={frame.frame_id} aria-pressed={index===i} onClick={()=>onIndexChange(i)} title={observationLabel(frame.observed_start_utc)}>{i===0?'EARLIEST':i===frames.length-1?'LATEST':`VISIT ${i+1}`}<small>{frame.observed_start_utc?.slice(0,10) ?? 'Date unavailable'}</small></button>)}</div>}
-    <p className={styles.hint}>Ticks follow elapsed UTC time. Gaps contain no observations. Playback steps through available exposures.</p>
   </div>;
 }
