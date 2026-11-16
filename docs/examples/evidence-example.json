@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "exported_at_utc": "2026-11-15T03:30:00.000Z",
   "notice": "Candidate marks made by a person in Khonsu. A candidate is a lead for follow-up, not a confirmed detection, planet or discovery. Apparent change can come from noise, detector artifacts, unmatched point spread functions or registration error.",
-  "sharing": "A Khonsu search link repeats a search but never carries notes. This file is the only way these notes leave the browser where they were made; nothing was uploaded.",
+  "sharing": "A Khonsu search link repeats a search but never carries notes. The private notebook service may keep a backup. This export contains human notes and evidence, but never the notebook access key.",
   "candidate_count": 2,
   "contains_synthetic_input": false,
   "candidates": [

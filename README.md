@@ -2,7 +2,7 @@
 
 **Find what time reveals.**
 
-Khonsu is a visual observatory for exploring real SPHEREx infrared observations across time. Enter a sky position, load registered observations, step through their actual dates, and keep local notes about features worth investigating. ByteBoyz is building it for NASA Space Apps 2026, [Planet X and SPHEREx](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/).
+Khonsu is a visual observatory for exploring real SPHEREx infrared observations across time. Enter a sky position, load registered observations, step through their actual dates, and keep notes about features worth investigating. ByteBoyz is building it for NASA Space Apps 2026, [Planet X and SPHEREx](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/).
 
 ## Why Khonsu?
 
@@ -18,7 +18,7 @@ The minimum viable product (MVP) targets a complete SPHEREx image explorer: boun
 
 The observation console now supports real-date rewind dragging, pan/zoom/reset, selected A/B blink and hold comparison, keyboard controls and shared black/white, asinh and gamma adjustments. Prepared float intensities use optional WebGL2 acceleration with worker/Canvas recovery; FITS and scientific processing remain in Python. Five catalog presets, an original celestial entry and an optional NASA Eyes mission panel are integrated. See the [console acceptance and hands-on guide](docs/console-acceptance.md) for Chromium/Firefox evidence and screenshots.
 
-Searches can be shared by URL. A candidate mark records its ICRS position, the observations compared and a snapshot of the sequence, and stays in the browser until exported as a versioned evidence file. See [shared search links, candidate marks and evidence export](docs/integration.md#shared-search-links). A public hosted demonstration and the official project submission remain release gates. The [initial backend handoff](docs/implementation-handoff.md) is historical; current tickets and acceptance evidence govern completion.
+Searches can be shared by URL. A candidate mark records its ICRS position, the observations compared and a snapshot of the sequence, and is saved in a private notebook with browser and optional SQLite copies. Export produces a versioned evidence file. General observation notes work without marking a pixel. The console has Guided Mode and a complete static `/docs/` field guide. See [notebook operation and storage](docs/guided-notebook.md). See [shared search links, candidate marks and evidence export](docs/integration.md#shared-search-links). A public hosted demonstration and the official project submission remain release gates. The [initial backend handoff](docs/implementation-handoff.md) is historical; current tickets and acceptance evidence govern completion.
 
 [Sky context](docs/sky-context.md) adds optional Gaia DR3 source rings with
 observation-date proper motion, a separately labeled AllWISE reference pane in

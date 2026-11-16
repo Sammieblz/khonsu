@@ -8,7 +8,7 @@ export const EVIDENCE_FORMAT = "khonsu-evidence";
 export const EVIDENCE_VERSION = "1.0";
 
 export const EVIDENCE_NOTICE = "Candidate marks made by a person in Khonsu. A candidate is a lead for follow-up, not a confirmed detection, planet or discovery. Apparent change can come from noise, detector artifacts, unmatched point spread functions or registration error.";
-export const EVIDENCE_SHARING = "A Khonsu search link repeats a search but never carries notes. This file is the only way these notes leave the browser where they were made; nothing was uploaded.";
+export const EVIDENCE_SHARING = "A Khonsu search link repeats a search but never carries notes. The private notebook service may keep a backup. This export contains human notes and evidence, but never the notebook access key.";
 
 export interface EvidenceFrameRef {
   frame_id: string;

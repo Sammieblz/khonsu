@@ -36,6 +36,16 @@ Commit a five-target coverage report, including actual epoch coordinates, dates 
 
 ## Browser acceptance
 
+Run `node scripts/verify-guided-notebook.mjs` for #77 / BYT-54. It checks the
+three-second entry, absence of the guardian during ordinary loading, note CRUD,
+JSON export, reload, offline retry, explicit tab conflicts, spring drag/release,
+keyboard selection, the seven-step tour, mobile layout and static docs. Set
+`AXE_SCRIPT` to the installed axe-core script for its documentation audit.
+The [guided notebook record](guided-notebook.md) explains storage and limits.
+`test_notebooks.py`, `notebook.test.ts`, `dial.test.ts` and the gateway tests cover
+the corresponding bounded database, synchronization and geometry contracts.
+
+
 For the dedicated `/console/` layout, run `node scripts/verify-console-design.mjs`.
 See [the console design contract](console-design.md) for state, routing and
 responsive acceptance. `verify-clean-view.mjs` and `verify-context.mjs` also use

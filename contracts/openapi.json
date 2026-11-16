@@ -620,6 +620,132 @@
         "title": "ImageGrid",
         "type": "object"
       },
+      "NotebookDocument": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_snapshot": {
+            "maxLength": 2000000,
+            "title": "Candidate Snapshot",
+            "type": "string"
+          },
+          "observation_notes": {
+            "items": {
+              "$ref": "#/components/schemas/ObservationNote"
+            },
+            "maxItems": 200,
+            "title": "Observation Notes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "candidate_snapshot"
+        ],
+        "title": "NotebookDocument",
+        "type": "object"
+      },
+      "NotebookRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "document": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotebookDocument"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision": {
+            "maximum": 2147483647.0,
+            "minimum": 0.0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "revision",
+          "document"
+        ],
+        "title": "NotebookRecord",
+        "type": "object"
+      },
+      "NotebookWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/NotebookDocument"
+          },
+          "revision": {
+            "maximum": 2147483646.0,
+            "minimum": 0.0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "revision",
+          "document"
+        ],
+        "title": "NotebookWrite",
+        "type": "object"
+      },
+      "ObservationNote": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "frame_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frame Id"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,80}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "sequence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SequenceManifest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ObservationNote",
+        "type": "object"
+      },
       "PreparedRaster": {
         "additionalProperties": false,
         "properties": {
@@ -1114,7 +1240,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           }
         },
         "summary": "Synthetic Frame",
@@ -1253,7 +1379,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1338,7 +1464,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "503": {
             "content": {
@@ -1354,6 +1480,150 @@
         "summary": "Example Frame",
         "tags": [
           "discovery"
+        ]
+      }
+    },
+    "/v1/notebook": {
+      "get": {
+        "operationId": "read_notebook_v1_notebook_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Khonsu-Notebook",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "X-Khonsu-Notebook",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotebookRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Read Notebook",
+        "tags": [
+          "notebook"
+        ]
+      },
+      "put": {
+        "operationId": "write_notebook_v1_notebook_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Khonsu-Notebook",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{64}$",
+              "title": "X-Khonsu-Notebook",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotebookWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotebookRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "507": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Insufficient Storage"
+          }
+        },
+        "summary": "Write Notebook",
+        "tags": [
+          "notebook"
         ]
       }
     },
@@ -1434,7 +1704,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1527,7 +1797,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1620,7 +1890,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1713,7 +1983,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1818,7 +2088,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {
@@ -1911,7 +2181,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Unprocessable Content"
           },
           "429": {
             "content": {

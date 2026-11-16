@@ -70,3 +70,35 @@ test("CORS never preserves a wildcard response or credential permission", () => 
   assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://khonsu.pages.dev");
   assert.equal(response.headers.has("Access-Control-Allow-Credentials"), false);
 });
+
+test("notebook PUT and its private header are limited to the notebook route", () => {
+  const request = new Request("https://api.example/v1/notebook", { method: "OPTIONS", headers: {
+    Origin: "https://khonsu.pages.dev", "Access-Control-Request-Method": "PUT",
+    "Access-Control-Request-Headers": "content-type,x-khonsu-notebook",
+  } });
+  validateRequest(request, origins);
+  const response = corsResponse(new Response(null, {status: 204}), request, origins);
+  assert.equal(response.headers.get("Access-Control-Allow-Methods"), "GET, PUT, OPTIONS");
+  assert.match(response.headers.get("Access-Control-Allow-Headers")!, /X-Khonsu-Notebook/);
+  assert.throws(() => validateRequest(new Request("https://api.example/v1/sequences", {
+    method: "PUT", headers: {"Content-Type": "application/json"}, body: "{}",
+  }), origins), (error: unknown) => error instanceof GatewayRequestError && error.status === 405);
+  assert.throws(() => validateRequest(new Request("https://api.example/v1/sequences", {
+    method: "OPTIONS", headers: {Origin: "https://khonsu.pages.dev",
+      "Access-Control-Request-Method": "POST", "Access-Control-Request-Headers": "x-khonsu-notebook"},
+  }), origins), (error: unknown) => error instanceof GatewayRequestError && error.status === 400);
+});
+
+test("notebook uploads accept bounded snapshots and reject oversized streamed bodies", async () => {
+  const body = "x".repeat(20 * 1024);
+  const request = new Request("https://api.example/v1/notebook", {
+    method: "PUT", headers: {"Content-Type": "application/json"}, body,
+  });
+  validateRequest(request, origins);
+  const forwarded = await boundedPostRequest(request);
+  assert.equal(forwarded.method, "PUT");
+  assert.equal(await forwarded.text(), body);
+  await assert.rejects(() => boundedPostRequest(new Request("https://api.example/v1/notebook", {
+    method: "PUT", headers: {"Content-Type": "application/json"}, body: "x".repeat(4 * 1024 * 1024 + 1),
+  })), (error: unknown) => error instanceof GatewayRequestError && error.status === 413);
+});

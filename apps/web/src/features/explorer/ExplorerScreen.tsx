@@ -18,7 +18,7 @@ export function ExplorerScreen(){
  useEffect(()=>{if(isConsoleLink(window.location.search))router.replace('/console/'+window.location.search);},[router]);
  return <div id="top" className={styles.landing}>
   <a className="skip-link" href="#explore-entry">Skip to exploration</a>
-  <header className={styles.header}><Brand/><nav aria-label="Main navigation"><a href="#story">HOW TO LOOK</a><a href="#mission">THE MISSION</a><ExploreLink href={destination}>EXPLORE <span aria-hidden="true">↗</span></ExploreLink></nav></header>
+  <header className={styles.header}><Brand/><nav aria-label="Main navigation"><Link href="/docs/">HOW TO LOOK</Link><a href="#mission">THE MISSION</a><ExploreLink href={destination}>EXPLORE <span aria-hidden="true">↗</span></ExploreLink></nav></header>
   <main>
    <section ref={hero} className={styles.hero} aria-labelledby="hero-title">
     <div className={styles.heroArt} aria-hidden="true"><img src="/art/khonsu-planet.webp" alt="" width="1672" height="941" fetchPriority="high"/><div className={styles.starLayer}/></div>

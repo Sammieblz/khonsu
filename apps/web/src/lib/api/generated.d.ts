@@ -11,6 +11,10 @@ export interface components {
     "GaiaSource": { "dec_deg": number; "g_magnitude"?: number | null; "pmdec_mas_yr"?: number | null; "pmra_mas_yr"?: number | null; "position_method": "proper-motion" | "catalog-position"; "positions": (components["schemas"]["CatalogPosition"])[]; "ra_deg": number; "ref_epoch": number; "source_id": string; };
     "HealthResponse": { "live_processing_available"?: boolean; "service"?: "khonsu-api"; "status"?: "ok"; "version": string; };
     "ImageGrid": { "height_px": number; "orientation"?: "north-up-east-left"; "pixel_center_convention"?: "zero-based-integer-centers"; "pixel_origin"?: "top-left"; "raster_to_wcs"?: "identity" | "flip-y" | null; "wcs_header"?: { [key: string]: string | number | number; } | null; "width_px": number; };
+    "NotebookDocument": { "candidate_snapshot": string; "observation_notes"?: (components["schemas"]["ObservationNote"])[]; };
+    "NotebookRecord": { "document": components["schemas"]["NotebookDocument"] | null; "revision": number; };
+    "NotebookWrite": { "document": components["schemas"]["NotebookDocument"]; "revision": number; };
+    "ObservationNote": { "created_at": string; "frame_id"?: string | null; "id": string; "sequence"?: components["schemas"]["SequenceManifest"] | null; "text": string; "updated_at": string; };
     "PreparedRaster": { "encoding"?: "float32-le-mask8-v1" | "float32-le-quality8-v2" | "float32-le-estimate8-v1" | "float32-le-refined8-v1"; "sha256": string; "size_bytes": number; "url": string; };
     "PresetTarget": { "coordinate_frame"?: "ICRS"; "coordinate_note": string; "dec_deg"?: number | null; "label": string; "object_type": string; "preset_id": string; "ra_deg"?: number | null; };
     "QualityWarning": { "code": string; "message": string; };

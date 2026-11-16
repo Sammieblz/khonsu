@@ -11,6 +11,7 @@ import { buildEvidence, evidenceFilename, evidenceJson } from "./evidence";
 import { MAX_CANDIDATES, MAX_NOTE_LENGTH } from "./records";
 import { formatSky, rasterToSky } from "./sky";
 import styles from "./annotations.module.css";
+import {ObservationNotes} from './ObservationNotes';
 
 function SelectionSummary({ selection, sequence }: { selection: ImageSelection; sequence: SequenceManifest }) {
   const index = sequence.frames.findIndex(frame => frame.frame_id === selection.frameId);
@@ -30,12 +31,12 @@ function StorageMessage({ storage, onStartFresh, onDownloadUnreadable }: { stora
     case "saved": return storage.preservedUnreadable
       ? <p className={styles.storage}>{storage.preservedUnreadable} saved {storage.preservedUnreadable === 1 ? "entry" : "entries"} could not be read by this version. {storage.preservedUnreadable === 1 ? "It is" : "They are"} kept unchanged in this browser and not shown.</p>
       : null;
-    case "unavailable": return <p className={styles.storage} role="status">This browser is not allowing saved data, so candidates last only until you leave or reload this page.</p>;
-    case "write-failed": return <p className={styles.storage} role="status">The latest change could not be saved in this browser. It remains on this page until you leave or reload it.</p>;
-    case "too-large": return <p className={styles.storage} role="status">The candidate list is too large to save in this browser. Delete some candidates to resume saving; changes remain on this page until you leave.</p>;
+    case "unavailable": return <p className={styles.storage} role="status">This browser is not allowing saved data, so notes last only until you leave or reload this page. Export to keep them.</p>;
+    case "write-failed": return <p className={styles.storage} role="status">The latest change could not be saved in this browser. Check the database status or export before leaving.</p>;
+    case "too-large": return <p className={styles.storage} role="status">The notebook is too large to save in this browser. Export and remove older notes to resume saving. Check the database status before leaving.</p>;
     case "unreadable": return <div className={styles.storage} role="status">
-      <p>{storage.reason} It has been left untouched. New candidates last only for this page visit until you choose what to do.</p>
-      <span><button type="button" onClick={onDownloadUnreadable}>DOWNLOAD SAVED DATA</button><button type="button" onClick={onStartFresh}>REPLACE IT WITH THIS PAGE'S CANDIDATES</button></span>
+      <p>{storage.reason} It has been left untouched. New notes last only for this page visit until you choose what to do. A raw backup can contain your private access key; keep its download private.</p>
+      <span><button type="button" onClick={onDownloadUnreadable}>DOWNLOAD SAVED DATA</button><button type="button" onClick={onStartFresh}>REPLACE IT WITH THIS PAGE'S NOTES</button></span>
     </div>;
   }
 }
@@ -44,7 +45,8 @@ export function AnnotationPanel({
   sequence, selection, annotations, contexts, selectedCandidateId, storage, atCapacity,
   onAdd, onUpdate, onRemove, onSelectCandidate, onStartFresh, onDownloadUnreadable,
 }: AnnotationPanelProps) {
-  const {noteDraft:note,setNoteDraft:setNote}=useExplorer();
+  const {noteDraft:note,setNoteDraft:setNote,candidates,activeFrameId,setSelection}=useExplorer();
+  const [savedMessage,setSavedMessage]=useState('');
   const [exportMessage, setExportMessage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const current = annotations.filter(item => item.selection.sequenceId === sequence?.sequence_id);
@@ -52,8 +54,10 @@ export function AnnotationPanel({
   const activeSelection = selection && sequence && selection.sequenceId === sequence.sequence_id ? selection : null;
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!activeSelection || !note.trim() || atCapacity) return;
-    onAdd(activeSelection, note);
+    if (!note.trim() || (activeSelection ? atCapacity || note.length>MAX_NOTE_LENGTH : candidates.notes.length>=200)) return;
+    if(activeSelection)onAdd(activeSelection, note);
+    else candidates.addNote(note,sequence,activeFrameId);
+    setSavedMessage(activeSelection?'Candidate note added.':'Observation note added.');
     setNote("");
   }
   // Works from the candidates in memory, so damaged or blocked storage never prevents an export.
@@ -82,16 +86,21 @@ export function AnnotationPanel({
   }
   return <section className={styles.panel} aria-labelledby="notes-title">
     <span className={styles.eyebrow}>03 / KEEP THE EVIDENCE</span>
-    <h2 id="notes-title" tabIndex={-1}>Something worth a closer look?</h2>
+    <h2 id="notes-title" tabIndex={-1}>Your observation notebook</h2>
     {activeSelection && sequence
       ? <SelectionSummary selection={activeSelection} sequence={sequence} />
-      : <p className={styles.instructions}>Load an observation, choose Mark, then select a location to start a candidate note.</p>}
+      : <p className={styles.instructions}>{sequence?'Write a note about this observation. A marked position is optional.':'Write a workspace note, or load observations to attach their dates and source details.'}</p>}
+    <div className={styles.noteTools}>{activeSelection?<button type="button" onClick={()=>setSelection(null)}>WRITE A FIELD NOTE</button>:<button type="button" disabled={!sequence} onClick={()=>window.dispatchEvent(new CustomEvent('khonsu:inspect',{detail:{panel:'notes',tool:'mark'}}))}>MARK A LOCATION</button>}</div>
     <form onSubmit={submit}>
       <label htmlFor="candidate-note">Observation note</label>
-      <textarea id="candidate-note" rows={3} maxLength={MAX_NOTE_LENGTH} placeholder="What changed? What might explain it?" value={note} onChange={event => setNote(event.target.value)} disabled={!activeSelection || atCapacity} />
-      <button type="submit" disabled={!activeSelection || !note.trim() || atCapacity}><Icon name="mark" size={17} />SAVE CANDIDATE NOTE</button>
+      <textarea id="candidate-note" rows={3} maxLength={activeSelection?MAX_NOTE_LENGTH:2000} placeholder="What did you notice? What would you check next?" value={note} onChange={event => setNote(event.target.value)} />
+      <button type="submit" disabled={!note.trim() || (activeSelection ? atCapacity || note.length>MAX_NOTE_LENGTH : candidates.notes.length>=200)}><Icon name="mark" size={17} />{activeSelection?'SAVE CANDIDATE NOTE':'SAVE OBSERVATION NOTE'}</button>
+      {activeSelection&&note.length>MAX_NOTE_LENGTH&&<p>Shorten this candidate note to {MAX_NOTE_LENGTH} characters, or save it as a field note.</p>}
+      {savedMessage&&<p role="status">{savedMessage}</p>}
+      {candidates.notes.length>=200&&<p>Export and remove some of your 200 observation notes before adding another.</p>}
       {atCapacity && <p className={styles.storage}>This browser holds the maximum of {MAX_CANDIDATES} candidates. Delete some to add more.</p>}
     </form>
+    <ObservationNotes/>
     {current.length
       ? <CandidateList annotations={current} framesFor={framesFor} selectedId={selectedCandidateId} onShow={id => onSelectCandidate(id === selectedCandidateId ? null : id)} onUpdate={onUpdate} onRemove={onRemove} onExport={exportOne} />
       : <p className={styles.empty}>No candidate notes for this sequence yet.</p>}
@@ -111,6 +120,6 @@ export function AnnotationPanel({
     </div>
     <StorageMessage storage={storage} onStartFresh={onStartFresh} onDownloadUnreadable={onDownloadUnreadable} />
     <p className={styles.guidance}>Apparent movement or brightening can come from noise, detector artifacts, unmatched point spread functions or remaining registration error. Check the quality notes and other epochs before trusting a change.</p>
-    <p className={styles.disclaimer}>Notes stay in this browser. A search link repeats the search but never includes notes; export an evidence file to share them. A candidate is an observation to investigate, not a confirmed discovery.</p>
+    <p className={styles.disclaimer}>Your browser keeps a notebook copy and a private access key for the observation service. Search links never include notes. Export before clearing browser data. A candidate is a question to investigate, not a confirmed discovery.</p>
   </section>;
 }

@@ -1,4 +1,5 @@
 const MAX_BODY_BYTES = 16 * 1024;
+const bodyLimit = (request: Request) => new URL(request.url).pathname === '/v1/notebook' ? 4 * 1024 * 1024 : MAX_BODY_BYTES;
 
 export class GatewayRequestError extends Error {
   readonly status: number;
@@ -40,7 +41,9 @@ export function validateRequest(request: Request, origins: Set<string>): void {
   if (!isApiPath(url.pathname)) {
     throw new GatewayRequestError(404, "ROUTE_NOT_FOUND", "This gateway serves /health and /v1 API paths only.");
   }
-  if (!["GET", "POST", "OPTIONS"].includes(request.method) ||
+  const notebook = url.pathname === '/v1/notebook';
+  const methods = notebook ? ['GET', 'PUT'] : ['GET', 'POST'];
+  if (![...methods, "OPTIONS"].includes(request.method) ||
       (request.method === "POST" && url.pathname === "/health")) {
     throw new GatewayRequestError(405, "METHOD_NOT_ALLOWED", "This route does not allow that method.");
   }
@@ -52,30 +55,30 @@ export function validateRequest(request: Request, origins: Set<string>): void {
     const method = request.headers.get("Access-Control-Request-Method");
     const requestedHeaders = (request.headers.get("Access-Control-Request-Headers") ?? "")
       .split(",").map((part) => part.trim().toLowerCase()).filter(Boolean);
-    if (!origin || !["GET", "POST"].includes(method ?? "") ||
+    if (!origin || !methods.includes(method ?? "") ||
         (method === "POST" && url.pathname === "/health") ||
-        requestedHeaders.some((header) => header !== "content-type")) {
+        requestedHeaders.some((header) => header !== "content-type" && !(notebook && header === 'x-khonsu-notebook'))) {
       throw new GatewayRequestError(400, "INVALID_PREFLIGHT", "The preflight method or headers are not allowed.");
     }
   }
-  if (request.method === "POST") {
+  if (request.method === "POST" || request.method === 'PUT') {
     const contentType = request.headers.get("Content-Type")?.split(";", 1)[0]?.trim().toLowerCase();
     if (contentType !== "application/json") {
-      throw new GatewayRequestError(415, "JSON_REQUIRED", "POST requests must use application/json.");
+      throw new GatewayRequestError(415, "JSON_REQUIRED", "Request bodies must use application/json.");
     }
     const encoding = request.headers.get("Content-Encoding");
     if (encoding && encoding.toLowerCase() !== "identity") {
       throw new GatewayRequestError(415, "ENCODING_NOT_ALLOWED", "Compressed request bodies are not supported.");
     }
     const length = request.headers.get("Content-Length");
-    if (length !== null && (!/^\d+$/.test(length) || Number(length) > MAX_BODY_BYTES)) {
-      throw new GatewayRequestError(413, "BODY_TOO_LARGE", "The request body exceeds 16 KiB.");
+    if (length !== null && (!/^\d+$/.test(length) || Number(length) > bodyLimit(request))) {
+      throw new GatewayRequestError(413, "BODY_TOO_LARGE", "The request body exceeds this route's limit.");
     }
   }
 }
 
 export async function boundedPostRequest(request: Request): Promise<Request> {
-  if (request.method !== "POST" || !request.body) return request;
+  if (!["POST", "PUT"].includes(request.method) || !request.body) return request;
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -84,9 +87,9 @@ export async function boundedPostRequest(request: Request): Promise<Request> {
       const result = await reader.read();
       if (result.done) break;
       size += result.value.byteLength;
-      if (size > MAX_BODY_BYTES) {
+      if (size > bodyLimit(request)) {
         await reader.cancel();
-        throw new GatewayRequestError(413, "BODY_TOO_LARGE", "The request body exceeds 16 KiB.");
+        throw new GatewayRequestError(413, "BODY_TOO_LARGE", "The request body exceeds this route's limit.");
       }
       chunks.push(result.value);
     }
@@ -112,8 +115,9 @@ export function corsResponse(response: Response, request: Request, origins: Set<
   const origin = request.headers.get("Origin");
   if (origin && origins.has(origin)) {
     headers.set("Access-Control-Allow-Origin", origin);
-    headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    headers.set("Access-Control-Allow-Headers", "Content-Type");
+    const notebook = new URL(request.url).pathname === '/v1/notebook';
+    headers.set("Access-Control-Allow-Methods", notebook ? "GET, PUT, OPTIONS" : "GET, POST, OPTIONS");
+    headers.set("Access-Control-Allow-Headers", notebook ? "Content-Type, X-Khonsu-Notebook" : "Content-Type");
   }
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }

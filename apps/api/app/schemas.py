@@ -5,6 +5,7 @@ Scientific array and filesystem objects belong in service interfaces, not JSON.
 
 from datetime import datetime, timezone
 import math
+import json
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
@@ -310,3 +311,56 @@ class SequenceJob(ApiModel):
     message: str | None = None
     manifest_url: str | None = None
     error: ApiError | None = None
+
+
+class ObservationNote(ApiModel):
+    id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,80}$")
+    text: str = Field(min_length=1, max_length=2000)
+    created_at: datetime
+    updated_at: datetime
+    sequence: SequenceManifest | None = None
+    frame_id: str | None = Field(default=None, max_length=80)
+
+    @model_validator(mode="after")
+    def validate_note(self):
+        if not self.text.strip():
+            raise ValueError("A note must contain text")
+        for name in ("created_at", "updated_at"):
+            value = getattr(self, name)
+            if value.utcoffset() is None:
+                raise ValueError("Note dates must include a timezone")
+            setattr(self, name, value.astimezone(timezone.utc))
+        if self.frame_id and (not self.sequence or self.frame_id not in {f.frame_id for f in self.sequence.frames}):
+            raise ValueError("The note frame must belong to its saved sequence")
+        return self
+
+
+class NotebookDocument(ApiModel):
+    # Keep the already-versioned candidate evidence intact, including unreadable
+    # legacy entries. This text is stored only; URLs in it are never fetched.
+    candidate_snapshot: str = Field(max_length=2_000_000)
+    observation_notes: list[ObservationNote] = Field(default_factory=list, max_length=200)
+
+    @model_validator(mode="after")
+    def validate_snapshot(self):
+        try:
+            value = json.loads(self.candidate_snapshot)
+        except (ValueError, RecursionError):
+            raise ValueError("Candidate snapshot must be valid JSON") from None
+        if not isinstance(value, dict) or value.get("schema") != "khonsu-candidates" or value.get("version") != 2:
+            raise ValueError("Candidate snapshot must use the supported version")
+        if not isinstance(value.get("candidates"), list) or len(value["candidates"]) > 200 or not isinstance(value.get("sequences"), dict):
+            raise ValueError("Candidate snapshot exceeds its record bounds")
+        if len({n.id for n in self.observation_notes}) != len(self.observation_notes):
+            raise ValueError("Note IDs must be unique")
+        return self
+
+
+class NotebookRecord(ApiModel):
+    revision: int = Field(ge=0, le=2_147_483_647)
+    document: NotebookDocument | None
+
+
+class NotebookWrite(ApiModel):
+    revision: int = Field(ge=0, le=2_147_483_646)
+    document: NotebookDocument
