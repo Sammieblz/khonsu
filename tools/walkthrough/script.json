@@ -1,0 +1,180 @@
+{
+  "long": [
+    {
+      "id": "story",
+      "title": "THE SKY REMEMBERS.",
+      "kicker": "Our story",
+      "lines": [
+        "Khonsu takes its name from the Egyptian lunar deity, the traveler.",
+        "The sky-rewinding moment in Moon Knight inspired us to turn wonder into an instrument for exploring time.",
+        "Our artwork is original. Our observation dates come from the telescope."
+      ]
+    },
+    {
+      "id": "entry",
+      "title": "ENTER THE OBSERVATORY",
+      "kicker": "Start here",
+      "lines": [
+        "Built by ByteBoyz, Khonsu makes the infrared sky approachable for curious people, not only specialists.",
+        "Choose Explore the Sky. A short, skippable introduction brings you into the console while observations load."
+      ]
+    },
+    {
+      "id": "field",
+      "title": "CHOOSE YOUR PATCH",
+      "kicker": "Coordinates and targets",
+      "lines": [
+        "In Field, enter right ascension and declination in degrees, then choose the field of view in arcminutes.",
+        "The named presets fill coordinates for the five challenge targets. Search this field starts a bounded archive request.",
+        "This walkthrough uses the saved WISE 0855 field: genuine SPHEREx data, not a live search or simulated stars."
+      ]
+    },
+    {
+      "id": "time",
+      "title": "ONE SKY. MANY MOMENTS.",
+      "kicker": "Real observation time",
+      "lines": [
+        "Drag the amber time dial or use Previous and Next to step between actual observation dates.",
+        "The handle follows your pointer and springs to a real epoch when released. Play advances through the available frames.",
+        "Unequal time gaps stay visible. We do not invent observations between visits."
+      ]
+    },
+    {
+      "id": "navigate",
+      "title": "LOOK CLOSER",
+      "kicker": "Fit, fill, pan and zoom",
+      "lines": [
+        "Fit shows the whole observed field. Fill uses more of the console by cropping the view.",
+        "Choose Pan to move around, and zoom in for inspection. The sky keeps its original geometry.",
+        "Keyboard controls offer another way to move through time and explore the image."
+      ]
+    },
+    {
+      "id": "compare",
+      "title": "PAUSE. COMPARE. NOTICE.",
+      "kicker": "A and B comparison",
+      "lines": [
+        "Use Compare to choose observations A and B. Blink alternates them, while Hold for B gives a temporary comparison.",
+        "Read their dates and wavelengths before interpreting a difference. Noise, changing backgrounds and unmatched blur can mimic change."
+      ]
+    },
+    {
+      "id": "display",
+      "title": "A CLEARER VIEW",
+      "kicker": "Display and original data",
+      "lines": [
+        "Clean View estimates eligible missing patches to make the image easier to explore.",
+        "Show original returns to measured data. Estimated-area highlighting reveals where visual guesses were used.",
+        "Advanced controls adjust presentation and display resolution. More screen pixels cannot create finer telescope measurements."
+      ]
+    },
+    {
+      "id": "quality",
+      "title": "ASK WHAT A PIXEL MEANS",
+      "kicker": "Quality and provenance",
+      "lines": [
+        "In Layers, turn on the quality overlay and choose Inspect to understand a pixel.",
+        "Warning samples, missing measurements and estimated areas remain distinct. Hiding a layer does not repair the data.",
+        "Info preserves the actual dates, source identifiers, release, wavelength and processing context."
+      ]
+    },
+    {
+      "id": "context",
+      "title": "PUT THE SKY IN CONTEXT",
+      "kicker": "Gaia and WISE",
+      "lines": [
+        "Optional Gaia markers provide known-source context. The separate WISE reference pane offers another telescope view.",
+        "These depend on external services. An unmarked point is not automatically a new object, and an overlay is not a confirmed match."
+      ]
+    },
+    {
+      "id": "notes",
+      "title": "KEEP YOUR OBSERVATIONS",
+      "kicker": "A usable notebook",
+      "lines": [
+        "Open Notes and write what you notice. You can save an observation note without marking a pixel.",
+        "Edit, delete or export your notes. A sequence and its displayed observation are attached when available.",
+        "The browser keeps a copy. Configured local Docker storage adds a private SQLite backup, with clear offline and conflict feedback."
+      ]
+    },
+    {
+      "id": "candidate",
+      "title": "FROM CURIOSITY TO EVIDENCE",
+      "kicker": "Mark and export",
+      "lines": [
+        "For a specific position, choose Mark, select the image, and save a candidate note.",
+        "The evidence retains its position, original validity, observation dates, comparison context and source references.",
+        "Export downloads a portable record. A candidate is a question to investigate, not a confirmed discovery."
+      ]
+    },
+    {
+      "id": "share",
+      "title": "SHARE THE FIELD",
+      "kicker": "Links, guidance and documentation",
+      "lines": [
+        "Share creates a coordinate link without private notes. Opening it fills the search, rather than silently downloading archive data.",
+        "Guided Mode walks through the controls. The Docs page explains features, testing, image limitations and notebook recovery."
+      ]
+    },
+    {
+      "id": "outro",
+      "title": "FIND WHAT TIME REVEALS.",
+      "kicker": "ByteBoyz / NASA Space Apps",
+      "lines": [
+        "Khonsu brings NASA SPHEREx observations into a visual workspace for careful exploration.",
+        "Built by Samuel Ndubuisi, Tyrone Johnson, Robel Mezgebe, Michael Ameteku and Aryan Pai.",
+        "One sky. Many moments. Find what time reveals."
+      ]
+    }
+  ],
+  "short": [
+    {
+      "id": "story",
+      "title": "THE SKY REMEMBERS.",
+      "kicker": "Khonsu / ByteBoyz",
+      "lines": [
+        "Khonsu means traveler. Inspired by the sky-rewinding moment in Moon Knight, we turned wonder into exploration."
+      ]
+    },
+    {
+      "id": "field",
+      "title": "CHOOSE A PATCH OF SKY",
+      "kicker": "Real SPHEREx observations",
+      "lines": [
+        "Enter a sky position, then compare real, dated SPHEREx observations."
+      ]
+    },
+    {
+      "id": "time",
+      "title": "REWIND. BLINK. INSPECT.",
+      "kicker": "Actual observation dates",
+      "lines": [
+        "Rewind, blink, inspect quality, and save evidence."
+      ]
+    },
+    {
+      "id": "display",
+      "title": "KEEP THE SCIENCE VISIBLE",
+      "kicker": "Estimates are labelled",
+      "lines": [
+        "Clean View labels estimated gaps. Original measurements stay available."
+      ]
+    },
+    {
+      "id": "candidate",
+      "title": "CURIOSITY BECOMES EVIDENCE",
+      "kicker": "A lead, not a discovery",
+      "lines": [
+        "Built by ByteBoyz for curious explorers, not just experts."
+      ]
+    },
+    {
+      "id": "outro",
+      "title": "FIND WHAT TIME REVEALS.",
+      "kicker": "NASA Space Apps / Planet X and SPHEREx",
+      "lines": [
+        "Khonsu. Find what time reveals."
+      ]
+    }
+  ]
+}

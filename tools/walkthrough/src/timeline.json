@@ -1,0 +1,549 @@
+{
+  "long": {
+    "scenes": [
+      {
+        "id": "story",
+        "title": "THE SKY REMEMBERS.",
+        "kicker": "Our story",
+        "lines": [
+          "Khonsu takes its name from the Egyptian lunar deity, the traveler.",
+          "The sky-rewinding moment in Moon Knight inspired us to turn wonder into an instrument for exploring time.",
+          "Our artwork is original. Our observation dates come from the telescope."
+        ],
+        "start": 0,
+        "audio": [
+          {
+            "src": "narration/long-story-0.wav",
+            "start": 20,
+            "frames": 132,
+            "text": "Khonsu takes its name from the Egyptian lunar deity, the traveler.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-story-1.wav",
+            "start": 160,
+            "frames": 185,
+            "text": "The sky-rewinding moment in Moon Knight inspired us to turn wonder into an instrument for exploring time.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-story-2.wav",
+            "start": 353,
+            "frames": 160,
+            "text": "Our artwork is original. Our observation dates come from the telescope.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 541
+      },
+      {
+        "id": "entry",
+        "title": "ENTER THE OBSERVATORY",
+        "kicker": "Start here",
+        "lines": [
+          "Built by ByteBoyz, Khonsu makes the infrared sky approachable for curious people, not only specialists.",
+          "Choose Explore the Sky. A short, skippable introduction brings you into the console while observations load."
+        ],
+        "start": 541,
+        "audio": [
+          {
+            "src": "narration/long-entry-0.wav",
+            "start": 20,
+            "frames": 215,
+            "text": "Built by ByteBoyz, Khonsu makes the infrared sky approachable for curious people, not only specialists.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-entry-1.wav",
+            "start": 243,
+            "frames": 228,
+            "text": "Choose Explore the Sky. A short, skippable introduction brings you into the console while observations load.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 499
+      },
+      {
+        "id": "field",
+        "title": "CHOOSE YOUR PATCH",
+        "kicker": "Coordinates and targets",
+        "lines": [
+          "In Field, enter right ascension and declination in degrees, then choose the field of view in arcminutes.",
+          "The named presets fill coordinates for the five challenge targets. Search this field starts a bounded archive request.",
+          "This walkthrough uses the saved WISE 0855 field: genuine SPHEREx data, not a live search or simulated stars."
+        ],
+        "start": 1040,
+        "audio": [
+          {
+            "src": "narration/long-field-0.wav",
+            "start": 20,
+            "frames": 199,
+            "text": "In Field, enter right ascension and declination in degrees, then choose the field of view in arcminutes.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-field-1.wav",
+            "start": 227,
+            "frames": 232,
+            "text": "The named presets fill coordinates for the five challenge targets. Search this field starts a bounded archive request.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-field-2.wav",
+            "start": 467,
+            "frames": 253,
+            "text": "This walkthrough uses the saved WISE 0855 field: genuine SPHEREx data, not a live search or simulated stars.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 748
+      },
+      {
+        "id": "time",
+        "title": "ONE SKY. MANY MOMENTS.",
+        "kicker": "Real observation time",
+        "lines": [
+          "Drag the amber time dial or use Previous and Next to step between actual observation dates.",
+          "The handle follows your pointer and springs to a real epoch when released. Play advances through the available frames.",
+          "Unequal time gaps stay visible. We do not invent observations between visits."
+        ],
+        "start": 1788,
+        "audio": [
+          {
+            "src": "narration/long-time-0.wav",
+            "start": 20,
+            "frames": 178,
+            "text": "Drag the amber time dial or use Previous and Next to step between actual observation dates.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-time-1.wav",
+            "start": 206,
+            "frames": 219,
+            "text": "The handle follows your pointer and springs to a real epoch when released. Play advances through the available frames.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-time-2.wav",
+            "start": 433,
+            "frames": 180,
+            "text": "Unequal time gaps stay visible. We do not invent observations between visits.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 641
+      },
+      {
+        "id": "navigate",
+        "title": "LOOK CLOSER",
+        "kicker": "Fit, fill, pan and zoom",
+        "lines": [
+          "Fit shows the whole observed field. Fill uses more of the console by cropping the view.",
+          "Choose Pan to move around, and zoom in for inspection. The sky keeps its original geometry.",
+          "Keyboard controls offer another way to move through time and explore the image."
+        ],
+        "start": 2429,
+        "audio": [
+          {
+            "src": "narration/long-navigate-0.wav",
+            "start": 20,
+            "frames": 181,
+            "text": "Fit shows the whole observed field. Fill uses more of the console by cropping the view.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-navigate-1.wav",
+            "start": 209,
+            "frames": 205,
+            "text": "Choose Pan to move around, and zoom in for inspection. The sky keeps its original geometry.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-navigate-2.wav",
+            "start": 422,
+            "frames": 142,
+            "text": "Keyboard controls offer another way to move through time and explore the image.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 592
+      },
+      {
+        "id": "compare",
+        "title": "PAUSE. COMPARE. NOTICE.",
+        "kicker": "A and B comparison",
+        "lines": [
+          "Use Compare to choose observations A and B. Blink alternates them, while Hold for B gives a temporary comparison.",
+          "Read their dates and wavelengths before interpreting a difference. Noise, changing backgrounds and unmatched blur can mimic change."
+        ],
+        "start": 3021,
+        "audio": [
+          {
+            "src": "narration/long-compare-0.wav",
+            "start": 20,
+            "frames": 216,
+            "text": "Use Compare to choose observations A and B. Blink alternates them, while Hold for B gives a temporary comparison.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-compare-1.wav",
+            "start": 244,
+            "frames": 256,
+            "text": "Read their dates and wavelengths before interpreting a difference. Noise, changing backgrounds and unmatched blur can mimic change.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 528
+      },
+      {
+        "id": "display",
+        "title": "A CLEARER VIEW",
+        "kicker": "Display and original data",
+        "lines": [
+          "Clean View estimates eligible missing patches to make the image easier to explore.",
+          "Show original returns to measured data. Estimated-area highlighting reveals where visual guesses were used.",
+          "Advanced controls adjust presentation and display resolution. More screen pixels cannot create finer telescope measurements."
+        ],
+        "start": 3549,
+        "audio": [
+          {
+            "src": "narration/long-display-0.wav",
+            "start": 20,
+            "frames": 151,
+            "text": "Clean View estimates eligible missing patches to make the image easier to explore.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-display-1.wav",
+            "start": 179,
+            "frames": 215,
+            "text": "Show original returns to measured data. Estimated-area highlighting reveals where visual guesses were used.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-display-2.wav",
+            "start": 402,
+            "frames": 252,
+            "text": "Advanced controls adjust presentation and display resolution. More screen pixels cannot create finer telescope measurements.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 682
+      },
+      {
+        "id": "quality",
+        "title": "ASK WHAT A PIXEL MEANS",
+        "kicker": "Quality and provenance",
+        "lines": [
+          "In Layers, turn on the quality overlay and choose Inspect to understand a pixel.",
+          "Warning samples, missing measurements and estimated areas remain distinct. Hiding a layer does not repair the data.",
+          "Info preserves the actual dates, source identifiers, release, wavelength and processing context."
+        ],
+        "start": 4231,
+        "audio": [
+          {
+            "src": "narration/long-quality-0.wav",
+            "start": 20,
+            "frames": 162,
+            "text": "In Layers, turn on the quality overlay and choose Inspect to understand a pixel.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-quality-1.wav",
+            "start": 190,
+            "frames": 233,
+            "text": "Warning samples, missing measurements and estimated areas remain distinct. Hiding a layer does not repair the data.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-quality-2.wav",
+            "start": 431,
+            "frames": 207,
+            "text": "Info preserves the actual dates, source identifiers, release, wavelength and processing context.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 666
+      },
+      {
+        "id": "context",
+        "title": "PUT THE SKY IN CONTEXT",
+        "kicker": "Gaia and WISE",
+        "lines": [
+          "Optional Gaia markers provide known-source context. The separate WISE reference pane offers another telescope view.",
+          "These depend on external services. An unmarked point is not automatically a new object, and an overlay is not a confirmed match."
+        ],
+        "start": 4897,
+        "audio": [
+          {
+            "src": "narration/long-context-0.wav",
+            "start": 20,
+            "frames": 230,
+            "text": "Optional Gaia markers provide known-source context. The separate WISE reference pane offers another telescope view.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-context-1.wav",
+            "start": 258,
+            "frames": 262,
+            "text": "These depend on external services. An unmarked point is not automatically a new object, and an overlay is not a confirmed match.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 548
+      },
+      {
+        "id": "notes",
+        "title": "KEEP YOUR OBSERVATIONS",
+        "kicker": "A usable notebook",
+        "lines": [
+          "Open Notes and write what you notice. You can save an observation note without marking a pixel.",
+          "Edit, delete or export your notes. A sequence and its displayed observation are attached when available.",
+          "The browser keeps a copy. Configured local Docker storage adds a private SQLite backup, with clear offline and conflict feedback."
+        ],
+        "start": 5445,
+        "audio": [
+          {
+            "src": "narration/long-notes-0.wav",
+            "start": 20,
+            "frames": 188,
+            "text": "Open Notes and write what you notice. You can save an observation note without marking a pixel.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-notes-1.wav",
+            "start": 216,
+            "frames": 213,
+            "text": "Edit, delete or export your notes. A sequence and its displayed observation are attached when available.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-notes-2.wav",
+            "start": 437,
+            "frames": 278,
+            "text": "The browser keeps a copy. Configured local Docker storage adds a private SQLite backup, with clear offline and conflict feedback.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 743
+      },
+      {
+        "id": "candidate",
+        "title": "FROM CURIOSITY TO EVIDENCE",
+        "kicker": "Mark and export",
+        "lines": [
+          "For a specific position, choose Mark, select the image, and save a candidate note.",
+          "The evidence retains its position, original validity, observation dates, comparison context and source references.",
+          "Export downloads a portable record. A candidate is a question to investigate, not a confirmed discovery."
+        ],
+        "start": 6188,
+        "audio": [
+          {
+            "src": "narration/long-candidate-0.wav",
+            "start": 20,
+            "frames": 189,
+            "text": "For a specific position, choose Mark, select the image, and save a candidate note.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-candidate-1.wav",
+            "start": 217,
+            "frames": 226,
+            "text": "The evidence retains its position, original validity, observation dates, comparison context and source references.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-candidate-2.wav",
+            "start": 451,
+            "frames": 225,
+            "text": "Export downloads a portable record. A candidate is a question to investigate, not a confirmed discovery.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 704
+      },
+      {
+        "id": "share",
+        "title": "SHARE THE FIELD",
+        "kicker": "Links, guidance and documentation",
+        "lines": [
+          "Share creates a coordinate link without private notes. Opening it fills the search, rather than silently downloading archive data.",
+          "Guided Mode walks through the controls. The Docs page explains features, testing, image limitations and notebook recovery."
+        ],
+        "start": 6892,
+        "audio": [
+          {
+            "src": "narration/long-share-0.wav",
+            "start": 20,
+            "frames": 258,
+            "text": "Share creates a coordinate link without private notes. Opening it fills the search, rather than silently downloading archive data.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-share-1.wav",
+            "start": 286,
+            "frames": 253,
+            "text": "Guided Mode walks through the controls. The Docs page explains features, testing, image limitations and notebook recovery.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 567
+      },
+      {
+        "id": "outro",
+        "title": "FIND WHAT TIME REVEALS.",
+        "kicker": "ByteBoyz / NASA Space Apps",
+        "lines": [
+          "Khonsu brings NASA SPHEREx observations into a visual workspace for careful exploration.",
+          "Built by Samuel Ndubuisi, Tyrone Johnson, Robel Mezgebe, Michael Ameteku and Aryan Pai.",
+          "One sky. Many moments. Find what time reveals."
+        ],
+        "start": 7459,
+        "audio": [
+          {
+            "src": "narration/long-outro-0.wav",
+            "start": 20,
+            "frames": 172,
+            "text": "Khonsu brings NASA SPHEREx observations into a visual workspace for careful exploration.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-outro-1.wav",
+            "start": 200,
+            "frames": 216,
+            "text": "Built by Samuel Ndubuisi, Tyrone Johnson, Robel Mezgebe, Michael Ameteku and Aryan Pai.",
+            "speed": 1.04
+          },
+          {
+            "src": "narration/long-outro-2.wav",
+            "start": 424,
+            "frames": 156,
+            "text": "One sky. Many moments. Find what time reveals.",
+            "speed": 1.04
+          }
+        ],
+        "duration": 608
+      }
+    ],
+    "frames": 8067
+  },
+  "short": {
+    "scenes": [
+      {
+        "id": "story",
+        "title": "THE SKY REMEMBERS.",
+        "kicker": "Khonsu / ByteBoyz",
+        "lines": [
+          "Khonsu means traveler. Inspired by the sky-rewinding moment in Moon Knight, we turned wonder into exploration."
+        ],
+        "start": 0,
+        "audio": [
+          {
+            "src": "narration/short-story-0.wav",
+            "start": 10,
+            "frames": 197,
+            "text": "Khonsu means traveler. Inspired by the sky-rewinding moment in Moon Knight, we turned wonder into exploration.",
+            "speed": 1.22
+          }
+        ],
+        "duration": 209
+      },
+      {
+        "id": "field",
+        "title": "CHOOSE A PATCH OF SKY",
+        "kicker": "Real SPHEREx observations",
+        "lines": [
+          "Enter a sky position, then compare real, dated SPHEREx observations."
+        ],
+        "start": 209,
+        "audio": [
+          {
+            "src": "narration/short-field-0.wav",
+            "start": 10,
+            "frames": 139,
+            "text": "Enter a sky position, then compare real, dated SPHEREx observations.",
+            "speed": 1.22
+          }
+        ],
+        "duration": 151
+      },
+      {
+        "id": "time",
+        "title": "REWIND. BLINK. INSPECT.",
+        "kicker": "Actual observation dates",
+        "lines": [
+          "Rewind, blink, inspect quality, and save evidence."
+        ],
+        "start": 360,
+        "audio": [
+          {
+            "src": "narration/short-time-0.wav",
+            "start": 10,
+            "frames": 123,
+            "text": "Rewind, blink, inspect quality, and save evidence.",
+            "speed": 1.22
+          }
+        ],
+        "duration": 135
+      },
+      {
+        "id": "display",
+        "title": "KEEP THE SCIENCE VISIBLE",
+        "kicker": "Estimates are labelled",
+        "lines": [
+          "Clean View labels estimated gaps. Original measurements stay available."
+        ],
+        "start": 495,
+        "audio": [
+          {
+            "src": "narration/short-display-0.wav",
+            "start": 10,
+            "frames": 138,
+            "text": "Clean View labels estimated gaps. Original measurements stay available.",
+            "speed": 1.22
+          }
+        ],
+        "duration": 150
+      },
+      {
+        "id": "candidate",
+        "title": "CURIOSITY BECOMES EVIDENCE",
+        "kicker": "A lead, not a discovery",
+        "lines": [
+          "Built by ByteBoyz for curious explorers, not just experts."
+        ],
+        "start": 645,
+        "audio": [
+          {
+            "src": "narration/short-candidate-0.wav",
+            "start": 10,
+            "frames": 121,
+            "text": "Built by ByteBoyz for curious explorers, not just experts.",
+            "speed": 1.22
+          }
+        ],
+        "duration": 133
+      },
+      {
+        "id": "outro",
+        "title": "FIND WHAT TIME REVEALS.",
+        "kicker": "NASA Space Apps / Planet X and SPHEREx",
+        "lines": [
+          "Khonsu. Find what time reveals."
+        ],
+        "start": 778,
+        "audio": [
+          {
+            "src": "narration/short-outro-0.wav",
+            "start": 10,
+            "frames": 91,
+            "text": "Khonsu. Find what time reveals.",
+            "speed": 1.22
+          }
+        ],
+        "duration": 122
+      }
+    ],
+    "frames": 900
+  }
+}

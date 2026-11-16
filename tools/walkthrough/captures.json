@@ -1,0 +1,46 @@
+{
+  "entry": {
+    "from": 2.372,
+    "duration": 9.267
+  },
+  "field": {
+    "from": 4.116,
+    "duration": 6.352
+  },
+  "time": {
+    "from": 4.091,
+    "duration": 10.288
+  },
+  "navigate": {
+    "from": 4.241,
+    "duration": 7.367000000000001
+  },
+  "compare": {
+    "from": 3.895,
+    "duration": 8.64
+  },
+  "display": {
+    "from": 3.705,
+    "duration": 6.561
+  },
+  "quality": {
+    "from": 3.768,
+    "duration": 7.011
+  },
+  "context": {
+    "from": 3.864,
+    "duration": 4.736
+  },
+  "notes": {
+    "from": 3.911,
+    "duration": 6.3870000000000005
+  },
+  "candidate": {
+    "from": 4.643,
+    "duration": 7.273000000000001
+  },
+  "share": {
+    "from": 3.897,
+    "duration": 9.724
+  }
+}
