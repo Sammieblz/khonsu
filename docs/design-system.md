@@ -73,7 +73,8 @@ The frontend's small original icon set uses a 24 px view box, 1.5 px strokes, co
 | --- | --- | --- |
 | Hover or focus feedback | 120 to 160 ms | Small color or border change |
 | Panel or tool changes | 200 to 280 ms | Short, deliberate transition |
-| Optional entry composition | 600 to 900 ms | No required introduction before using the explorer |
+| First Explore entry | 3 seconds | Skippable anticipation, loads begin immediately; reduced motion skips it |
+| Time handle release | 250 ms spring | Continuous drag settles on a real date; keyboard is immediate |
 | Time cursor | Direct manipulation | Follow the pointer without decorative lag |
 | Scientific frame | Discrete observation switch | No fabricated intermediate positions |
 

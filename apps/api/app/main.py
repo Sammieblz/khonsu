@@ -8,14 +8,15 @@ import tempfile
 import threading
 from typing import Annotated
 
-from fastapi import FastAPI, Path as ApiPath, Request
+from fastapi import FastAPI, Header, Path as ApiPath, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
 from .jobs import JobManager, JobError
 from .paths import fixture_directory
-from .schemas import ApiError, GaiaContext, HealthResponse, PresetTarget, SequenceJob, SequenceManifest, SequenceRequest
+from .schemas import ApiError, GaiaContext, HealthResponse, PresetTarget, SequenceJob, SequenceManifest, SequenceRequest, NotebookRecord, NotebookWrite
+from .notebooks import NotebookBodyLimit, notebook_repository
 
 VERSION = "1.0.0"
 FIXTURES = fixture_directory(Path(__file__), os.environ.get("KHONSU_FIXTURE_DIR"))
@@ -45,13 +46,35 @@ async def lifespan(app):
         manager = None
 
 
-app = FastAPI(title="Khonsu API", version=VERSION, lifespan=lifespan,
+app = FastAPI(title="Khonsu API", version=VERSION, lifespan=lifespan, separate_input_output_schemas=False,
               description="Explore genuine IRSA SPHEREx observations through bounded retrieval and scientific processing. Synthetic development imagery is opt-in.")
 origins = [value.strip() for value in os.environ.get(
     "KHONSU_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
 ).split(",") if value.strip()]
+app.add_middleware(NotebookBodyLimit)
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False,
-                   allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+                   allow_methods=["GET", "POST", "PUT"], allow_headers=["Content-Type", "X-Khonsu-Notebook"])
+
+NotebookKey = Annotated[str, Header(alias="X-Khonsu-Notebook", pattern=r"^[a-f0-9]{64}$")]
+
+
+def notebook_action(response, action):
+    import sqlite3
+    response.headers["Cache-Control"] = "private, no-store"
+    try:
+        return action()
+    except (sqlite3.Error, OSError, ValueError):
+        raise JobError(503, "NOTEBOOK_UNAVAILABLE", "Database storage is unavailable. Your browser copy is kept.") from None
+
+
+@app.get("/v1/notebook", response_model=NotebookRecord, responses={422: {"model": ApiError}, 503: {"model": ApiError}}, tags=["notebook"])
+def read_notebook(response: Response, key: NotebookKey):
+    return notebook_action(response, lambda: notebook_repository().read(key))
+
+
+@app.put("/v1/notebook", response_model=NotebookRecord, responses={409: {"model": ApiError}, 413: {"model": ApiError}, 422: {"model": ApiError}, 503: {"model": ApiError}, 507: {"model": ApiError}}, tags=["notebook"])
+def write_notebook(value: NotebookWrite, response: Response, key: NotebookKey):
+    return notebook_action(response, lambda: notebook_repository().write(key, value))
 
 
 def error_response(status, code, message, details=None):

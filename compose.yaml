@@ -10,12 +10,16 @@ services:
     environment:
       KHONSU_CORS_ORIGINS: ${KHONSU_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       KHONSU_FIXTURE_DIR: /app/fixtures
+      KHONSU_NOTEBOOK_DB: /app/data/notebooks.sqlite3
+    volumes:
+      - notebook-data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 10s
+
   web:
     build:
       context: .
@@ -34,4 +38,7 @@ services:
       timeout: 10s
       retries: 12
       start_period: 10s
+
+volumes:
+  notebook-data:
 

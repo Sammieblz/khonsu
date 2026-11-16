@@ -9,12 +9,12 @@ const output=resolve('.cache/sky-motion');await mkdir(output,{recursive:true});
 const examples=await(await fetch(api+'/v1/examples')).text();
 const report=[];
 for(const engine of [chromium,firefox]){
- const browser=await engine.launch({headless:true});
+ const browser=await engine.launch({headless:true,...(engine===chromium&&process.env.CHROMIUM_EXECUTABLE?{executablePath:process.env.CHROMIUM_EXECUTABLE}:{})});
  try{
   const context=await browser.newContext({viewport:{width:1920,height:1080},recordVideo:{dir:output,size:{width:1280,height:720}}}),p=await context.newPage(),errors=[];
   p.setDefaultTimeout(15000);p.on('pageerror',e=>errors.push(e.message));
   const requests=[];
-  await p.route('**/v1/examples',async route=>{requests.push(Date.now());await new Promise(r=>setTimeout(r,2500));await route.fulfill({contentType:'application/json',body:examples}).catch(()=>{});});
+  await p.route('**/v1/examples',async route=>{requests.push(Date.now());await new Promise(r=>setTimeout(r,5000));await route.fulfill({contentType:'application/json',body:examples}).catch(()=>{});});
   await p.goto(base);if(engine===chromium){const cdp=await context.newCDPSession(p);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});}
   await p.evaluate(()=>{document.addEventListener('click',()=>{window.__entryClicked=Date.now();},{capture:true,once:true});window.__entryObserver=new MutationObserver(()=>{const entry=document.querySelector('[data-sky-entry]');if(entry&&!window.__entryStart)window.__entryStart=Date.now();if(!entry&&window.__entryStart&&!window.__entryEnd)window.__entryEnd=Date.now();});window.__entryObserver.observe(document.body,{childList:true,subtree:true});});
   await p.locator('#explore-entry').getByRole('link',{name:'EXPLORE THE SKY',exact:true}).click();
@@ -22,10 +22,10 @@ for(const engine of [chromium,firefox]){
   const timing=await p.evaluate(()=>({click:window.__entryClicked,start:window.__entryStart,end:window.__entryEnd}));
   const afterClick=requests.find(time=>time>=timing.click)-timing.click;
   assert.ok(afterClick<timing.end-timing.click,'Request should start during, not after, the transition');
-  assert.ok(timing.end-timing.start<1400,'Intro is bounded even with throttled CPU');
+  assert.ok(timing.end-timing.start>=2800&&timing.end-timing.start<4500,'Three-second intro is bounded even with throttled CPU');
   const status=p.locator('[data-loading-stage]');await status.waitFor();const text=await status.getByRole('status').textContent();
   await p.screenshot({path:resolve(output,engine.name()+'-loading.png')});
-  assert.match(text,/saved observations/);assert.equal(await status.locator('progress').getAttribute('value'),null);
+  assert.match(text,/saved observations/);assert.equal(await status.locator('progress').getAttribute('value'),null);assert.equal(await p.locator('[data-khonsu-guardian]').count(),0);
   await p.waitForFunction(()=>document.querySelector('canvas')?.style.visibility==='visible',null,{timeout:60000});assert.equal(await status.count(),0);
   await p.unroute('**/v1/examples');
   await p.emulateMedia({reducedMotion:'reduce'});await p.goto(base);await p.locator('#explore-entry').getByRole('link',{name:'EXPLORE THE SKY',exact:true}).click();assert.equal(await p.locator('[data-sky-entry]').count(),0);
@@ -37,9 +37,11 @@ for(const engine of [chromium,firefox]){
   await p.route('**/v1/sequences/motion-control/cancel',r=>{cancelled++;return r.fulfill({contentType:'application/json',body:JSON.stringify({...job,status:'cancelled'})});});
   await p.goto(base+'/console/?ra_deg=12&dec_deg=-7&fov_arcmin=6');await p.getByRole('button',{name:'SEARCH THIS FIELD',exact:true}).click();
   await p.locator('[data-loading-stage="retrieving"]').waitFor();
-  await p.locator('[data-loading-stage] button').filter({hasText:'CANCEL'}).click();await p.locator('[data-loading-stage="cancelled"]').waitFor();
+  const stopping=p.waitForResponse(r=>r.url().endsWith('/motion-control/cancel'));
+  await p.locator('[data-loading-stage] button').filter({hasText:'CANCEL'}).click();await p.locator('[data-loading-stage="cancelled"]').waitFor();await stopping;
   assert.equal(cancelled,1);await p.getByRole('button',{name:'TRY AGAIN',exact:true}).click();await p.locator('[data-loading-stage="retrieving"]').waitFor();
-  await p.getByRole('link',{name:'Khonsu home',exact:true}).click();await p.waitForURL(base+'/');await p.waitForTimeout(300);assert.equal(cancelled,2);
+  const leaving=p.waitForResponse(r=>r.url().endsWith('/motion-control/cancel'));
+  await p.getByRole('link',{name:'Khonsu home',exact:true}).click();await p.waitForURL(base+'/');await leaving;assert.equal(cancelled,2);
   assert.deepEqual(errors,[]);await context.close();report.push({browser:engine.name(),version:browser.version(),requestDuringEntryMs:afterClick,throttle:engine===chromium?'4x CPU':'none',cancelled,errors});
  }finally{await browser.close();}
 }

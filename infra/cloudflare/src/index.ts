@@ -105,7 +105,7 @@ export default {
         const response = errorResponse(error.status, error.code, error.message);
         if (error.status === 405) {
           response.headers.set("Allow", new URL(request.url).pathname === "/health"
-            ? "GET, OPTIONS" : "GET, POST, OPTIONS");
+            ? "GET, OPTIONS" : new URL(request.url).pathname === '/v1/notebook' ? 'GET, PUT, OPTIONS' : "GET, POST, OPTIONS");
         }
         return corsResponse(response, request, origins);
       }

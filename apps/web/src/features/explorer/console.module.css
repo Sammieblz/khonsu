@@ -5,6 +5,8 @@
 .fieldTitle{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12px var(--font-data);color:var(--silver);}
 .header button,.header nav a,.sheet button{min-height:44px;padding:8px 14px;border:1px solid var(--line);background:var(--space);color:var(--ivory);font:11px var(--font-data);}
 .header nav{display:flex;gap:8px;}
+.header nav>a{display:inline-flex;align-items:center;text-decoration:none;}
+@media(max-width:599px){.header>a{font-size:0!important;letter-spacing:0;}.header>a img{margin:0;width:26px;height:26px;}.header nav{gap:4px;}.header nav button,.header nav a{font-size:9px;padding:8px 6px;}}
 .inspector{grid-area:inspector;min-width:0;min-height:0;border-left:1px solid var(--line);background:#0b121d;overflow:hidden;}
 .inspectorTabs{height:100%;min-height:0;display:flex;flex-direction:column;}
 .tabList{display:grid;grid-template-columns:repeat(3,1fr);padding:8px;gap:4px;border-bottom:1px solid var(--line);flex-shrink:0;}
@@ -21,7 +23,7 @@
 .sheetHeading{display:flex;align-items:center;justify-content:space-between;padding:4px 12px;}
 .sheetHeading h2{font:11px var(--font-data);}
 .sheet .inspectorTabs{height:auto;min-height:0;flex:1;}
-.mobileLauncher{position:fixed;z-index:3;right:125px;top:6px;min-height:44px;padding:8px 10px;background:var(--space);color:var(--amber);border:1px solid var(--amber);font:12px var(--font-data);}
+.controlsSlot{display:contents;}.mobileLauncher{min-height:44px;padding:8px 10px;background:var(--space);color:var(--amber);border:1px solid var(--amber);font:12px var(--font-data);}
 .dialogBackdrop{position:fixed;inset:0;background:#02050cbb;z-index:100;}
 .dialog{position:fixed;z-index:101;left:50%;top:50%;transform:translate(-50%,-50%);width:min(600px,calc(100vw - 32px));max-height:85dvh;overflow:auto;padding:24px;background:var(--surface);border:1px solid var(--silver);}
 .dialog h2{font:500 32px var(--font-display);margin-top:0;}
@@ -33,3 +35,6 @@
 @media(max-width:599px){.sheet{bottom:192px;}}
 @media(max-height:599px){.shell{height:auto;min-height:100dvh;overflow:visible;}.sheet{bottom:8px;height:75dvh;}.header{min-height:56px;}}
 @media(prefers-reduced-motion:reduce){.sheet{transition:none;}}
+
+@media(max-width:599px){.header .quickHelp{display:none;}.header .mobileLauncher{font-size:9px;padding:8px 6px;}}
+@media(max-width:1099px),(max-height:599px){:global(body:has([data-guided-mode])) .sheet{height:min(34dvh,300px);}}

@@ -179,3 +179,23 @@ and interruptible 900 ms entry. No new 3D engine or science processing is added.
 The landing story may use GSAP only for its scroll progression. Motion and
 Remotion were considered but are unnecessary for this scope. See
 [console-design.md](console-design.md) for contracts and acceptance.
+
+## 2026-11-15: Guided notebook and spring controls, #77 / BYT-54
+
+Samuel explicitly requested durable notes, a lightweight database, a longer entry,
+a tour, robust docs and a responsive spring dial. This is the scoped exception
+to the initial database deferral. SQLite uses Python's standard library, one
+bounded private notebook per browser key, optimistic revisions and a persistent
+local Compose volume. No login, shared account service or persistent science
+jobs are added. Public Cloudflare notebook storage stays disabled until a durable
+disk is configured. The schema and generated clients change together; Tyrone is
+the contract and integration reviewer.
+
+The entry now lasts three seconds with Skip/Escape and reduced-motion bypass.
+Data starts loading immediately. The guardian appears only here, not during
+subsequent image or archive loads. This supersedes the previous 900 ms policy.
+Base UI supplies the tour; docs remain static. Motion 14.14.0 supplies only the
+short dial-release spring, with immediate pointer following and real-date
+selection. No image interpolation or scientific processing changes are made.
+The installed animation skills and [implementation record](guided-notebook.md)
+document the choices and acceptance checks.

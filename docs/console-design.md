@@ -61,9 +61,11 @@ in the loaded console. Both browsers reported no uncaught page errors.
 
 ## Entry and feedback, #62 / BYT-47
 
-Explore starts navigation immediately, while an original SVG sky sweep runs for
-at most 900 ms. Ready images, errors, Skip and Escape remove it early. Returning
-to an already loaded session skips the intro. Reduced motion skips the sweep.
+The #77 follow-up supersedes the original 900 ms policy. Explore starts navigation
+immediately, while the original SVG sky sweep runs for three seconds even when
+images are ready. Errors, Skip and Escape remove it early. Returning to a loaded
+session and reduced motion skip it. The guardian appears only during entry; later
+loads use ordinary status feedback. See [guided-notebook.md](guided-notebook.md).
 The request is never gated by an animation-completion callback.
 
 The small ivory and amber guardian is original, code-authored SVG artwork. Its

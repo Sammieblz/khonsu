@@ -10,6 +10,14 @@ export type PresetTarget = components['schemas']['PresetTarget'];
 export type GaiaContext = components['schemas']['GaiaContext'];
 export type GaiaSource = components['schemas']['GaiaSource'];
 
+export function notebookTransport(key:string){
+  const headers={'X-Khonsu-Notebook':key,'Content-Type':'application/json'};
+  return {
+    read:()=>requestJson<components['schemas']['NotebookRecord']>('/v1/notebook',{headers,cache:'no-store',signal:AbortSignal.timeout(5000)}),
+    write:(revision:number,document:components['schemas']['NotebookDocument'])=>requestJson<components['schemas']['NotebookRecord']>('/v1/notebook',{method:'PUT',headers,body:JSON.stringify({revision,document}),cache:'no-store',signal:AbortSignal.timeout(8000)}),
+  };
+}
+
 export async function loadGaiaContext(sequence: SequenceManifest, signal: AbortSignal): Promise<GaiaContext> {
   if (sequence.data_mode === 'synthetic' || !/^[a-zA-Z0-9_-]{1,80}$/.test(sequence.sequence_id)) {
     throw new ApiClientError('Catalog context requires a real observation sequence.', 409, 'CONTEXT_UNAVAILABLE');
@@ -298,7 +306,7 @@ export async function runSequenceJob(request: SequenceRequest, options: RunOptio
 /** Distinct, readable failure states shown to the user. */
 export type FailureKind =
   | "invalid-search" | "no-coverage" | "too-large" | "archive" | "busy" | "timeout"
-  | "unusable-data" | "processing" | "expired" | "unreachable" | "misconfigured" | "not-configured" | "cancelled";
+  | "unusable-data" | "processing" | "expired" | "unreachable" | "misconfigured" | "not-configured" | "cancelled" | "notebook-offline" | "notebook-full" | "notebook-conflict";
 
 export interface FailureGuide {
   kind: FailureKind;
@@ -315,6 +323,9 @@ export interface FailureGuide {
 }
 
 const GUIDES: Record<FailureKind, Omit<FailureGuide, "kind">> = {
+  "notebook-offline":{title:'NOTEBOOK DATABASE UNAVAILABLE',hint:'Your page keeps its notes. Export a copy and retry notebook saving when the service is available.',retry:true,editSearch:false,cachedExample:false},
+  "notebook-full":{title:'NOTEBOOK STORAGE LIMIT',hint:'Export your notebook and remove older entries before saving again.',retry:false,editSearch:false,cachedExample:false},
+  "notebook-conflict":{title:'NOTEBOOK COPIES DIFFER',hint:'Export this page, then choose which notebook copy to keep. No copy was silently overwritten.',retry:false,editSearch:false,cachedExample:false},
   "invalid-search": {
     title: "CHECK THE SEARCH", retry: false, editSearch: true, cachedExample: false,
     hint: "The service rejected these search values. Correct them and search again.",
@@ -372,6 +383,7 @@ const GUIDES: Record<FailureKind, Omit<FailureGuide, "kind">> = {
 // Every code the API, retrieval, processing or this client can report.
 // Unknown codes fall back to "processing", which still offers a retry.
 const KIND_BY_CODE: Record<string, FailureKind> = {
+  NOTEBOOK_UNAVAILABLE:'notebook-offline',NOTEBOOK_TOO_LARGE:'notebook-full',NOTEBOOK_CAPACITY:'notebook-full',NOTEBOOK_CONFLICT:'notebook-conflict',
   INVALID_REQUEST: "invalid-search", invalid_target: "invalid-search", INVALID_PROCESSING_OPTIONS: "invalid-search",
   NO_USABLE_COVERAGE: "no-coverage", INSUFFICIENT_EPOCHS: "no-coverage",
   INSUFFICIENT_COMPARABLE_EPOCHS: "no-coverage", INSUFFICIENT_SPECTRAL_OVERLAP: "no-coverage",

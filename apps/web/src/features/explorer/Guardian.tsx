@@ -4,7 +4,7 @@ import styles from './motion.module.css';
 // Original geometric celestial guardian. Illustration only, never observation data.
 export function Guardian({moving=false}:{moving?:boolean}){
  const id=useId().replaceAll(':','');
- return <svg className={styles.guardian} data-moving={moving} viewBox="0 0 240 200" aria-hidden="true">
+ return <svg data-khonsu-guardian className={styles.guardian} data-moving={moving} viewBox="0 0 240 200" aria-hidden="true">
   <defs><linearGradient id={id} x1="0" x2="1"><stop stopColor="#aab5c7"/><stop offset=".5" stopColor="#f1f0e9"/><stop offset="1" stopColor="#b0b8c6"/></linearGradient></defs>
   <g className={styles.guardianSky}><path d="M20 80 Q120 -10 220 80 M42 110 Q120 30 200 100" fill="none" stroke="#edb85e" strokeOpacity=".4"/><g fill="#f1f0e9"><circle cx="24" cy="75" r="2"/><circle cx="51" cy="48" r="1.5"/><circle cx="181" cy="42" r="2.5"/><circle cx="211" cy="70" r="1.8"/><path d="m93 18 2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></g></g>
   <ellipse cx="120" cy="185" rx="39" ry="3" fill="#edb85e" opacity=".2"/>

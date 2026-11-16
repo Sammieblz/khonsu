@@ -16,7 +16,7 @@ import { qualityOverlay } from '@/features/context/quality';
 import { usePreparedFrames } from './usePreparedFrames';
 import { displaySize, measuredResolution, HD_DISPLAY_SIDE, MAX_DISPLAY_SIDE, type AutoResolution, type DisplayOptions } from './display';
 import styles from "./viewer.module.css";
-import {Inspector,type InspectorTab} from '@/features/explorer/Inspector';
+import {Inspector,INSPECTOR_TABS,type InspectorTab} from '@/features/explorer/Inspector';
 import {useViewerSetting} from '@/features/explorer/ViewerMemory';
 const EMPTY_FRAMES: ObservationFrame[] = [];
 const CLEAN_VIEW_KEY='khonsu.clean-view.v1';
@@ -34,6 +34,7 @@ function ObservationConsole({ sequence, activeFrameId, annotations, selectedCand
   const [showMarks,setShowMarks]=useViewerSetting(memoryKey,'marks',true),[showLabels,setShowLabels]=useViewerSetting(memoryKey,'labels',true);
   function openPanel(tab:InspectorTab){setPanel(tab);setExpanded(false);}
   useEffect(()=>{if(matchMedia('(max-width: 1099px), (max-height: 599px)').matches)setExpanded(true);const field=()=>openPanel('field');window.addEventListener('khonsu:field',field);return()=>window.removeEventListener('khonsu:field',field);},[]);
+  useEffect(()=>{const inspect=(event:Event)=>{const detail=(event as CustomEvent).detail??{};if(INSPECTOR_TABS.includes(detail.panel))openPanel(detail.panel);if(['time','pan','mark','inspect'].includes(detail.tool)){stop();setTool(detail.tool);}if(detail.close)setExpanded(true);};window.addEventListener('khonsu:inspect',inspect);return()=>window.removeEventListener('khonsu:inspect',inspect);},[]);
   const gaia=useGaia(sequence,gaiaEnabled);
   const [view, setView] = useViewerSetting(memoryKey,'view',FIT), [expanded, setExpanded] = useState(false);
   const [speed, setSpeed] = useViewerSetting(memoryKey,'speed',700), [blink, setBlink] = useState(false);

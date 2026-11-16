@@ -15,7 +15,8 @@ RUN if [ "$INSTALL_SCIENCE" = "true" ]; then \
       pip install --no-cache-dir -r requirements.txt; \
     fi \
     && groupadd --system khonsu \
-    && useradd --system --gid khonsu --no-create-home khonsu
+    && useradd --system --gid khonsu --no-create-home khonsu \
+    && mkdir -p /app/data && chown khonsu:khonsu /app/data
 
 COPY --chown=khonsu:khonsu apps/api/app ./app
 COPY --chown=khonsu:khonsu fixtures ./fixtures

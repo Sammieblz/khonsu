@@ -71,7 +71,7 @@ The address bar describes the live search on screen. **Share this field** builds
 | `obs` | IRSA observation ID to select | Ignored unless it is a plain identifier; selected only if the returned sequence contains it |
 | `embed` | `1` selects the compact layout of the same static page | Any other value uses the ordinary layout |
 
-Opening a link fills the form; the visitor still chooses **Explore the sky**, so a link never starts an archive download by itself. The frame count stays the form's fixed bound because links cannot carry it. Coordinates are validated with the same rules as typed input and are never wrapped, clamped or rounded, so a link cannot silently move the requested position. Unknown parameters are ignored, and values that look like URLs are never used. Loading a cached example clears search parameters and preserves compact mode when selected. Share this field can create a new coordinate query, but cannot reproduce that cached bundle. Candidate notes stay in the browser and are never part of a link. The frontend does not yet expose wavelength or time filters, so links do not carry them.
+Opening a link fills the form; the visitor still chooses **Explore the sky**, so a link never starts an archive download by itself. The frame count stays the form's fixed bound because links cannot carry it. Coordinates are validated with the same rules as typed input and are never wrapped, clamped or rounded, so a link cannot silently move the requested position. Unknown parameters are ignored, and values that look like URLs are never used. Loading a cached example clears search parameters and preserves compact mode when selected. Share this field can create a new coordinate query, but cannot reproduce that cached bundle. Candidate notes have a browser copy and optional private database backup; they are never part of a link. The frontend does not yet expose wavelength or time filters, so links do not carry them.
 
 ## Candidate marks
 
@@ -98,16 +98,18 @@ Saving a note creates a `CandidateAnnotation` (record version 2, `origin: "human
 
 ![The cached real WISE 0855 sequence on its second observation, with two marks made on the first observation drawn dashed at the same grid positions, next to the candidate panel. Each candidate shows its ICRS position, grid pixel, marked observation and A/B comparison. One is flagged as having no valid data at its pixel, and the other shows when its note was edited.](images/candidate-marks.png)
 
-Records live in browser storage under `khonsu.candidates.v2` as `{ "schema": "khonsu-candidates", "version": 2, "candidates": [...], "sequences": {...} }`, holding at most 200 candidates and 2,000,000 characters.
+The candidate format remains mirrored under `khonsu.candidates.v2` as `{ "schema": "khonsu-candidates", "version": 2, "candidates": [...], "sequences": {...} }`, holding at most 200 candidates and 2,000,000 characters.
 
 - Version 1 notes are migrated as pixel-only candidates.
 - A candidate or snapshot this version cannot read is kept under `unreadable` and written back unchanged.
 - Unreadable or incompatible data is left untouched. The panel offers to download it or to replace it with the current page's candidates.
 - If storage is unavailable or a save fails, candidates keep working for the visit, and the panel says they will not survive a reload.
 
+The current [notebook contract](guided-notebook.md#api-contract) adds general observation notes, an atomic `khonsu.notebook.v1` browser backup and a private SQLite service. Existing records migrate without discarding unknown entries. Database saves use explicit revision checks and visible recovery choices.
+
 ## Evidence export
 
-A search link and an evidence file do different jobs. The link repeats a search, and it never carries notes. The evidence file is the only way notes leave the browser where they were made. **Export** on a candidate, or **Export all saved candidates**, downloads a JSON file in the browser. There is no upload, no account and no server route. Exports work from the candidates in memory, so damaged or blocked browser storage never prevents one. The panel can also preview the file.
+A search link and an evidence file do different jobs. The link repeats a search, and it never carries notes. The private notebook service can back up notes; an export is the portable copy the visitor chooses to share. **Export** on a candidate, or **Export all saved candidates**, downloads a JSON file in the browser. There is no account or public listing. Notebook GET/PUT routes use a private browser key, which is excluded from exports and links. Exports work from the candidates in memory, so damaged or blocked browser storage never prevents one. The panel can also preview the file.
 
 ![Two candidates on the cached real WISE 0855 sequence, each with Show, Edit, Export and Delete actions, followed by Export all saved candidates, the confirmation of the downloaded file, an explanation of what an evidence file holds, and the open preview of the JSON](images/evidence-export.png)
 

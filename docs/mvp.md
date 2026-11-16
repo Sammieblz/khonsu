@@ -10,7 +10,7 @@ The team targets Sunday November 15, 2026 at 23:59. Planning uses America/New_Yo
 2. Retrieve genuine SPHEREx observations and show progress or an actionable empty, timeout, or unavailable state.
 3. Display aligned images of the same sky region in chronological order with actual UTC dates, release, wavelength context, detector, and quality information.
 4. Drag the time arc or use keyboard controls to select actual epochs. Play, pause, step, and blink A/B. Pan and zoom without changing the scientific image geometry. Keep time, pan, and mark modes distinct.
-5. Mark a possible moving or changing source. Save notes locally and export coordinates, selected frames, observation metadata, processing settings, source links, and the candidate disclaimer.
+5. Mark a possible moving or changing source. Save notes in the browser with an optional private SQLite backup, and export coordinates, selected frames, observation metadata, processing settings, source links, and the candidate disclaimer.
 6. Share the search parameters by URL. Clearly distinguish a query link from private local annotations.
 7. Inspect credits, data lineage, quality limitations, and a short explanation of what the user is seeing.
 
@@ -39,9 +39,11 @@ The scaffold establishes folders, ownership, skills, visual tokens, a frontend c
 
 ## Scope held until after the MVP
 
-Defer automatic AI detection or classification, webcam hand tracking, historical star-sky reconstruction, 2,000-year rewinds, spectrum analysis, global sky streaming, accounts, multiplayer annotations, persistence services, a new Blender satellite model, and native desktop/mobile apps. WISE cross-mission blinking and NEOSSat/CADC science adapters remain outside the critical path. After core playback, Samuel authorized [bounded sky context](sky-context.md): optional Gaia DR3 source markers, a separate AllWISE reference pane, pixel-quality explanations and compact coordinate embeds. These do not change SPHEREx measurement validity or establish full MVP acceptance.
+Defer automatic AI detection or classification, webcam hand tracking, historical star-sky reconstruction, 2,000-year rewinds, spectrum analysis, global sky streaming, accounts, multiplayer annotations, public account-sync services, a new Blender satellite model, and native desktop/mobile apps. WISE cross-mission blinking and NEOSSat/CADC science adapters remain outside the critical path. After core playback, Samuel authorized [bounded sky context](sky-context.md): optional Gaia DR3 source markers, a separate AllWISE reference pane, pixel-quality explanations and compact coordinate embeds. These do not change SPHEREx measurement validity or establish full MVP acceptance.
 
 A lightweight NASA Eyes mission-context link or embed may be included only after the core journey works. Its simulation clock must remain separate from observation time. The dramatic sky-swipe idea becomes direct manipulation of genuine epochs, with cinematic motion confined to interface decoration.
+
+The [guided notebook pass](guided-notebook.md), #77 / BYT-54, explicitly authorizes a lightweight SQLite backup for human notes, a tour, static docs, a three-second skippable entry and a spring time dial. It does not persist science jobs or add accounts.
 
 ## Working schedule
 

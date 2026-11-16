@@ -22,6 +22,7 @@ Run `docker compose up --build` from the repository root for the declared local 
 | Environment variable | Meaning | Initial status |
 | --- | --- | --- |
 | `NEXT_PUBLIC_API_BASE_URL` | Public API origin compiled into the frontend. | Build-time configuration. |
+| `KHONSU_NOTEBOOK_DB` | Server-selected SQLite path, unset disables database backup. | Compose sets `/app/data/notebooks.sqlite3` on the persistent `notebook-data` volume. |
 | `KHONSU_CORS_ORIGINS` | Comma-separated permitted browser origins. | Defaults to `http://localhost:3000,http://127.0.0.1:3000`. |
 | `KHONSU_FIXTURE_DIR` | Directory of allowlisted demo fixtures. | Uses repository fixtures locally and `/app/fixtures` in Docker. |
 | `KHONSU_CACHE_DIR` | Temporary processing/cache directory. | Defaults under the operating system temp directory. |
@@ -31,6 +32,8 @@ Run `docker compose up --build` from the repository root for the declared local 
 Keep the API process running while a job is active. Limit queued jobs, active processing, bytes, frame count, field size and execution duration. Clean temporary files after expiry and cancellation. Make cancellation cooperative between processing stages. Do not accept unlimited image processing from a public route.
 
 For a temporary live demonstration, a [Cloudflare Quick Tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/) can expose the local API. It stops when the tunnel process stops; its hostname changes on restart, and uptime is not guaranteed. The laptop and API must stay online. Do not mistake this arrangement for unattended hosting. Rebuild a static frontend when its public API endpoint changes, unless a separately designed runtime configuration mechanism has been implemented.
+
+Notebook persistence is separate from temporary image jobs. Restarting or rebuilding Compose keeps the named notebook volume. Do not remove it when clearing a job. The current Cloudflare Container has no persistent notebook disk configured, so its notebook endpoint remains disabled. See [notebook storage, backup and recovery](guided-notebook.md#docker-and-durability).
 
 ## Frontend static export
 
