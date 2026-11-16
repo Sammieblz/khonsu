@@ -183,7 +183,7 @@ def test_live_processor_writes_separate_estimates_without_changing_validity(tmp_
     inputs = [make_observation(tmp_path, i, defects=True) for i in range(2)]
     output = tmp_path / 'processed'
     manifest = AstronomyProcessor().process(inputs, options(), output)
-    assert manifest.processing['gap_fill_method'] == 'bounded-gap-harmonic-v2'
+    assert manifest.processing['gap_fill_method'] == 'bounded-gap-harmonic-v3'
     for frame in manifest.frames:
         assert frame.gap_fill and 0 < frame.estimated_fraction <= frame.masked_fraction
         original = (output / (frame.frame_id + '.bin')).read_bytes()

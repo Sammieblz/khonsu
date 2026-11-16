@@ -1,0 +1,95 @@
+{
+  "mode": "controlled replay of genuine recorded observations",
+  "browsers": [
+    {
+      "browser": "chromium",
+      "version": "157.0.8103.50",
+      "checks": [
+        {
+          "frame": "2025W29_2A_0288_3",
+          "changed": 20845,
+          "measuredChanged": 0,
+          "originalCenter": [
+            7,
+            11,
+            18
+          ],
+          "filledCenter": [
+            255,
+            255,
+            255
+          ],
+          "stripes": 10280,
+          "maximumDifference": 1,
+          "gpuMode": "WebGL2"
+        },
+        {
+          "frame": "2026W29_1A_0015_3",
+          "changed": 20070,
+          "measuredChanged": 0,
+          "originalCenter": [
+            7,
+            11,
+            18
+          ],
+          "filledCenter": [
+            255,
+            255,
+            255
+          ],
+          "stripes": 9934,
+          "maximumDifference": 1,
+          "gpuMode": "WebGL2"
+        }
+      ],
+      "markShowsOriginal": true,
+      "exportRejectsEstimatedMeasurement": true,
+      "pageErrors": []
+    },
+    {
+      "browser": "firefox",
+      "version": "153.0",
+      "checks": [
+        {
+          "frame": "2025W29_2A_0288_3",
+          "changed": 20845,
+          "measuredChanged": 0,
+          "originalCenter": [
+            7,
+            11,
+            18
+          ],
+          "filledCenter": [
+            255,
+            255,
+            255
+          ],
+          "stripes": 10280,
+          "maximumDifference": 1,
+          "gpuMode": "WebGL2"
+        },
+        {
+          "frame": "2026W29_1A_0015_3",
+          "changed": 20070,
+          "measuredChanged": 0,
+          "originalCenter": [
+            7,
+            11,
+            18
+          ],
+          "filledCenter": [
+            255,
+            255,
+            255
+          ],
+          "stripes": 9934,
+          "maximumDifference": 1,
+          "gpuMode": "WebGL2"
+        }
+      ],
+      "markShowsOriginal": true,
+      "exportRejectsEstimatedMeasurement": true,
+      "pageErrors": []
+    }
+  ]
+}
