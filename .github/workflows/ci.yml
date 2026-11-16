@@ -64,9 +64,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose config --quiet
+      - run: docker compose -f compose.yaml -f compose.tunnel.yaml config --quiet
       - run: docker compose build
       - run: docker compose up -d --wait --wait-timeout 120
       - run: curl --fail http://localhost:8000/health && curl --fail http://localhost:3000/
+      - run: python scripts/verify-tunnel.py --origin http://localhost:3000
       - if: always()
         run: docker compose logs && docker compose down
   live-archive:
