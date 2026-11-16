@@ -58,3 +58,42 @@ in the loaded console. Both browsers reported no uncaught page errors.
 ![Desktop console](images/console-desktop.png)
 
 ![Mobile controls with transport available](images/console-mobile.png)
+
+## Entry and feedback, #62 / BYT-47
+
+Explore starts navigation immediately, while an original SVG sky sweep runs for
+at most 900 ms. Ready images, errors, Skip and Escape remove it early. Returning
+to an already loaded session skips the intro. Reduced motion skips the sweep.
+The request is never gated by an animation-completion callback.
+
+The small ivory and amber guardian is original, code-authored SVG artwork. Its
+arm gestures and star arc use CSS transform/opacity with the existing easing
+tokens. It is decorative and excluded from assistive announcements. No Marvel
+frames, character assets, audio or simulation dates are used. The user's
+[reference scene](https://www.youtube.com/watch?v=XDk9jjZxx70&t=35s) informed the
+gesture, not any celestial observation.
+
+The status model uses actual queued/retrieving/processing job states, then browser
+image preparation. The progress bar receives a value only from the server. Saved
+bundle checks and image loading remain indeterminate. Elapsed time is outside the
+polite stage live region. Cancel, retry and edit actions stay available. Animation
+pauses when hidden or outside the viewport, using the
+[Page Visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API)
+and IntersectionObserver. All observers and timers are cleaned up.
+
+`scripts/verify-sky-motion.mjs` records entry/loading video in Chromium and Firefox,
+with delayed real cached assets, reduced motion and injected server cancellation.
+Chromium runs at 4x CPU throttling. This measures browser behavior on this desktop;
+it does not establish weak-GPU or physical-phone performance. The 98 frontend
+tests include server-stage and actionable failure tests. Console acceptance remains
+green after the loading integration.
+The corrected cold-entry timing was 59 ms from click to request in throttled
+Chromium and 20 ms in Firefox, both before the intro finished.
+
+The migrated Clean View suite also passes in both browsers, including all real
+cached frames, original pixels, gap-fill exclusion from candidate evidence and
+GPU/CPU byte agreement. The real Gaia/WISE suite passes: 55 catalog sources in
+the bounded result, marker alignment within 0.02 display pixels, successful WISE
+tile retrieval, independent injected catalog failure/retry and compact embeds.
+
+![Original guardian loading feedback](images/console-loading.png)

@@ -169,3 +169,13 @@ New context routes and models are additive and generated with the API contract.
 The compact view reuses the existing static explorer and never auto-starts an
 archive search. Original science arrays, masks, observations and evidence remain
 unchanged. GitHub #72 / Linear BYT-53 track verification and integration.
+
+## 2026-11-15: Dedicated console and scoped design motion
+
+Samuel authorized implementing #61/#62/#63 under #2 / BYT-14. The static console
+route and persistent session replace the single-page workspace. Base UI 1.9.0
+supplies tabs and dialogs; CSS transform/opacity handles the original guardian
+and interruptible 900 ms entry. No new 3D engine or science processing is added.
+The landing story may use GSAP only for its scroll progression. Motion and
+Remotion were considered but are unnecessary for this scope. See
+[console-design.md](console-design.md) for contracts and acceptance.

@@ -38,8 +38,9 @@ Commit a five-target coverage report, including actual epoch coordinates, dates 
 
 For the dedicated `/console/` layout, run `node scripts/verify-console-design.mjs`.
 See [the console design contract](console-design.md) for state, routing and
-responsive acceptance. Older browser scripts refer to historical page controls;
-their renderer-unit checks remain useful independently of those selectors.
+responsive acceptance. `verify-clean-view.mjs` and `verify-context.mjs` also use
+the dedicated route. Other historical suites may need their page selectors
+updated; their isolated renderer checks remain useful independently.
 
 The [sky-context pass](sky-context.md) adds `test_catalog_context.py`,
 `context.test.ts` and `node scripts/verify-context.mjs`. The browser suite needs

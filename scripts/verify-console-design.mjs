@@ -57,7 +57,7 @@ for(const engine of [chromium,firefox]){
   await button(p,'CONTROLS').click();await tab(p,'FIELD');
   assert.equal(await p.locator('#ra').inputValue(),'12');assert.equal(archive.length,0);
   await p.setViewportSize({width:1366,height:768});
-  await p.goto(base+'/console/?example=not-an-example');await p.getByText(/selected cached example is no longer available/).waitFor();assert.equal(await canvas.count(),0);
+  await p.goto(base+'/console/?example=not-an-example');await p.getByText(/selected cached example is no longer available/).first().waitFor();assert.equal(await canvas.count(),0);
   await p.route('**/v1/examples',route=>route.abort());await p.goto(base+'/console/?example=real-wise-0855');await p.getByRole('alert').first().waitFor();await p.unroute('**/v1/examples');
   await p.goto(base+'/console/?example=real-wise-0855');await ready(p);
   const axePath=process.env.AXE_SCRIPT;if(axePath){await p.addScriptTag({path:axePath});const audit=await p.evaluate(()=>axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));assert.deepEqual(audit.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[]);}

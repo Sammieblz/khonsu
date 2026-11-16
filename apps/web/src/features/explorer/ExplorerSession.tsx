@@ -40,6 +40,7 @@ function useExplorerController(){
   // One live search at a time; replacing or leaving it cancels its server job.
   const session = useRef<SequenceSession | null>(null);
   const activeExampleLoad = useRef<AbortController | null>(null);
+  const pendingExampleId=useRef<string|null>(null);
   const candidates = useAnnotations();
   const current = useRef({sequence,search});
   current.current={sequence,search};
@@ -80,6 +81,7 @@ function useExplorerController(){
     return () => {
       controller.abort();
       activeExampleLoad.current?.abort();
+      pendingExampleId.current=null;
       void session.current?.stop();
     };
   }, []);
@@ -94,6 +96,8 @@ function useExplorerController(){
   }
 
   async function submit(request: SequenceRequest) {
+    setExampleError('');
+    pendingExampleId.current=null;
     activeExampleLoad.current?.abort();
     activeExampleLoad.current = null;
     // Never leave a previous sequence on screen under a new query.
@@ -145,6 +149,7 @@ function useExplorerController(){
 
   async function loadExample(id=selectedExampleId, observation:string|null=null) {
     if(!id)return;
+    pendingExampleId.current=id;
     setExampleLoading(true);setSequence(null);setExampleError("");setSearch({phase:"idle"});
     activeExampleLoad.current?.abort();
     const controller = new AbortController();
@@ -214,9 +219,11 @@ function useExplorerController(){
 
 
   function cancelExample(){activeExampleLoad.current?.abort();activeExampleLoad.current=null;setExampleLoading(false);setExampleError('Opening saved observations was cancelled. Choose a field or try again.');}
+  function cancelLoading(){if(search.phase==='running'){cancelSearch();return;}cancelExample();setSequence(null);setActiveFrameId(null);setSearch({phase:'idle'});}
   useEffect(()=>{
     if(pathname!=='/console/'&&pathname!=='/console'){
       activeExampleLoad.current?.abort();activeExampleLoad.current=null;setExampleLoading(false);
+      pendingExampleId.current=null;
       void session.current?.stop();
       setSearch(current=>current.phase==='running'?{phase:'cancelled',request:current.request}:current);
       lastRoute.current='';return;
@@ -227,8 +234,10 @@ function useExplorerController(){
       setCompact(compactMode(query));const route=readConsoleRoute(query);
       if(route.kind==='example'){
         if(sequence?.sequence_id===route.id){const frame=sequence.frames.find(item=>item.observation_id===route.observation);if(frame)setActiveFrameId(frame.frame_id);return;}
+        if(pendingExampleId.current===route.id)return;
         void loadExample(route.id,route.observation);
       } else if(route.kind==='ok'){
+        pendingExampleId.current=null;
         activeExampleLoad.current?.abort();activeExampleLoad.current=null;setExampleLoading(false);void session.current?.stop();
         linkedSearch.current=route.search;setDraft({ra:String(route.search.values.ra_deg),dec:String(route.search.values.dec_deg),fov:String(route.search.values.fov_arcmin)});
         setSharedLink({values:route.search.values,message:'Search restored. Choose Search this field to query real observations.'});
@@ -239,7 +248,7 @@ function useExplorerController(){
     }
     restore();window.addEventListener('popstate',restore);return()=>{lastRoute.current='';window.removeEventListener('popstate',restore);};
   },[pathname]);
-  return {compact,sequence,activeFrameId,setActiveFrameId,selection,setSelection,selectedCandidateId,search,examples,selectedExampleId,setSelectedExampleId,exampleError,examplesLoading,targets,selectedTarget,setSelectedTarget,catalogError,sharedLink,candidates,submit,cancelSearch,retrySearch,editSearch,loadExample,addCandidate,selectCandidate,removeCandidate,downloadUnreadable,draft,setDraft,noteDraft,setNoteDraft,exampleLoading,cancelExample,presentation,setPresentation};
+  return {compact,sequence,activeFrameId,setActiveFrameId,selection,setSelection,selectedCandidateId,search,examples,selectedExampleId,setSelectedExampleId,exampleError,examplesLoading,targets,selectedTarget,setSelectedTarget,catalogError,sharedLink,candidates,submit,cancelSearch,retrySearch,editSearch,loadExample,addCandidate,selectCandidate,removeCandidate,downloadUnreadable,draft,setDraft,noteDraft,setNoteDraft,exampleLoading,cancelExample,cancelLoading,presentation,setPresentation};
 }
 const Context=createContext<ReturnType<typeof useExplorerController>|null>(null);
 export function ExplorerSession({children}:{children:ReactNode}){const session=useExplorerController();return <Context.Provider value={session}><ViewerMemory>{children}</ViewerMemory></Context.Provider>;}

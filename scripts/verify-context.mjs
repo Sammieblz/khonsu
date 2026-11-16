@@ -9,7 +9,7 @@ const output=resolve(process.env.KHONSU_TEST_OUTPUT||'.cache/context72/browser')
 const examples=await(await fetch(api+'/v1/examples')).json(),primary=examples[0];
 const button=(page,name)=>page.getByRole('button',{name,exact:true});
 const ready=async page=>{await page.waitForFunction(()=>document.querySelector('canvas')?.style.visibility==='visible',null,{timeout:60000});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));};
-const load=async page=>{await page.goto(base);await button(page,'LOAD CACHED REAL EXAMPLE').click();await ready(page);};
+const load=async page=>{await page.goto(base+'/console/?example=real-wise-0855');await ready(page);};
 const report={testedAt:new Date().toISOString(),browsers:[]};
 for(const engine of [chromium,firefox]){
  const browser=await engine.launch({headless:true});
@@ -17,9 +17,9 @@ for(const engine of [chromium,firefox]){
   const page=await browser.newPage({viewport:{width:1440,height:1100},reducedMotion:'reduce'}),errors=[];
   page.on('pageerror',error=>errors.push(String(error)));
   await load(page);
-  const canvas=page.locator('canvas').first(),layers=page.locator('details').filter({has:page.locator('summary').filter({hasText:'LAYERS & SKY CONTEXT'})}).first();
+  const canvas=page.locator('canvas').first(),layers=page.getByRole('region',{name:'Layers & sky context',exact:true});
   await button(page,'INSPECT').click();await ready(page);
-  assert.equal(await layers.evaluate(element=>element.open),true);
+  assert.equal(await layers.isVisible(),true);
   await button(page,'Next observation').click();await ready(page);
   // This is the exact previously reported gap in the second genuine WISE frame.
   await canvas.scrollIntoViewIfNeeded();let rect=await canvas.boundingBox();
@@ -53,7 +53,7 @@ for(const engine of [chromium,firefox]){
     assert.ok(dx<.1&&dy<.1,JSON.stringify({dx,dy}));return {dx,dy};
   };
   const fit=await alignment();await button(page,'Zoom in').click();await ready(page);const zoom=await alignment();
-  await button(page,'FIT / RESET').click();await ready(page);
+  await button(page,'FIT').click();await ready(page);
   await page.getByRole('group',{name:'Observation canvas',exact:true}).screenshot({path:resolve(output,engine.name()+'-gaia.png')});
   // Marker data changes to the selected genuine epoch without inventing frames.
   await button(page,'Next observation').click();await ready(page);
@@ -63,7 +63,7 @@ for(const engine of [chromium,firefox]){
   await page.getByLabel('Known sources / Gaia DR3',{exact:true}).uncheck();
   // New sequence remount clears catalog state, allowing a controlled outage.
   await load(page);
-  await layers.locator('summary').first().click();
+  await page.getByRole('tab',{name:'LAYERS',exact:true}).click();
   await page.route('**/context/gaia',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({code:'CONTEXT_UNAVAILABLE',message:'Injected catalog outage for acceptance',details:[]})}));
   await page.getByLabel('Known sources / Gaia DR3',{exact:true}).check();
   await page.getByRole('alert').filter({hasText:'Injected catalog outage'}).waitFor();
@@ -86,7 +86,7 @@ for(const engine of [chromium,firefox]){
   assert.ok(wiseTiles.length>0,'No successful real WISE tile response');
   await iframe.screenshot({path:resolve(output,engine.name()+'-wise.png')});
   await page.getByLabel('WISE reference pane',{exact:true}).uncheck();assert.equal(await iframe.count(),0);
-  await page.getByText('Link & embed preview',{exact:true}).click();
+  await button(page,'SHARE').click();await page.getByText('Link & embed preview',{exact:true}).click();
   const code=await page.getByLabel('HTML embed code',{exact:true}).inputValue();assert.match(code,/embed=1/);
   await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{value:{writeText:()=>Promise.reject(new Error('Injected clipboard denial'))},configurable:true}));
   await button(page,'COPY EMBED CODE').click();await page.getByText('Copying was blocked. Select and copy the text below.',{exact:true}).waitFor();
@@ -94,13 +94,15 @@ for(const engine of [chromium,firefox]){
   const embedded=await browser.newPage({viewport:{width:820,height:900}}),archiveRequests=[];
   embedded.on('request',request=>{if(request.method()==='POST'&&request.url().endsWith('/v1/sequences'))archiveRequests.push(request.url());});
   await embedded.goto(url);await embedded.locator('[data-embed="true"]').waitFor();
+  await button(embedded,'CONTROLS').click();await embedded.getByRole('tab',{name:'FIELD',exact:true}).click();
   assert.equal(Number(await embedded.locator('#ra').inputValue()),primary.target.ra_deg);
   assert.equal(archiveRequests.length,0,'Shared links must not start an archive job');
   await embedded.screenshot({path:resolve(output,engine.name()+'-embed.png')});
   await embedded.close();
   const host=await browser.newPage();await host.setContent(code);const compactFrame=await(await host.locator('iframe').elementHandle()).contentFrame();
-  await compactFrame.locator('[data-embed="true"]').waitFor();assert.equal(Number(await compactFrame.locator('#ra').inputValue()),primary.target.ra_deg);await host.close();
+  await compactFrame.locator('[data-embed="true"]').waitFor();if(await button(compactFrame,'CONTROLS').isVisible())await button(compactFrame,'CONTROLS').click();await compactFrame.getByRole('tab',{name:'FIELD',exact:true}).click();assert.equal(Number(await compactFrame.locator('#ra').inputValue()),primary.target.ra_deg);await host.close();
   await page.setViewportSize({width:390,height:844});await ready(page);
+  await page.keyboard.press('Escape');if(!await page.getByRole('tab',{name:'LAYERS',exact:true}).isVisible())await button(page,'CONTROLS').click();await page.getByRole('tab',{name:'LAYERS',exact:true}).click();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
   await layers.scrollIntoViewIfNeeded();await layers.screenshot({path:resolve(output,engine.name()+'-mobile.png')});
   assert.deepEqual(errors,[]);

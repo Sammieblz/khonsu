@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import {ExplorerSession} from '@/features/explorer/ExplorerSession';
+import {SkyEntry} from '@/features/explorer/SkyEntry';
 
 export const metadata: Metadata = {
   title: "Khonsu | Find what time reveals",
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           rel="stylesheet"
         />
       </head>
-      <body><ExplorerSession>{children}</ExplorerSession></body>
+      <body><ExplorerSession><SkyEntry>{children}</SkyEntry></ExplorerSession></body>
     </html>
   );
 }
