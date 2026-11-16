@@ -10,9 +10,9 @@ const output=resolve(process.env.KHONSU_TEST_OUTPUT||'.cache/clean-view/browser'
 const examples=await(await fetch(api+'/v1/examples')).json(),primary=examples[0];
 const modules=await browserDisplayModules(),folder=new URL('../apps/web/out/__clean/',import.meta.url);
 await mkdir(folder,{recursive:true});for(const [name,source] of Object.entries(modules))await writeFile(new URL(name,folder),source);
-const button=(page,name)=>page.getByRole('button',{name,exact:true});
+const button=(page,name)=>page.getByRole('button',{name,exact:true,includeHidden:true});
 const ready=async page=>{await page.waitForFunction(()=>document.querySelector('canvas')?.style.visibility==='visible',null,{timeout:60000});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));};
-const load=async page=>{await page.goto(base);await button(page,'LOAD CACHED REAL EXAMPLE').click();await ready(page);};
+const load=async page=>{await page.goto(base+'/console/?example=real-wise-0855');await ready(page);};
 const advanced=async page=>{const summary=page.locator('summary').filter({hasText:'IMAGE DISPLAY'});if(!await summary.evaluate(e=>e.parentElement.open))await summary.click();};
 const report={testedAt:new Date().toISOString(),browsers:[]};
 try{
@@ -89,6 +89,7 @@ try{
    assert.equal(evidence.candidates[0].position.pixel_has_data,false);
    assert.notEqual(evidence.candidates[0].position.pixel_quality,'strict-valid');
    await button(page,'REWIND').click();await ready(page);
+   await page.getByRole('tab',{name:'DISPLAY',exact:true}).click();
    await button(page,'CLEAN VIEW').focus();await page.keyboard.press('Space');await ready(page);
    assert.equal(await page.locator('[data-clean-view]').getAttribute('data-clean-view'),'off');
    await load(page);assert.equal(await button(page,'CLEAN VIEW').getAttribute('aria-pressed'),'false');

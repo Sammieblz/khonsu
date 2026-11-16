@@ -88,6 +88,7 @@ export type CandidateStorageState =
 
 export interface SkyViewerProps {
   fieldPanel?:ReactNode;
+  loadingFeedback?:ReactNode;
   notesPanel?:ReactNode;
   onPresentationState?:(state:PresentationState)=>void;
   sequence: SequenceManifest | null;
