@@ -1,0 +1,74 @@
+[
+  {
+    "browser": "chromium",
+    "version": "before",
+    "browserVersion": "151.0.7922.34",
+    "cpuThrottle": 4,
+    "domContentLoadedMs": 1362,
+    "loadMs": 1499,
+    "localResourceBytes": 670934,
+    "longTasks": [
+      185
+    ],
+    "scrollFrameIntervals": {
+      "frames": 144,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 16.799999999999727,
+      "over50ms": 0
+    }
+  },
+  {
+    "browser": "chromium",
+    "version": "after",
+    "browserVersion": "151.0.7922.34",
+    "cpuThrottle": 4,
+    "domContentLoadedMs": 1326,
+    "loadMs": 1546,
+    "localResourceBytes": 918389,
+    "longTasks": [
+      187,
+      59,
+      93,
+      74,
+      79
+    ],
+    "scrollFrameIntervals": {
+      "frames": 144,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 16.700000000000273,
+      "over50ms": 0
+    }
+  },
+  {
+    "browser": "firefox",
+    "version": "before",
+    "browserVersion": "153.0",
+    "cpuThrottle": 1,
+    "domContentLoadedMs": 293,
+    "loadMs": 481,
+    "localResourceBytes": 694938,
+    "longTasks": [],
+    "scrollFrameIntervals": {
+      "frames": 123,
+      "medianMs": 16.660000000000082,
+      "p95Ms": 16.68000000000029,
+      "over50ms": 1
+    }
+  },
+  {
+    "browser": "firefox",
+    "version": "after",
+    "browserVersion": "153.0",
+    "cpuThrottle": 1,
+    "domContentLoadedMs": 119,
+    "loadMs": 231,
+    "localResourceBytes": 911316,
+    "longTasks": [],
+    "scrollFrameIntervals": {
+      "frames": 143,
+      "medianMs": 16.660000000000082,
+      "p95Ms": 16.68000000000029,
+      "over50ms": 0
+    }
+  }
+]

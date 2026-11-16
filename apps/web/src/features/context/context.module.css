@@ -1,7 +1,4 @@
 .panel { margin: 10px 0; border: 1px solid var(--line); background: #0b111b; padding: 12px; font-size: 12px; line-height: 1.6; }
-.panel[open] { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; }
-.panel summary { cursor: pointer; min-height: 44px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 12px var(--font-data); color: var(--amber); }
-.panel summary span { color: var(--silver); font-size: 10px; }
 .panel h3 { font: 12px var(--font-data); color: var(--ivory); }
 .panel p { color: var(--silver); }
 .panel a { color: #a6d0e8; display: inline-flex; align-items: center; min-height: 44px; }

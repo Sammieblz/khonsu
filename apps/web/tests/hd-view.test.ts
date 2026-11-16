@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { centerField, visibleField, nativeSampling } from '../src/features/viewer/viewport.ts';
+import { centerImageField, visibleImageField, nativeSampling } from '../src/features/viewer/viewport.ts';
 import { frameCacheWindow } from '../src/features/viewer/time.ts';
 import { requestedFrames, readSharedSearch, sharedSearchQuery } from '../src/features/explorer/coordinates.ts';
 import { decodeRaster, displaySize, MAX_RASTER_BYTES } from '../src/features/viewer/display.ts';
@@ -17,12 +17,13 @@ test('HD display retains aspect ratio and the largest valid prepared raster', ()
 });
 
 test('overview recenter and visible field agree through zoom and pan', () => {
-  const view=centerField({zoom:4,x:0,y:0},.7,.3,800,600);
-  const region=visibleField(view,800,600);
+  const geometry={stageWidth:800,stageHeight:600,rasterWidth:800,rasterHeight:600};
+  const view=centerImageField({zoom:4,x:0,y:0},.7,.3,geometry);
+  const region=visibleImageField(view,geometry);
   assert(Math.abs(region.left+region.width/2-.7)<1e-12);
   assert(Math.abs(region.top+region.height/2-.3)<1e-12);
   assert.equal(region.width,.25);
-  const edge=visibleField(centerField(view,0,1,800,600),800,600);
+  const edge=visibleImageField(centerImageField(view,0,1,geometry),geometry);
   assert.equal(edge.left,0); assert.equal(edge.top+edge.height,1);
   assert.equal(nativeSampling(6,6.2),360/6.2);
   for (const value of [null,undefined,'6.2',NaN,0]) assert.equal(nativeSampling(6,value),null);

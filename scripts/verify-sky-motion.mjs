@@ -17,7 +17,7 @@ for(const engine of [chromium,firefox]){
   await p.route('**/v1/examples',async route=>{requests.push(Date.now());await new Promise(r=>setTimeout(r,2500));await route.fulfill({contentType:'application/json',body:examples}).catch(()=>{});});
   await p.goto(base);if(engine===chromium){const cdp=await context.newCDPSession(p);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});}
   await p.evaluate(()=>{document.addEventListener('click',()=>{window.__entryClicked=Date.now();},{capture:true,once:true});window.__entryObserver=new MutationObserver(()=>{const entry=document.querySelector('[data-sky-entry]');if(entry&&!window.__entryStart)window.__entryStart=Date.now();if(!entry&&window.__entryStart&&!window.__entryEnd)window.__entryEnd=Date.now();});window.__entryObserver.observe(document.body,{childList:true,subtree:true});});
-  await p.getByRole('link',{name:'EXPLORE THE SKY',exact:true}).click();
+  await p.locator('#explore-entry').getByRole('link',{name:'EXPLORE THE SKY',exact:true}).click();
   await p.waitForFunction(()=>window.__entryStart&&window.__entryEnd,null,{timeout:6000});
   const timing=await p.evaluate(()=>({click:window.__entryClicked,start:window.__entryStart,end:window.__entryEnd}));
   const afterClick=requests.find(time=>time>=timing.click)-timing.click;
@@ -28,7 +28,7 @@ for(const engine of [chromium,firefox]){
   assert.match(text,/saved observations/);assert.equal(await status.locator('progress').getAttribute('value'),null);
   await p.waitForFunction(()=>document.querySelector('canvas')?.style.visibility==='visible',null,{timeout:60000});assert.equal(await status.count(),0);
   await p.unroute('**/v1/examples');
-  await p.emulateMedia({reducedMotion:'reduce'});await p.goto(base);await p.getByRole('link',{name:'EXPLORE THE SKY',exact:true}).click();assert.equal(await p.locator('[data-sky-entry]').count(),0);
+  await p.emulateMedia({reducedMotion:'reduce'});await p.goto(base);await p.locator('#explore-entry').getByRole('link',{name:'EXPLORE THE SKY',exact:true}).click();assert.equal(await p.locator('[data-sky-entry]').count(),0);
   await p.waitForFunction(()=>document.querySelector('canvas')?.style.visibility==='visible');
   // A fake in-flight transport tests real cancellation code without NASA work.
   let cancelled=0;const job={sequence_id:'motion-control',status:'retrieving',progress:.25,message:'Injected retrieval stage for browser acceptance',created_at:'2026-11-15T00:00:00Z',updated_at:'2026-11-15T00:00:00Z',error:null};
